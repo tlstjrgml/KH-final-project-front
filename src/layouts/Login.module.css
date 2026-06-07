@@ -1,0 +1,222 @@
+.page {
+  min-height: 100vh;
+  padding-top: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding-bottom: 3rem;
+  background: #F4F7FB;
+}
+
+/* ── 폼 카드 ── */
+.card {
+  width: 100%;
+  max-width: 420px;
+  background: #ffffff;
+  border-radius: 20px;
+  box-shadow: 0 2px 16px rgba(55,138,221,0.08), 0 1px 4px rgba(0,0,0,0.04);
+  border: 1px solid #E9ECEF;
+  padding: 2.5rem 2.5rem 2rem;
+  margin: 2rem 1rem;
+}
+
+.cardLogo {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  margin-bottom: 1.75rem;
+}
+
+.cardLogoIcon {
+  width: 36px;
+  height: 36px;
+  background: #378ADD;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.cardLogoIcon svg {
+  width: 20px;
+  height: 20px;
+  fill: none;
+  stroke: #fff;
+  stroke-width: 1.8;
+}
+
+.cardLogoText {
+  font-size: 17px;
+  font-weight: 600;
+  color: #0C447C;
+  letter-spacing: -0.02em;
+}
+
+.cardTitle {
+  font-size: 22px;
+  font-weight: 600;
+  color: #1A1D23;
+  margin-bottom: 4px;
+  letter-spacing: -0.02em;
+}
+
+.cardSub {
+  font-size: 13px;
+  color: #6C757D;
+  margin-bottom: 2rem;
+}
+
+/* ── 필드 ── */
+.field {
+  margin-bottom: 14px;
+}
+
+.field label {
+  display: block;
+  font-size: 13px;
+  font-weight: 500;
+  color: #6C757D;
+  margin-bottom: 6px;
+}
+
+.field label .req {
+  color: #378ADD;
+  margin-left: 2px;
+}
+
+.field input {
+  width: 100%;
+  height: 48px;
+  border: 1px solid #E9ECEF;
+  border-radius: 12px;
+  padding: 0 16px;
+  font-size: 14px;
+  color: #1A1D23;
+  background: #F8F9FA;
+  outline: none;
+  transition: border-color 0.15s, box-shadow 0.15s, background 0.15s;
+  font-family: inherit;
+}
+
+.field input::placeholder {
+  color: #ADB5BD;
+}
+
+.field input:focus {
+  border-color: #378ADD;
+  box-shadow: 0 0 0 3px #E6F1FB;
+  background: #fff;
+}
+
+/* ── 로그인 버튼 ── */
+.btnPrimary {
+  width: 100%;
+  height: 48px;
+  background: #378ADD;
+  color: #fff;
+  border: none;
+  border-radius: 12px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s;
+  font-family: inherit;
+  margin-top: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+}
+
+.btnPrimary:hover {
+  background: #185FA5;
+}
+
+.btnPrimary svg {
+  width: 18px;
+  height: 18px;
+  fill: none;
+  stroke: #fff;
+  stroke-width: 2;
+}
+
+/* ── 구분선 ── */
+.divider {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 18px 0;
+}
+
+.dividerLine {
+  flex: 1;
+  height: 1px;
+  background: #E9ECEF;
+}
+
+.dividerText {
+  font-size: 12px;
+  color: #ADB5BD;
+  white-space: nowrap;
+}
+
+/* ── 카카오 버튼 ── */
+.btnKakao {
+  width: 100%;
+  height: 48px;
+  background: #FEE500;
+  color: #3C1E1E;
+  border: none;
+  border-radius: 12px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s;
+  font-family: inherit;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+}
+
+.btnKakao:hover {
+  background: #F6DC00;
+}
+
+.kakaoIcon {
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+}
+
+/* ── 하단 링크 ── */
+.footerLinks {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-top: 1.5rem;
+  padding-top: 1.25rem;
+  border-top: 1px solid #E9ECEF;
+}
+
+.muted {
+  font-size: 13px;
+  color: #6C757D;
+}
+
+.sep {
+  font-size: 13px;
+  color: #ADB5BD;
+}
+
+.footerLinks a {
+  font-size: 13px;
+  color: #185FA5;
+  text-decoration: none;
+}
+
+.footerLinks a:hover {
+  text-decoration: underline;
+}
