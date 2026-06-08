@@ -5,6 +5,7 @@ import Signup from './layouts/Signup';
 import ExtraInfoModal from './layouts/ExtraInfoModal';
 import Main from './layouts/Main';
 import EditProfile from './layouts/EditProfile';
+import AdminPage from './layouts/AdminPage';
 
 function App() {
   return (
@@ -17,8 +18,9 @@ function App() {
         onClose={() => console.log('닫기')}
         onSave={() => console.log('저장')}
       /> */}
-      <Main />
+      {/* <Main /> */}
       {/*<EditProfile/>*/}
+      <AdminPage/>
     </>
   )
 }

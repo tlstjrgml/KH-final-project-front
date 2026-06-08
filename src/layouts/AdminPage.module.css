@@ -1,0 +1,116 @@
+/* 컨테이너: 화면 전체 스크롤 허용, Navbar 공간(60px) + 상하단 여유 공간 확보 */
+.container {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 90px 2rem 4rem 2rem; 
+  background-color: #F8F9FA;
+  min-height: 100vh; 
+  box-sizing: border-box;
+}
+
+.pageHeader {
+  margin-bottom: 1.5rem;
+}
+
+.title {
+  font-size: 24px;
+  font-weight: 700;
+  color: #1A1D23;
+  margin-bottom: 0.3rem;
+}
+
+.subtitle {
+  font-size: 14px;
+  color: #6C757D;
+  margin: 0;
+}
+
+/* 요약 카드 */
+.summaryGrid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.summaryCard {
+  background: #FFFFFF;
+  border-radius: 12px;
+  padding: 1.5rem;
+  border: 1px solid #E9ECEF;
+}
+
+.cardHeader { margin-bottom: 0.8rem; }
+.cardTitle { font-size: 14px; font-weight: 600; color: #495057; }
+.cardValue { font-size: 28px; font-weight: 700; color: #1A1D23; margin-bottom: 0.4rem; }
+.cardValueText { font-size: 20px; font-weight: 700; color: #1A1D23; margin-bottom: 0.4rem; white-space: nowrap; }
+.unit { font-size: 16px; font-weight: 500; margin-left: 4px; }
+.cardCompare { font-size: 13px; color: #868E96; }
+
+/* 메인 콘텐츠 레이아웃 */
+.mainContent {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.listGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem;
+}
+
+.chartGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem;
+}
+
+/* 박스 공통 */
+.sectionBox {
+  background: #FFFFFF;
+  border-radius: 12px;
+  padding: 1.5rem;
+  border: 1px solid #E9ECEF;
+  display: flex;
+  flex-direction: column;
+}
+
+.sectionHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.2rem;
+}
+
+.sectionTitle {
+  font-size: 16px;
+  font-weight: 700;
+  color: #1A1D23;
+  margin: 0;
+}
+
+.btnText { background: none; border: none; color: #378ADD; font-size: 13px; cursor: pointer; padding: 0; }
+
+/* 리스트 & 테이블 스타일 */
+.topList { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 4px; }
+.listItem { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid #F1F3F5; font-size: 14px; }
+.listItem:last-child { border-bottom: none; }
+.itemLeft { display: flex; align-items: center; gap: 12px; color: #343A40; }
+.rankBadge { display: inline-flex; align-items: center; justify-content: center; width: 24px; height: 24px; background: #E6F1FB; color: #185FA5; border-radius: 6px; font-weight: 600; font-size: 12px; }
+.itemRight { color: #868E96; font-size: 13px; }
+
+.reportTable { width: 100%; border-collapse: collapse; font-size: 14px; }
+.reportTable th { text-align: left; padding: 12px 8px; color: #868E96; font-weight: 500; border-bottom: 1px solid #E9ECEF; }
+.reportTable td { padding: 14px 8px; color: #343A40; border-bottom: 1px solid #F1F3F5; }
+
+.statusBadge { padding: 4px 10px; border-radius: 4px; font-size: 12px; font-weight: 500; }
+.processing { background: #E6F1FB; color: #185FA5; }
+.waiting { background: #F8F9FA; color: #495057; border: 1px solid #E9ECEF; }
+.completed { background: #E3F2FD; color: #0C447C; }
+
+/* 차트 래퍼: 높이를 320px로 크게 고정 */
+.chartWrapper {
+  width: 100%;
+  height: 320px; 
+}
