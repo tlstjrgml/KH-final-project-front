@@ -9,6 +9,7 @@ import EditProfile from './layouts/EditProfile';
 function App() {
   return (
     <>
+
        <Navbar isLoggedIn={false} nickname="석희" />
       {/* <Login /> 
       <Signup />
@@ -19,6 +20,7 @@ function App() {
       /> */}
       <Main />
       {/*<EditProfile/>*/}
+
     </>
   )
 }
