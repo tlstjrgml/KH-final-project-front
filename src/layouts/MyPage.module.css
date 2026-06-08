@@ -1,0 +1,302 @@
+.page {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 80px 2rem 4rem;
+}
+
+/* ── 페이지 그리드 ── */
+.pageGrid {
+  display: grid;
+  grid-template-columns: 220px 1fr;
+  gap: 20px;
+  align-items: start;
+}
+
+/* ── 프로필 카드 ── */
+.profileCard {
+  background: #ffffff;
+  border: 1px solid #DEE2E6;
+  border-radius: 16px;
+  box-shadow: 0 1px 8px rgba(0,0,0,0.06);
+  padding: 1.75rem 1.25rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: sticky;
+  top: 80px;
+}
+
+.avatarWrap { position: relative; margin-bottom: 12px; }
+
+.avatar {
+  width: 72px; height: 72px;
+  border-radius: 50%;
+  background: #E6F1FB;
+  display: flex; align-items: center; justify-content: center;
+}
+
+.avatar svg {
+  width: 32px; height: 32px;
+  fill: none; stroke: #378ADD; stroke-width: 1.6;
+}
+
+.avatarEdit {
+  position: absolute; bottom: 0; right: 0;
+  width: 22px; height: 22px;
+  background: #378ADD; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; border: none;
+}
+
+.avatarEdit svg {
+  width: 11px; height: 11px;
+  fill: none; stroke: #fff; stroke-width: 2;
+}
+
+.profileName  { font-size: 15px; font-weight: 600; color: #1A1D23; margin-bottom: 3px; }
+.profileId    { font-size: 12px; color: #6C757D; margin-bottom: 2px; }
+.profileEmail { font-size: 12px; color: #6C757D; margin-bottom: 1.25rem; }
+
+/* ── 통계 ── */
+.statsRow {
+  display: flex; width: 100%;
+  border: 1px solid #DEE2E6;
+  border-radius: 10px;
+  overflow: hidden;
+  margin-bottom: 1.25rem;
+}
+
+.statItem {
+  flex: 1; padding: 10px 4px; text-align: center;
+  border-right: 1px solid #DEE2E6;
+}
+
+.statItem:last-child { border-right: none; }
+.statNum   { font-size: 15px; font-weight: 600; color: #185FA5; }
+.statLabel { font-size: 10px; color: #6C757D; margin-top: 2px; }
+
+.profileDivider {
+  width: 100%; height: 1px;
+  background: #DEE2E6;
+  margin-bottom: 1rem;
+}
+
+/* ── 프로필 버튼 ── */
+.profileBtn {
+  width: 100%; height: 38px;
+  border-radius: 99px;
+  font-size: 12px; font-weight: 500;
+  cursor: pointer; font-family: inherit;
+  display: flex; align-items: center;
+  justify-content: center; gap: 5px;
+  margin-bottom: 8px; transition: all 0.15s;
+}
+
+.profileBtn svg { width: 14px; height: 14px; fill: none; stroke: currentColor; stroke-width: 2; }
+
+.btnEdit {
+  background: #E6F1FB; color: #185FA5;
+  border: 1px solid #B5D4F4;
+}
+
+.btnEdit:hover { background: #B5D4F4; }
+
+.btnLogout {
+  background: transparent; color: #6C757D;
+  border: 1px solid #DEE2E6;
+}
+
+.btnLogout:hover { border-color: #ADB5BD; color: #1A1D23; }
+
+.btnWithdraw {
+  background: transparent; color: #ADB5BD;
+  border: 1px solid #DEE2E6;
+}
+
+.btnWithdraw:hover { color: #E24B4A; border-color: #E24B4A; background: #FCEBEB; }
+
+/* ── 오른쪽 컬럼 ── */
+.rightCol { display: flex; flex-direction: column; gap: 16px; }
+
+.sectionBox {
+  background: #ffffff;
+  border: 1px solid #DEE2E6;
+  border-radius: 16px;
+  box-shadow: 0 1px 8px rgba(0,0,0,0.06);
+  padding: 1.5rem;
+}
+
+.sectionHeader {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 1.25rem;
+}
+
+.sectionTitle {
+  font-size: 15px; font-weight: 600; color: #1A1D23;
+  padding-left: 10px;
+  border-left: 3px solid #378ADD;
+}
+
+.sectionMore {
+  font-size: 12px; color: #378ADD;
+  text-decoration: none; display: flex; align-items: center; gap: 2px;
+  transition: color 0.15s;
+}
+
+.sectionMore:hover { color: #185FA5; }
+.sectionMore svg { width: 13px; height: 13px; fill: none; stroke: currentColor; stroke-width: 2.5; }
+
+/* ── 찜한 복지 카드 ── */
+.wishGrid { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 10px; }
+
+.wishCard {
+  border-radius: 14px; padding: 14px;
+  background: #F4F7FB;
+  border: 0.5px solid transparent;
+  cursor: pointer; transition: all 0.18s;
+  text-decoration: none; display: block;
+}
+
+.wishCard:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 6px 16px rgba(55,138,221,0.1);
+  border-color: #B5D4F4;
+  background: #ffffff;
+}
+
+.wishBadge {
+  display: inline-block; font-size: 10px;
+  padding: 2px 8px; background: #E6F1FB;
+  color: #185FA5; border-radius: 99px;
+  margin-bottom: 7px; font-weight: 500;
+}
+
+.wishTitle { font-size: 12px; font-weight: 500; color: #1A1D23; line-height: 1.5; margin-bottom: 6px; }
+.wishDate  { font-size: 10px; color: #6C757D; }
+
+/* ── 게시글/댓글 목록 ── */
+.postList { display: flex; flex-direction: column; }
+
+.postItem {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 10px 0;
+  border-bottom: 1px solid #E9ECEF;
+  cursor: pointer; text-decoration: none;
+}
+
+.postItem:last-child { border-bottom: none; }
+.postItem:hover .postTitle { color: #378ADD; }
+
+.postLeft { display: flex; align-items: center; gap: 8px; flex: 1; }
+
+.postType {
+  font-size: 10px; padding: 2px 8px;
+  border-radius: 99px; font-weight: 500; flex-shrink: 0;
+  background: #F1F3F5; color: #6C757D;
+}
+
+.postTitle { font-size: 13px; color: #1A1D23; transition: color 0.15s; }
+
+.postMeta {
+  font-size: 11px; color: #6C757D;
+  display: flex; gap: 10px; flex-shrink: 0;
+}
+
+.postMeta span { display: flex; align-items: center; gap: 3px; }
+.postMeta svg { width: 12px; height: 12px; fill: none; stroke: currentColor; stroke-width: 2; }
+
+/* ── 회원탈퇴 모달 ── */
+.modalOverlay {
+  position: fixed; inset: 0; z-index: 200;
+  background: rgba(15,23,42,0.45);
+  display: flex; align-items: center; justify-content: center;
+  padding: 1rem;
+  animation: fadeIn 0.2s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+.modal {
+  width: 100%; max-width: 420px;
+  background: #ffffff;
+  border-radius: 20px;
+  box-shadow: 0 8px 40px rgba(0,0,0,0.18);
+  border: 1px solid #DEE2E6;
+  overflow: hidden;
+  animation: slideUp 0.2s ease;
+}
+
+@keyframes slideUp {
+  from { transform: translateY(12px); opacity: 0; }
+  to   { transform: translateY(0); opacity: 1; }
+}
+
+.modalHeader {
+  background: #E24B4A;
+  padding: 1.25rem 1.5rem;
+  display: flex; align-items: center; gap: 10px;
+}
+
+.modalHeader svg { width: 20px; height: 20px; fill: none; stroke: #fff; stroke-width: 2; flex-shrink: 0; }
+.modalHeaderTitle { font-size: 16px; font-weight: 600; color: #fff; }
+
+.modalBody { padding: 1.5rem; }
+
+.modalWarn {
+  background: #FCEBEB;
+  border: 1px solid #F09595;
+  border-radius: 12px;
+  padding: 12px 14px;
+  font-size: 13px; color: #791F1F;
+  line-height: 1.7; margin-bottom: 1.25rem;
+}
+
+.modalField { margin-bottom: 1.25rem; }
+.modalField label { display: block; font-size: 13px; font-weight: 500; color: #6C757D; margin-bottom: 6px; }
+
+.modalField input {
+  width: 100%; height: 48px;
+  border: none;
+  border-radius: 12px;
+  padding: 0 16px; font-size: 14px;
+  background: #ffffff;
+  box-shadow: 0 0 0 1px #E9ECEF;
+  outline: none;
+  font-family: inherit;
+  transition: box-shadow 0.15s;
+}
+
+.modalField input:focus {
+  box-shadow: 0 0 0 2px #E24B4A;
+}
+
+.modalActions { display: flex; gap: 10px; }
+
+.btnCancel {
+  flex: 1; height: 48px;
+  border: 1px solid #DEE2E6;
+  border-radius: 12px;
+  font-size: 14px; font-weight: 500;
+  color: #6C757D;
+  background: #F8F9FA;
+  cursor: pointer; font-family: inherit;
+  transition: all 0.15s;
+}
+
+.btnCancel:hover { border-color: #ADB5BD; color: #1A1D23; }
+
+.btnDanger {
+  flex: 2; height: 48px;
+  background: #E24B4A; color: #fff;
+  border: none; border-radius: 12px;
+  font-size: 15px; font-weight: 600;
+  cursor: pointer; font-family: inherit;
+  transition: background 0.15s;
+  display: flex; align-items: center; justify-content: center; gap: 6px;
+}
+
+.btnDanger:hover { background: #C0392B; }
+.btnDanger svg { width: 16px; height: 16px; fill: none; stroke: #fff; stroke-width: 2; }
