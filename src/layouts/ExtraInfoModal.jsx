@@ -29,7 +29,7 @@ const ExtraInfoModal = ({ isOpen, onClose, onSave }) => {
             <span>입력하지 않아도 서비스 이용은 가능하지만, 입력하면 내 상황에 맞는 복지 서비스를 더 정확하게 추천받을 수 있어요.</span>
           </div>
 
-          <form id="extraForm">
+          <form onSubmit={(e)=>e.preventDefault()}>
 
             <div className={styles.field}>
               <label>거주지역</label>

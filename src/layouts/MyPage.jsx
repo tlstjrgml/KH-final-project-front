@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import styles from './MyPage.module.css'
+import { Link } from 'react-router-dom'
 
 const MyPage = () => {
   const [isOpen, setIsOpen] = useState(false)
@@ -58,40 +59,40 @@ const MyPage = () => {
           <section className={styles.sectionBox}>
             <div className={styles.sectionHeader}>
               <h2 className={styles.sectionTitle}>찜한 복지</h2>
-              <a href="#" className={styles.sectionMore}>
+              <Link to="#" className={styles.sectionMore}>
                 더 보러가기
                 <svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
-              </a>
+              </Link>
             </div>
             <div className={styles.wishGrid}>
-              <a href="#" className={styles.wishCard}>
+              <Link to="#" className={styles.wishCard}>
                 <span className={styles.wishBadge}>주거</span>
                 <p className={styles.wishTitle}>청년 월세 한시 특별지원</p>
                 <p className={styles.wishDate}>찜한 날짜: 2025.03.12</p>
-              </a>
-              <a href="#" className={styles.wishCard}>
+              </Link>
+              <Link to="#" className={styles.wishCard}>
                 <span className={styles.wishBadge}>금융</span>
                 <p className={styles.wishTitle}>청년도약계좌 가입 지원</p>
                 <p className={styles.wishDate}>찜한 날짜: 2025.03.10</p>
-              </a>
-              <a href="#" className={styles.wishCard}>
+              </Link>
+              <Link to="#" className={styles.wishCard}>
                 <span className={styles.wishBadge}>교육</span>
                 <p className={styles.wishTitle}>국가장학금 1유형 지원</p>
                 <p className={styles.wishDate}>찜한 날짜: 2025.03.08</p>
-              </a>
+              </Link>
             </div>
           </section>
 
           <section className={styles.sectionBox}>
             <div className={styles.sectionHeader}>
               <h2 className={styles.sectionTitle}>내가 쓴 글</h2>
-              <a href="#" className={styles.sectionMore}>
+              <Link to="#" className={styles.sectionMore}>
                 더 보러가기
                 <svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
-              </a>
+              </Link>
             </div>
             <div className={styles.postList}>
-              <a href="#" className={styles.postItem}>
+              <Link to="#" className={styles.postItem}>
                 <div className={styles.postLeft}>
                   <span className={styles.postType}>자유</span>
                   <span className={styles.postTitle}>청년 월세 지원 신청 후기 공유합니다</span>
@@ -101,8 +102,8 @@ const MyPage = () => {
                   <span><svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>48</span>
                   <span>2025.03.12</span>
                 </div>
-              </a>
-              <a href="#" className={styles.postItem}>
+              </Link>
+              <Link to="#" className={styles.postItem}>
                 <div className={styles.postLeft}>
                   <span className={styles.postType}>후기</span>
                   <span className={styles.postTitle}>청년도약계좌 가입 조건 정리해봤어요</span>
@@ -112,8 +113,8 @@ const MyPage = () => {
                   <span><svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>32</span>
                   <span>2025.03.10</span>
                 </div>
-              </a>
-              <a href="#" className={styles.postItem}>
+              </Link>
+              <Link to="#" className={styles.postItem}>
                 <div className={styles.postLeft}>
                   <span className={styles.postType}>자유</span>
                   <span className={styles.postTitle}>취준생인데 받을 수 있는 복지 뭐가 있나요?</span>
@@ -123,33 +124,33 @@ const MyPage = () => {
                   <span><svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>21</span>
                   <span>2025.03.08</span>
                 </div>
-              </a>
+              </Link>
             </div>
           </section>
 
           <section className={styles.sectionBox}>
             <div className={styles.sectionHeader}>
               <h2 className={styles.sectionTitle}>내가 쓴 댓글</h2>
-              <a href="#" className={styles.sectionMore}>
+              <Link to="#" className={styles.sectionMore}>
                 더 보러가기
                 <svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
-              </a>
+              </Link>
             </div>
             <div className={styles.postList}>
-              <a href="#" className={styles.postItem}>
+              <Link to="#" className={styles.postItem}>
                 <div className={styles.postLeft}>
                   <span className={styles.postType}>댓글</span>
                   <span className={styles.postTitle}>저도 신청해봤는데 생각보다 어렵지 않았어요!</span>
                 </div>
                 <div className={styles.postMeta}><span>2025.03.11</span></div>
-              </a>
-              <a href="#" className={styles.postItem}>
+              </Link>
+              <Link to="#" className={styles.postItem}>
                 <div className={styles.postLeft}>
                   <span className={styles.postType}>댓글</span>
                   <span className={styles.postTitle}>국가장학금은 소득분위 확인 먼저 하세요</span>
                 </div>
                 <div className={styles.postMeta}><span>2025.03.09</span></div>
-              </a>
+              </Link>
             </div>
           </section>
 

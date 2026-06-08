@@ -1,4 +1,5 @@
 import styles from './Login.module.css'
+import { Link } from 'react-router-dom'
 
 const Login = () => {
   return (
@@ -14,7 +15,7 @@ const Login = () => {
         <h1 className={styles.cardTitle}>로그인</h1>
         <p className={styles.cardSub}>청년 복지 서비스를 한눈에 확인하세요</p>
 
-        <form action="#" method="post">
+        <form onSubmit={(e)=>e.preventDefault()}>
           <div className={styles.field}>
             <label htmlFor="userId">아이디<span className={styles.req}>*</span></label>
             <input type="text" id="userId" name="userId" placeholder="아이디를 입력해주세요" autoComplete="username"/>
@@ -45,11 +46,11 @@ const Login = () => {
 
         <div className={styles.footerLinks}>
           <span className={styles.muted}>계정이 없으신가요?</span>
-          <a href="signup.html">회원가입</a>
+          <Link to="/signup">회원가입</Link>
           <span className={styles.sep}>·</span>
-          <a href="#">아이디 찾기</a>
+          <Link to="#">아이디 찾기</Link>
           <span className={styles.sep}>·</span>
-          <a href="#">비밀번호 찾기</a>
+          <Link to="#">비밀번호 찾기</Link>
         </div>
       </div>
     </main>
