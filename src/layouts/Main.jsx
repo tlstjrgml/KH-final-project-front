@@ -4,22 +4,29 @@ const Main = () => {
   return (
     <main className={styles.page}>
 
+      {/* 히어로 */}
       <section className={styles.hero}>
-        <div className={styles.heroEyebrow}>
-          <svg style={{width:'13px', height:'13px', fill:'none', stroke:'currentColor', strokeWidth:2}} viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
-          청년을 위한 복지 정보 한눈에
+        <div className={styles.heroInner}>
+          <div className={styles.heroEyebrow}>
+            <span></span>
+            정부 공식 복지 데이터 연동
+          </div>
+          <h1 className={styles.heroTitle}>
+            내게 맞는 복지 서비스를,<br/>
+            <em>한 곳에서 찾아보세요</em>
+          </h1>
+          <p className={styles.heroSub}>주거, 일자리, 교육, 금융까지 — 청년을 위한 모든 복지 정보</p>
+          <form className={styles.heroSearch} action="#" method="get">
+            <input type="text" name="q" placeholder="복지 서비스를 검색해보세요" autoComplete="off"/>
+            <button type="submit">
+              <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+              검색
+            </button>
+          </form>
         </div>
-        <h1 className={styles.heroTitle}>내게 맞는 복지 서비스를<br/>지금 바로 찾아보세요</h1>
-        <p className={styles.heroSub}>정부 지원 복지 서비스를 한 곳에서 쉽게</p>
-        <form className={styles.heroSearch} action="#" method="get">
-          <input type="text" name="q" placeholder="복지 서비스를 검색해보세요" autoComplete="off"/>
-          <button type="submit">
-            <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-            검색
-          </button>
-        </form>
       </section>
 
+      {/* 카테고리 */}
       <nav className={styles.catRow} aria-label="복지 카테고리">
         <a href="#" className={styles.catChip}>
           <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
@@ -44,9 +51,27 @@ const Main = () => {
       </nav>
 
       <div className={styles.mainGrid}>
-
         <div className={styles.leftCol}>
 
+          {/* 복지 추천 */}
+          <div className={styles.recBox}>
+            <div className={styles.recBoxHd}>
+              <div className={styles.recBoxIcon}>
+                <svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+              </div>
+              <span className={styles.recBoxTitle}>나에게 맞는 복지 추천</span>
+              <span className={styles.recBoxSub}>프로필 기반 자동 매칭</span>
+            </div>
+            <div className={styles.recChips}>
+              <span className={styles.recChip}>청년 월세 특별지원</span>
+              <span className={styles.recChip}>청년도약계좌</span>
+              <span className={styles.recChip}>국가장학금</span>
+              <span className={styles.recChip}>취업성공패키지</span>
+              <span className={`${styles.recChip} ${styles.recChipMuted}`}>+ 더 보기 →</span>
+            </div>
+          </div>
+
+          {/* 복지 서비스 */}
           <section className={styles.sectionBox}>
             <div className={styles.sectionHeader}>
               <h2 className={styles.sectionTitle}>복지 서비스</h2>
@@ -95,6 +120,7 @@ const Main = () => {
             </div>
           </section>
 
+          {/* 인기 게시글 */}
           <section className={styles.sectionBox}>
             <div className={styles.sectionHeader}>
               <h2 className={styles.sectionTitle}>인기 게시글</h2>
