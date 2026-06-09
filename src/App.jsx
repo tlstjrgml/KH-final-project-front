@@ -6,6 +6,9 @@ import Signup from './layouts/Signup';
 import Main from './layouts/Main';
 import EditProfile from './layouts/EditProfile';
 import MyPage from './layouts/MyPage';
+import WelfareList from './layouts/WelfareList';
+import WelfareDetail from './layouts/WelfareDetail';
+import Persona from './layouts/Persona';
 
 function App() {
   return (
@@ -18,6 +21,9 @@ function App() {
         <Route path="/signup" element={<Signup />} />
         <Route path="/edit-profile" element={<EditProfile />} />
         <Route path="/mypage" element={<MyPage />} />
+        <Route path="/welfarelist" element={<WelfareList />} />
+        <Route path="/welfaredetail" element={<WelfareDetail />} />
+        <Route path="/persona" element={<Persona />} />
       </Routes>
     </BrowserRouter>
   );

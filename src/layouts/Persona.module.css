@@ -1,0 +1,212 @@
+.pageBg {
+  background: #F4F7FB;
+  min-height: calc(100vh - 60px);
+  padding-top: 60px;
+}
+
+.errorMsg {
+  font-size: 13px;
+  color: #E24B4A;
+  padding: 12px;
+  background: #FCEBEB;
+  border-radius: 8px;
+  margin: 12px 0;
+}
+
+/* 브레드크럼 */
+.breadcrumb {
+  font-size: 12px;
+  color: #ADB5BD;
+  padding: 10px 20px;
+  background: #fff;
+  border-bottom: 1px solid #E9ECEF;
+}
+
+.breadcrumb span {
+  cursor: pointer;
+  color: #378ADD;
+  transition: color 0.15s;
+}
+
+.breadcrumb span:hover { text-decoration: underline; }
+
+.breadCurrent {
+  color: #ADB5BD !important;
+  cursor: default !important;
+}
+
+.breadCurrent:hover { text-decoration: none !important; }
+
+/* 히어로 */
+.personaHero {
+  background: transparent;
+  padding: 0;
+}
+
+.phCard {
+  background: linear-gradient(135deg, #0C447C 0%, #185FA5 100%);
+  border-radius: 16px;
+  padding: 22px 24px 0;
+}
+
+.phTitle {
+  font-size: 20px;
+  font-weight: 600;
+  color: #fff;
+  margin-bottom: 4px;
+  letter-spacing: -0.02em;
+}
+
+.phDesc {
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.75);
+  margin-bottom: 16px;
+}
+
+/* 페르소나 탭 */
+.ptabs { display: flex; gap: 0; }
+
+.ptab {
+  padding: 10px 22px;
+  font-size: 13px;
+  cursor: pointer;
+  border-bottom: 3px solid transparent;
+  color: rgba(255, 255, 255, 0.65);
+  font-weight: 500;
+  transition: all 0.15s;
+  background: none;
+  border-top: none;
+  border-left: none;
+  border-right: none;
+  font-family: inherit;
+}
+
+.ptab:hover { color: rgba(255, 255, 255, 0.85); }
+.ptab.on    { color: #fff; border-bottom-color: #fff; }
+
+/* 컨텐츠 */
+.phInner {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 0 2rem;
+}
+
+.pContent {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 16px 2rem;
+  background: transparent;
+}
+
+
+/* 그룹 섹션 */
+.pGroup {
+  background: #fff;
+  border: 1px solid #DEE2E6;
+  border-radius: 14px;
+  padding: 16px;
+  margin-bottom: 12px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.03);
+}
+
+.pgTitle {
+  font-size: 13px;
+  font-weight: 600;
+  color: #1A1D23;
+  margin-bottom: 12px;
+}
+
+/* 카드 그리드 */
+.grid4 {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+}
+
+/* 카드 */
+.pcard {
+  border: 1px solid #DEE2E6;
+  border-radius: 14px;
+  padding: 13px;
+  background: #F8F9FA;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  min-height: 110px;
+  transition: all 0.15s;
+}
+
+.pcard:hover {
+  border-color: #85B7EB;
+  background: #fff;
+  box-shadow: 0 2px 16px rgba(55, 138, 221, 0.08);
+  transform: translateY(-1px);
+}
+
+.pcardTitle {
+  font-size: 12px;
+  font-weight: 600;
+  color: #1A1D23;
+  margin-top: 6px;
+  line-height: 1.4;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.pcardMeta {
+  font-size: 11px;
+  color: #ADB5BD;
+  margin-top: 4px;
+}
+
+.pcardBottom {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 8px;
+}
+
+/* 뱃지 */
+.badge {
+  font-size: 11px;
+  padding: 2px 8px;
+  border-radius: 20px;
+  display: inline-block;
+  font-weight: 500;
+}
+
+.badgeBlue  { background: #E6F1FB; color: #0C447C; }
+.badgeGreen { background: #E1F5EE; color: #0F6E56; }
+.badgeAmber { background: #FAEEDA; color: #633806; }
+.badgePink  { background: #FBEAF0; color: #72243E; }
+.badgeGray  { background: #F1F3F5; color: #6C757D; }
+
+/* 하트 */
+.heartBtn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 15px;
+  color: #ADB5BD;
+  padding: 2px;
+  line-height: 1;
+  transition: color 0.15s;
+}
+
+.heartBtn:hover { color: #D4537E; }
+.heartBtn.on    { color: #D4537E; }
+
+/* 스켈레톤 */
+.skeleton {
+  background: #E9ECEF;
+  border-radius: 14px;
+  height: 110px;
+  animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.4; }
+}
