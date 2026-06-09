@@ -9,7 +9,7 @@ function Navbar({ isLoggedIn = false, nickname = '' }) {
       <div className={styles.inner}>
         
         {/* 로고 영역 (.logo) */}
-        <Link to="#" className={styles.logo}>
+        <Link to="/" className={styles.logo}>
           <div className={styles.logoIcon}>
             
             <svg viewBox="0 0 24 24" width="18" height="18" fill="#ffffff">
@@ -21,7 +21,7 @@ function Navbar({ isLoggedIn = false, nickname = '' }) {
 
         {/* 내비 링크 메뉴 영역 (.navList, .navLink) */}
         <ul className={styles.navList}>
-          <li><Link to="#" className={styles.navLink}>복지서비스</Link></li>
+          <li><Link to="/welfarelist" className={styles.navLink}>복지서비스</Link></li>
           <li><Link to="#" className={styles.navLink}>커뮤니티</Link></li>
           <li><Link to="#" className={styles.navLink}>공지사항</Link></li>
         </ul>

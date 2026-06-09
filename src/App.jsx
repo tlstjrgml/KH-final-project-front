@@ -10,6 +10,9 @@ import BoardFree from './layouts/BoardFree';
 import BoardFreeDetail from './layouts/BoardFreeDetail';
 
 import MyPage from './layouts/MyPage';
+import WelfareList from './layouts/WelfareList';
+import WelfareDetail from './layouts/WelfareDetail';
+import Persona from './layouts/Persona';
 
 function App() {
   return (
@@ -22,6 +25,9 @@ function App() {
         <Route path="/signup" element={<Signup />} />
         <Route path="/edit-profile" element={<EditProfile />} />
         <Route path="/mypage" element={<MyPage />} />
+        <Route path="/welfarelist" element={<WelfareList />} />
+        <Route path="/welfaredetail" element={<WelfareDetail />} />
+        <Route path="/persona" element={<Persona />} />
       </Routes>
     </BrowserRouter>
   );

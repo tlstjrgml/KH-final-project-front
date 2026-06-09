@@ -77,7 +77,7 @@ const Main = () => {
           <section className={styles.sectionBox}>
             <div className={styles.sectionHeader}>
               <h2 className={styles.sectionTitle}>복지 서비스</h2>
-              <Link to="#" className={styles.sectionMore}>
+              <Link to="/welfarelist" className={styles.sectionMore}>
                 더 보러가기
                 <svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
               </Link>
