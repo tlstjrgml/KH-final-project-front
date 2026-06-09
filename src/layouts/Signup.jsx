@@ -1,4 +1,5 @@
 import styles from './Signup.module.css'
+import { Link } from 'react-router-dom'
 
 const Signup = () => {
   return (
@@ -8,7 +9,7 @@ const Signup = () => {
         <h1 className={styles.cardTitle}>회원가입</h1>
         <p className={styles.cardSub}>서비스 이용을 위한 기본 정보를 입력해주세요</p>
 
-        <form action="#" method="post" id="signupForm">
+        <form onSubmit={(e)=>e.preventDefault()}>
 
           <div className={styles.field}>
             <label htmlFor="userId">아이디<span className={styles.req}>*</span></label>
@@ -82,7 +83,7 @@ const Signup = () => {
 
         <div className={styles.footerLinks}>
           <span className={styles.muted}>이미 계정이 있으신가요?</span>
-          <a href="login.html">로그인</a>
+          <Link to="/login">로그인</Link>
         </div>
       </div>
     </main>
