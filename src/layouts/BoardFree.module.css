@@ -1,0 +1,192 @@
+/* 전체 카드 */
+.boardCard {
+    width: 90%;
+    max-width: 1500px;
+    margin: 40px auto;
+    background: #fff;
+    padding: 30px;
+    border-radius: 12px;
+}
+
+/* 헤더 */
+.boardHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+}
+
+.boardTitle {
+    font-size: 32px;
+    font-weight: 700;
+    color: #222;
+}
+
+.btnWrite {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+
+    border: none;
+    border-radius: 8px;
+
+    background-color: #234a87;
+    color: white;
+
+    padding: 12px 20px;
+    cursor: pointer;
+
+    font-size: 15px;
+    font-weight: 600;
+}
+
+.btnWrite svg {
+    width: 18px;
+    height: 18px;
+    stroke: currentColor;
+    fill: none;
+    stroke-width: 2;
+}
+
+/* 게시판 테이블 */
+.boardTable {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.boardTable thead tr {
+    border-bottom: 3px solid #333;
+}
+
+.boardTable th {
+    padding: 18px 10px;
+    font-size: 15px;
+    font-weight: 700;
+    color: #444;
+}
+
+.boardTable td {
+    padding: 22px 10px;
+    border-bottom: 1px solid #e5e5e5;
+    color: #666;
+    font-size: 15px;
+}
+
+.dataRow:hover {
+    background-color: #fafafa;
+    cursor: pointer;
+}
+
+/* 컬럼 크기 */
+.colId {
+    width: 100px;
+    text-align: center;
+}
+
+.colTitle {
+    text-align: left;
+    padding-left: 30px !important;
+}
+
+.colAuthor {
+    width: 120px;
+    text-align: center;
+}
+
+.colDate {
+    width: 150px;
+    text-align: center;
+}
+
+.colViews {
+    width: 100px;
+    text-align: center;
+}
+
+/* 페이지네이션 */
+.pagination {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+
+    margin-top: 30px;
+    margin-bottom: 40px;
+}
+
+.pageItem {
+    width: 42px;
+    height: 42px;
+
+    border: 1px solid #d9d9d9;
+    border-radius: 8px;
+
+    background: white;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    color: #666;
+    font-size: 15px;
+    text-decoration: none;
+
+    cursor: pointer;
+}
+
+/* 현재 페이지 */
+.pageItem:nth-child(2) {
+    background: #4d7ec7;
+    color: white;
+    border-color: #4d7ec7;
+}
+
+/* 검색 영역 */
+.searchBar {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 12px;
+}
+
+.searchSelect {
+    width: 160px;
+    height: 56px;
+
+    border: 1px solid #ddd;
+    border-radius: 12px;
+
+    padding: 0 16px;
+    font-size: 16px;
+}
+
+.searchInput {
+    width: 400px;
+    height: 56px;
+
+    border: 1px solid #ddd;
+    border-radius: 12px;
+
+    padding: 0 18px;
+    font-size: 16px;
+}
+
+.searchInput::placeholder {
+    color: #b5b5b5;
+}
+
+.btnSearch {
+    width: 90px;
+    height: 56px;
+
+    border: none;
+    border-radius: 12px;
+
+    background-color: #234a87;
+    color: white;
+
+    font-size: 16px;
+    font-weight: 700;
+
+    cursor: pointer;
+}

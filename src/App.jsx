@@ -5,6 +5,8 @@ import Signup from './layouts/Signup';
 import ExtraInfoModal from './layouts/ExtraInfoModal';
 import Main from './layouts/Main';
 import EditProfile from './layouts/EditProfile';
+import BoardFree from './layouts/BoardFree';
+import BoardFreeDetail from './layouts/BoardFreeDetail';
 
 function App() {
   return (
@@ -18,7 +20,9 @@ function App() {
         onSave={() => console.log('저장')}
       />
       <Main />  */}
-      <EditProfile/>
+      {/* <EditProfile/> */}
+      {/* <BoardFree/> */}
+      <BoardFreeDetail/>
     </>
   )
 }
