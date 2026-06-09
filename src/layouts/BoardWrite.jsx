@@ -1,6 +1,9 @@
+import { useNavigate } from 'react-router-dom';
 import styles from './BoardWrite.module.css';
 
 const BoardWrite = () => {
+    const navigate = useNavigate();
+
     return (
         <div className={styles.page}>
             <div className={styles.writeCard}>
@@ -52,7 +55,9 @@ const BoardWrite = () => {
                     </div>
 
                     <div className={styles.formActions}>
-                        <button type="button" className={styles.btnCancel} onClick={() => { }}>취소</button>
+                        <button type="button" className={styles.btnCancel} onClick={() => navigate(-1)}>
+                            취소
+                        </button>
                         <button type="button" id="submitAttm" className={styles.btnSubmit} onClick={() => { }}>
                             <svg viewBox="0 0 24 24">
                                 <path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z" />

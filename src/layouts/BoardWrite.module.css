@@ -1,7 +1,7 @@
 /* ── 페이지 본문 ── */
 .page {
     min-height: 100vh;
-    padding: 80px 2rem 4rem;
+    padding: 40px 2rem 4rem;
     max-width: 1280px;
     margin: 0 auto;
     display: flex;
