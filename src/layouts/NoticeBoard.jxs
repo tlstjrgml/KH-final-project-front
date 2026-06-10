@@ -1,6 +1,9 @@
-import styles from './AlertBoard.module.css';
+import styles from './NoticeBoard.module.css';
 
-const AlertBoard = () =>{
+const NoticeBoard = () =>{
+    
+     const pageList = [1, 2, 3, 4, 5];
+
     return(
         <main className={styles.page}>
             <div className={styles.contentWrapper}>
@@ -10,17 +13,17 @@ const AlertBoard = () =>{
 
                     {/* 게시판 헤더 */}
                     <div className={styles.boardHeader}>
-                        <h2 className={styles.boardtitle}>공지사항</h2>
+                        <h2 className={styles.boardTitle}>공지사항</h2>
                         
                         {/* 관리자 등 특정 권한 사용자만 글쓰기 버튼 노출 (임시로 session 조건 적용) */}
-                        <button type="button" className={styles.btenwrite} onClick={() => {location.href=' '}}>
+                        <button type="button" className={styles.btnWrite} onClick={() => {location.href=' '}}>
                         <svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
                         글쓰기
                         </button>
                     </div>
 
                     {/* 게시판 목록 테이블 */}
-                    <table className={boardTable}>
+                    <table className={styles.boardTable}>
                         <thead>
                         <tr>
                             <th className={styles.colId}>글 번호</th>
@@ -32,27 +35,24 @@ const AlertBoard = () =>{
                         </thead>
                         <tbody id="board-tbody">
                         {/* 1. 백엔드 연동용 데이터 출력 */}
-                        <tr className={styles.dataRow}>
-                            <td className={`${styles.colId} ${styles.boardId}`} >[[${b.boardId}]]</td>
-                            <td className={styles.colTitle} >[[${b.boardTitle}]]</td>
-                            <td className={styles.colauthor} >[[${b.nickName}]]</td>
-                            <td className={styles.coldate} >[[${b.createDate}]]</td>
-                            <td className={styles.colviews} >[[${b.boardCount}]]</td>
+                        {[...Array(10)].map((_, index) => (
+                        <tr key={index} className={styles.dataRow}>
+                            <td className={`${styles.colId} ${styles.boardId}`} >1</td>
+                            <td className={styles.colTitle} >이번주 공지사항</td>
+                            <td className={styles.colauthor} >관리자</td>
+                            <td className={styles.coldate} >2026.06.10</td>
+                            <td className={styles.colviews} >0</td>
                         </tr>
-
-                        {/* 2. 게시글이 없을 때의 안내 */}
-                        <tr>
-                            <td colspan="5" style={{ padding: '4rem 0', color: '#ADB5BD' }}>등록된 공지사항이 없습니다.</td>
-                        </tr>
+                        ))}
                         </tbody>
                     </table>
 
                     {/* 페이지네이션 (백엔드 연동) */}
                     <div className={styles.pagination} id="pagination-container">
                         <a className={styles.pageitem} aria-label="Previous">&lt;</a>
-                        <th:block >
-                            <a>[[${p}]]</a>
-                        </th:block>
+                            {pageList.map((p) => (
+                                <a key={p}>{p}</a>
+                                ))}
                         <a className={styles.pageitem} aria-label="Next">&gt;</a>
                     </div>
 
@@ -75,4 +75,4 @@ const AlertBoard = () =>{
     )
 }
 
-export default AlertBoard;
+export default NoticeBoard;
