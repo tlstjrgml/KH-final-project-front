@@ -1,0 +1,114 @@
+.page {
+    min-height: 100vh;
+    padding: 40px 2rem;
+    max-width: 1280px;
+    margin: 0 auto;
+    display: flex;
+    justify-content: center;
+}
+
+.writeCard {
+    width: 100%;
+    max-width: 800px;
+    background: #fff;
+    border-radius: 12px;
+    border: 1px solid #dee2e6;
+    padding: 2rem;
+}
+
+.writeHeader {
+    padding-bottom: 1rem;
+    margin-bottom: 1.75rem;
+    border-bottom: 1px solid #dee2e6;
+}
+
+.writeTitle {
+    font-size: 20px;
+    font-weight: 600;
+    color: #1a1d23;
+    padding-left: 10px;
+    border-left: 3px solid #378add;
+}
+
+.field {
+    margin-bottom: 20px;
+}
+
+.field label {
+    display: block;
+    font-size: 13px;
+    font-weight: 500;
+    color: #495057;
+    margin-bottom: 6px;
+}
+
+.row {
+    display: flex;
+    gap: 10px;
+}
+
+.field input,
+.field textarea {
+    width: 100%;
+    border: 1px solid #ced4da;
+    border-radius: 8px;
+    padding: 12px;
+    font-size: 14px;
+    outline: none;
+}
+
+.field textarea {
+    min-height: 200px;
+}
+
+.starContainer {
+    display: flex;
+    gap: 5px;
+    font-size: 28px;
+    cursor: pointer;
+}
+
+.starEmpty {
+    color: #dee2e6;
+}
+
+.starFilled {
+    color: #ffc107;
+}
+
+.btnLoad {
+    width: 150px;
+    background: #fff;
+    border: 1px solid #ced4da;
+    border-radius: 8px;
+    cursor: pointer;
+}
+
+.formActions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 1.5rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid #dee2e6;
+}
+
+.btnCancel,
+.btnSubmit {
+    height: 44px;
+    padding: 0 24px;
+    border-radius: 99px;
+    border: none;
+    cursor: pointer;
+}
+
+.btnCancel {
+    background: #fff;
+    border: 1px solid #378add;
+    color: #378add;
+}
+
+.btnSubmit {
+    background: #378add;
+    color: #fff;
+}

@@ -6,8 +6,11 @@ import Signup from './layouts/Signup';
 import Main from './layouts/Main';
 import EditProfile from './layouts/EditProfile';
 import MyPage from './layouts/MyPage';
-import BoardEdit from './layouts/BoardEdit';
-import BoardWrite from './layouts/BoardWrite';
+import BoardReview from './layouts/BoardReview'
+import BoardReviewEdit from './layouts/BoardReviewEdit';
+import BoardReviewWrite from './layouts/BoardReviewWrite';
+import AlertDetail from './layouts/AlertDetail';
+import AlertWrite from './layouts/AlertWrite';
 
 function App() {
   return (
@@ -20,8 +23,11 @@ function App() {
         <Route path="/signup" element={<Signup />} />
         <Route path="/edit-profile" element={<EditProfile />} />
         <Route path="/mypage" element={<MyPage />} />
-        <Route path="/board/edit" element={<BoardEdit />} />
-        <Route path="/board/write" element={<BoardWrite />} />
+        <Route path="/boardreview" element={<BoardReview />} />
+        <Route path="/boardreview/write" element={<BoardReviewWrite />} />
+        <Route path="/boardreview/edit" element={<BoardReviewEdit />} />
+        <Route path="/alert/detail" element={<AlertDetail />} />
+        <Route path="/alert/write" element={<AlertWrite />} />
       </Routes>
     </BrowserRouter>
   );

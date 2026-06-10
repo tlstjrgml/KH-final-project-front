@@ -1,0 +1,165 @@
+.page {
+    min-height: 100vh;
+    padding: 40px 2rem 4rem;
+    max-width: 1280px;
+    margin: 0 auto;
+    display: flex;
+    justify-content: center;
+}
+
+.writeCard {
+    width: 100%;
+    max-width: 800px;
+    background: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    border: 1px solid #dee2e6;
+    padding: 2rem;
+}
+
+.writeHeader {
+    padding-bottom: 1rem;
+    margin-bottom: 1.75rem;
+    border-bottom: 1px solid #dee2e6;
+}
+
+.writeTitle {
+    font-size: 20px;
+    font-weight: 600;
+    color: #1a1d23;
+    padding-left: 10px;
+    border-left: 3px solid #378add;
+}
+
+.field {
+    margin-bottom: 20px;
+}
+
+.field label {
+    display: block;
+    font-size: 13px;
+    font-weight: 500;
+    color: #495057;
+    margin-bottom: 6px;
+}
+
+.field label .req {
+    color: #378add;
+    margin-left: 3px;
+}
+
+.field input[type="text"],
+.field input[type="number"],
+.field textarea {
+    width: 100%;
+    border: none;
+    border-radius: 8px;
+    padding: 12px 14px;
+    font-size: 14px;
+    background: #fff;
+    outline: none;
+    box-shadow: 0 0 0 1px #ced4da;
+}
+
+.field input[type="text"],
+.field input[type="number"] {
+    height: 48px;
+}
+
+.field textarea {
+    min-height: 200px;
+    resize: vertical;
+}
+
+/* 후기게시판 전용 가로 배치 */
+.row {
+    display: flex;
+    gap: 10px;
+    align-items: flex-end;
+}
+
+/* 별점 스타일 */
+.starContainer {
+    display: flex;
+    gap: 5px;
+    font-size: 24px;
+    cursor: pointer;
+    padding-top: 5px;
+}
+
+.starEmpty {
+    color: #dee2e6;
+}
+
+.starFilled {
+    color: #ffc107;
+}
+
+/* 버튼 스타일 */
+.btnLoad {
+    width: 100%;
+    height: 48px;
+    background: #fff;
+    border: 1px solid #ced4da;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 13px;
+    color: #495057;
+}
+
+.btnFile {
+    background: #fff;
+    border: 1px solid #ced4da;
+    color: #495057;
+    padding: 6px 16px;
+    border-radius: 99px;
+    font-size: 13px;
+}
+
+.fileCustomBox {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    border: 1px dashed #a1a9b0;
+    background: #f8f9fa;
+    border-radius: 8px;
+    padding: 12px 16px;
+    cursor: pointer;
+}
+
+.fileName {
+    font-size: 13px;
+    color: #adb5bd;
+}
+
+.formActions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 1.5rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid #dee2e6;
+}
+
+.btnCancel,
+.btnSubmit {
+    height: 44px;
+    padding: 0 24px;
+    border-radius: 99px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    border: none;
+}
+
+.btnCancel {
+    background: #fff;
+    border: 1px solid #378add;
+    color: #378add;
+}
+
+.btnSubmit {
+    background: #378add;
+    color: #fff;
+}
