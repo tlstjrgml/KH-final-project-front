@@ -6,6 +6,8 @@ import Signup from './layouts/Signup';
 import Main from './layouts/Main';
 import EditProfile from './layouts/EditProfile';
 import MyPage from './layouts/MyPage';
+import BoardEdit from './layouts/BoardEdit';
+import BoardWrite from './layouts/BoardWrite';
 
 function App() {
   return (
@@ -18,11 +20,13 @@ function App() {
         <Route path="/signup" element={<Signup />} />
         <Route path="/edit-profile" element={<EditProfile />} />
         <Route path="/mypage" element={<MyPage />} />
+        <Route path="/board/edit" element={<BoardEdit />} />
+        <Route path="/board/write" element={<BoardWrite />} />
       </Routes>
     </BrowserRouter>
   );
   
-  )
+  
 }
 
 export default App;

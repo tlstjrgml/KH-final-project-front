@@ -268,23 +268,23 @@
     font-size: 14px;
     font-weight: 500;
     cursor: pointer;
-    transition: all 0.15s;
-    font-family: inherit;
     display: flex;
     align-items: center;
     justify-content: center;
     gap: 6px;
+    transition: all 0.15s;
 }
 
 .btnCancel {
-    background: #fff;
-    border: 1px solid #DEE2E6;
-    color: #6C757D;
+    background: #fff !important;
+    border: 1px solid #378ADD !important;
+    color: #378ADD !important;
 }
 
 .btnCancel:hover {
-    border-color: #ADB5BD;
-    color: #1A1D23;
+    background: #E6F1FB !important;
+    border-color: #378ADD !important;
+    color: #378ADD !important;   
 }
 
 .btnSubmit {
