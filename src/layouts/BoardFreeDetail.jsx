@@ -79,7 +79,7 @@ const  BoardFreeDetail = () =>{
                         <div className={styles.commentText}>저도 그 부분이 헷갈리더라고요. 아시는 분 답변 부탁드립니다!</div>
                         <div className={styles.commentActions}>
                         <button className={styles.actionBtn} onClick={() => {toggleCommentLike('cnt-1')}}>
-                            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3zM7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"/></svg>
+                            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3zM7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"/></svg>
                             좋아요 <span id="cnt-1">2</span>
                         </button>
                         <span className={styles.metaDivider}>|</span>
@@ -107,7 +107,7 @@ const  BoardFreeDetail = () =>{
                         <div className={styles.commentText}>소득은 가구원 수에 따른 기준 중위소득(세전 기준)으로 산정합니다. 부모님과 주민등록상 세대가 분리되어 있으면 본인 소득만 봅니다!</div>
                         <div className={styles.commentActions}>
                         <button className={styles.actionBtn} onClick={() => {toggleCommentLike('cnt-2')}}>
-                            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3zM7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"/></svg>
+                            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3zM7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"/></svg>
                             좋아요 <span id="cnt-2">8</span>
                         </button>
                         <span className={styles.metaDivider}>|</span>

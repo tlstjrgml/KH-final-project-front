@@ -1,57 +1,53 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import { useNavigate } from 'react-router-dom'
 import styles from './WelfareList.module.css'
 
 const CATEGORIES = ['주거', '일자리', '생활', '교육', '금융', '참여･기반', '금융･복지･문화']
-
-const REGIONS = [
-  '전국', '서울', '부산', '대구', '인천', '광주', '대전',
-  '울산', '세종', '경기', '강원', '충북', '충남',
-  '전북', '전남', '경북', '경남', '제주',
-]
-
-const AGE_OPTIONS    = ['19~24세', '25~29세', '30~34세', '35~39세']
+const REGIONS = ['전국', '서울', '부산', '대구', '인천', '광주', '대전', '울산', '세종', '경기', '강원', '충북', '충남', '전북', '전남', '경북', '경남', '제주']
+const AGE_OPTIONS = ['19~24세', '25~29세', '30~34세', '35~39세']
 const INCOME_OPTIONS = ['기초/차상위', '1~3분위', '4~6분위', '7분위 이상']
-const JOB_OPTIONS    = ['미취업', '재직중', '자영업']
+const JOB_OPTIONS = ['미취업', '재직중', '자영업']
 
 const BADGE_CLASS = {
-  '주거':           styles.badgeBlue,
-  '일자리':         styles.badgeAmber,
-  '생활':           styles.badgePink,
-  '교육':           styles.badgeBlue,
-  '금융':           styles.badgeGreen,
-  '참여･기반':      styles.badgeGray,
+  '주거': styles.badgeBlue,
+  '일자리': styles.badgeAmber,
+  '생활': styles.badgePink,
+  '교육': styles.badgeBlue,
+  '금융': styles.badgeGreen,
+  '참여･기반': styles.badgeGray,
   '금융･복지･문화': styles.badgeGreen,
 }
 
-const MOCK_LIST = [
-  { id: 1,  lclsfNm: '주거', plcyNm: '청년 월세 한시 특별지원',  aplyYmd: '2025.03.01 ~ 05.31', sprvsnInstCdNm: '국토교통부',   wished: true  },
-  { id: 2,  lclsfNm: '금융', plcyNm: '청년도약계좌',              aplyYmd: '상시',               sprvsnInstCdNm: '금융위원회',   wished: false },
-  { id: 3,  lclsfNm: '주거', plcyNm: '청년 전용 보증금 대출',     aplyYmd: '상시',               sprvsnInstCdNm: '주택도시기금', wished: true  },
-  { id: 4,  lclsfNm: '생활', plcyNm: '청년내일저축계좌',          aplyYmd: '2025.05.01 ~ 06.30', sprvsnInstCdNm: '보건복지부',   wished: false },
-  { id: 5,  lclsfNm: '생활', plcyNm: '청년 마음건강 바우처',      aplyYmd: '2025.04.01 ~ 06.30', sprvsnInstCdNm: '보건복지부',   wished: false },
-  { id: 6,  lclsfNm: '금융', plcyNm: '청년 희망 적금',            aplyYmd: '상시',               sprvsnInstCdNm: '금융위원회',   wished: false },
-  { id: 7,  lclsfNm: '교육', plcyNm: '청년 국가기술자격 응시료 지원', aplyYmd: '상시',            sprvsnInstCdNm: '고용노동부',   wished: false },
-  { id: 8,  lclsfNm: '일자리', plcyNm: '청년 일경험 지원사업',    aplyYmd: '2025.04.01 ~ 07.31', sprvsnInstCdNm: '고용노동부',   wished: false },
-  { id: 9,  lclsfNm: '생활', plcyNm: '청년 문화예술패스',         aplyYmd: '상시',               sprvsnInstCdNm: '문화체육관광부', wished: false },
-  { id: 10, lclsfNm: '주거', plcyNm: '청년 행복주택',             aplyYmd: '상시',               sprvsnInstCdNm: '국토교통부',   wished: false },
-  { id: 11, lclsfNm: '주거', plcyNm: '청년 행복주택',             aplyYmd: '상시',               sprvsnInstCdNm: '국토교통부',   wished: false },
-  { id: 12, lclsfNm: '주거', plcyNm: '청년 행복주택',             aplyYmd: '상시',               sprvsnInstCdNm: '국토교통부',   wished: false },
-  { id: 13, lclsfNm: '주거', plcyNm: '청년 행복주택',             aplyYmd: '상시',               sprvsnInstCdNm: '국토교통부',   wished: false },
-  { id: 14, lclsfNm: '주거', plcyNm: '청년 행복주택',             aplyYmd: '상시',               sprvsnInstCdNm: '국토교통부',   wished: false },
-]
-
 const WelfareList = () => {
-  const [selectedCats,    setSelectedCats]    = useState([])
+  const navigate = useNavigate()
+  const [selectedCats, setSelectedCats] = useState([])
   const [selectedRegions, setSelectedRegions] = useState(['전국'])
-  const [selectedAges,    setSelectedAges]    = useState([])
+  const [selectedAges, setSelectedAges] = useState([])
   const [selectedIncomes, setSelectedIncomes] = useState([])
-  const [selectedJobs,    setSelectedJobs]    = useState([])
-  const [sort,            setSort]            = useState('최신순')
-  const [wished,          setWished]          = useState({})
-  const [currentPage,     setCurrentPage]     = useState(1)
+  const [selectedJobs, setSelectedJobs] = useState([])
+  const [sort, setSort] = useState('최신순')
+  const [wished, setWished] = useState({})
+  const [currentPage, setCurrentPage] = useState(1)
+  const [keyword, setKeyword] = useState('')
+  const [searchInput, setSearchInput] = useState('')
+  const [welfareList, setWelfareList] = useState([])
+  const [total, setTotal] = useState(0)
+  const [totalPages, setTotalPages] = useState(1)
+
+  useEffect(() => {
+    const lclsfNm = selectedCats.length === 1 ? selectedCats[0] : ''
+    fetch(`http://localhost:8080/api/welfare/list?keyword=${keyword}&lclsfNm=${encodeURIComponent(lclsfNm)}&page=${currentPage}`)
+      .then(res => res.json())
+      .then(data => {
+        setWelfareList(data.list)
+        setTotal(data.total)
+        setTotalPages(data.totalPages)
+      })
+  }, [keyword, selectedCats, currentPage])
 
   const toggleCheck = (val, setList) => {
     setList(prev => prev.includes(val) ? prev.filter(v => v !== val) : [...prev, val])
+    setCurrentPage(1)
   }
 
   const resetFilters = () => {
@@ -60,6 +56,7 @@ const WelfareList = () => {
     setSelectedAges([])
     setSelectedIncomes([])
     setSelectedJobs([])
+    setCurrentPage(1)
   }
 
   const toggleWish = (id, e) => {
@@ -81,17 +78,35 @@ const WelfareList = () => {
     setSelectedAges(p => p.filter(v => v !== tag))
     setSelectedIncomes(p => p.filter(v => v !== tag))
     setSelectedJobs(p => p.filter(v => v !== tag))
+    setCurrentPage(1)
   }
 
-  const totalPages = 5
+  const handleSearch = () => {
+    setKeyword(searchInput)
+    setCurrentPage(1)
+  }
+
+  const renderPageButtons = () => {
+    const pages = []
+    const start = Math.max(1, currentPage - 2)
+    const end = Math.min(totalPages, start + 4)
+    for (let i = start; i <= end; i++) pages.push(i)
+    return pages
+  }
 
   return (
     <div className={styles.pageBg}>
       <div className={styles.pageContainer}>
 
         <div className={styles.searchCard}>
-          <input className={styles.searchInput} placeholder="키워드로 검색 (예: 월세, 장학금, 취업)" />
-          <button className={styles.searchBtn}>검색</button>
+          <input
+            className={styles.searchInput}
+            placeholder="키워드로 검색 (예: 월세, 장학금, 취업)"
+            value={searchInput}
+            onChange={e => setSearchInput(e.target.value)}
+            onKeyDown={e => e.key === 'Enter' && handleSearch()}
+          />
+          <button className={styles.searchBtn} onClick={handleSearch}>검색</button>
         </div>
 
         <div className={styles.listWrap}>
@@ -154,7 +169,7 @@ const WelfareList = () => {
 
           <div className={styles.listMain}>
             <div className={styles.listHd}>
-              <span className={styles.cnt}>총 <b>{MOCK_LIST.length}</b>개 복지 서비스</span>
+              <span className={styles.cnt}>총 <b>{total}</b>개 복지 서비스</span>
               <select className={styles.sortSel} value={sort} onChange={e => setSort(e.target.value)}>
                 <option>최신순</option>
                 <option>조회수순</option>
@@ -173,13 +188,13 @@ const WelfareList = () => {
             )}
 
             <div className={styles.grid2}>
-              {MOCK_LIST.map(w => {
-                const isWished = wished[w.id] !== undefined ? wished[w.id] : w.wished
+              {welfareList.map(w => {
+                const isWished = wished[w.welfareId] || false
                 return (
-                  <div key={w.id} className={styles.wcard} onClick={() => console.log('상세 이동:', w.id)}>
+                  <div key={w.welfareId} className={styles.wcard} onClick={() => navigate(`/welfaredetail/${w.welfareId}`)}>
                     <div className={styles.wcardTop}>
                       <span className={`${styles.badge} ${BADGE_CLASS[w.lclsfNm] || styles.badgeGray}`}>{w.lclsfNm}</span>
-                      <button className={`${styles.heartBtn} ${isWished ? styles.on : ''}`} onClick={(e) => toggleWish(w.id, e)}>
+                      <button className={`${styles.heartBtn} ${isWished ? styles.on : ''}`} onClick={(e) => toggleWish(w.welfareId, e)}>
                         {isWished ? '♥' : '♡'}
                       </button>
                     </div>
@@ -195,7 +210,7 @@ const WelfareList = () => {
 
             <div className={styles.paging}>
               <button className={styles.pgbtn} onClick={() => setCurrentPage(p => Math.max(1, p - 1))}>‹</button>
-              {Array.from({ length: totalPages }, (_, i) => i + 1).map(p => (
+              {renderPageButtons().map(p => (
                 <button key={p} className={`${styles.pgbtn} ${currentPage === p ? styles.on : ''}`} onClick={() => setCurrentPage(p)}>{p}</button>
               ))}
               <button className={styles.pgbtn} onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}>›</button>

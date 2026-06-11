@@ -27,7 +27,7 @@ function App() {
         <Route path="/edit-profile" element={<EditProfile />} />
         <Route path="/mypage" element={<MyPage />} />
         <Route path="/welfarelist" element={<WelfareList />} />
-        <Route path="/welfaredetail" element={<WelfareDetail />} />
+        <Route path="/welfaredetail/:id" element={<WelfareDetail />} />
         <Route path="/persona" element={<Persona />} />
         <Route path="/boardfree" element={<BoardFree />} />
         <Route path="/boardfreedetail" element={<BoardFreeDetail />} />
