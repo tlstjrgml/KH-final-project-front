@@ -33,7 +33,10 @@ function Navbar({ isLoggedIn = false, nickname = '' }) {
               <span className={styles.welcome}>{nickname}님 환영합니다</span>
               
               <button className={`${styles.btn} ${styles.btnOutline}`}>마이페이지</button>
-              <button className={`${styles.btn} ${styles.btnGhost}`}>로그아웃</button>
+              <button className={`${styles.btn} ${styles.btnGhost}`} onClick={()=>{
+                localStorage.removeItem('token');
+                window.location.replace('/');
+              }}>로그아웃</button>
             </>
           ) : (
             <>
