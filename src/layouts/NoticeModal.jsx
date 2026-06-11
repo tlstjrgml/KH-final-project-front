@@ -5,13 +5,14 @@ function NoticeModal({ notice, onClose, onSave, isReadOnly = false }) {
     // DB BOARD 테이블의 물리명 적용
     const [boardTitle, setBoardTitle] = useState('');
     const [boardContent, setBoardContent] = useState('');
-    const [isPinned, setIsPinned] = useState(false); // (프론트 전용 노출 상태)
+    const [isPinned, setIsPinned] = useState(false); // (프론트 UI 조작용 상태)
 
     useEffect(() => {
         if (notice) {
             setBoardTitle(notice.boardTitle);
             setBoardContent(notice.boardContent || '');
-            setIsPinned(notice.isPinned);
+            // 백엔드에서 boardType으로 데이터를 받을 경우를 대비해 호환성 추가
+            setIsPinned(notice.boardType === 'PIN' || notice.isPinned === true);
         } else {
             setBoardTitle('');
             setBoardContent('');
@@ -22,7 +23,17 @@ function NoticeModal({ notice, onClose, onSave, isReadOnly = false }) {
     const handleSubmit = () => {
         if (!boardTitle.trim()) { alert("제목을 입력해주세요."); return; }
         if (!boardContent.trim()) { alert("내용을 입력해주세요."); return; }
-        onSave({ boardTitle, boardContent, isPinned });
+
+        // [핵심 변경] 프론트의 boolean 값을 DB 설계에 맞게 문자열 코드로 변환
+        const boardType = isPinned ? 'PIN' : 'NOT';
+
+        // 부모 컴포넌트(혹은 백엔드 API)로 변환된 값 전달
+        onSave({ 
+            boardTitle, 
+            boardContent, 
+            boardType, // 백엔드 전송용 ('PIN' or 'NOT')
+            isPinned   // 프론트 UI 유지용 (AdminPage 화면 즉시 반영용)
+        });
     };
 
     return (

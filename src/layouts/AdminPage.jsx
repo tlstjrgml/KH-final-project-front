@@ -172,7 +172,13 @@ function AdminPage() {
     const totalReportPages = Math.ceil(processedReports.length / rowsPerPage);
     const currentReportsList = processedReports.slice((currentReportPage - 1) * rowsPerPage, currentReportPage * rowsPerPage);
 
-    const handleProcessComplete = (reportId) => {
+    // [핵심 변경] 모달에서 넘겨준 파라미터(상태코드, 처리사유)를 모두 받을 수 있도록 수정
+    const handleProcessComplete = (reportId, statusCode, processReason) => {
+        
+        // 나중에 여기에 백엔드 API 통신 코드가 들어갑니다.
+        // 예: axios.put(`/api/admin/reports/${reportId}`, { status: statusCode, reportResult: processReason })
+        // console.log("서버 전송 데이터:", { reportId, statusCode, processReason });
+
         const updatedReports = reports.filter(r => r.reportId !== reportId);
         setReports(updatedReports);
         const newProcessed = updatedReports.filter(r =>
@@ -472,7 +478,8 @@ function AdminPage() {
                         content: selectedReport.reportResult
                     }}
                     onClose={() => setSelectedReport(null)}
-                    onComplete={(id) => handleProcessComplete(id)}
+                    // [핵심 변경] 파라미터 3개를 넘겨받도록 연결
+                    onComplete={(id, status, reason) => handleProcessComplete(id, status, reason)}
                 />
             )}
 

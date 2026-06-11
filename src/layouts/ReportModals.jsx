@@ -21,8 +21,12 @@ function ReportModals({ report, onClose, onComplete }) {
             alert("처리사유를 입력하세요.");
             return;
         }
-        // 부모(AdminPage)에게 처리가 끝났음을 번호(no)와 함께 알림
-        onComplete(report.no);
+        
+        // DB STATUS 컬럼에 맞게 영어 코드로 변환
+        const statusCode = processResult === '처리완료' ? 'DONE' : 'REJECT';
+
+        // 부모에게 번호, 상태코드, 처리사유 3가지를 모두 넘겨줍니다.
+        onComplete(report.no, statusCode, processReason);
     };
 
     return (
