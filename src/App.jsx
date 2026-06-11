@@ -12,8 +12,8 @@ import BoardReview from './layouts/BoardReview'
 import BoardReviewEdit from './layouts/BoardReviewEdit';
 import BoardReviewWrite from './layouts/BoardReviewWrite';
 import BoardReviewDetail from './layouts/BoardReviewDetail';
-import AlertDetail from './layouts/AlertDetail';
-import AlertWrite from './layouts/AlertWrite';
+import NoticeDetail from './layouts/NoticeDetail';
+//import NoticeWrite from './layouts/NoticeWrite';
 import WelfareList from './layouts/WelfareList';
 import WelfareDetail from './layouts/WelfareDetail';
 import Persona from './layouts/Persona';
@@ -83,8 +83,8 @@ function App() {
         <Route path="/boardreview/write" element={<BoardReviewWrite />} />
         <Route path="/boardreview/edit" element={<BoardReviewEdit />} />
         <Route path="/boardreview/detail" element={<BoardReviewDetail />} />
-        <Route path="/alert/detail" element={<AlertDetail />} />
-        <Route path="/alert/write" element={<AlertWrite />} />
+        <Route path="/notice/detail" element={<NoticeDetail />} />
+        {/* <Route path="/notice/write" element={<NoticeWrite />} /> */}
         <Route path="/welfarelist" element={<WelfareList />} />
         <Route path="/welfaredetail" element={<WelfareDetail />} />
         <Route path="/persona" element={<Persona />} />
