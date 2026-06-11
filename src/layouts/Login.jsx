@@ -18,6 +18,13 @@ const Login = () => {
         password: passWord
       })
     });
+
+    if(!response.ok){
+      const message = await response.text();
+      alert(message);
+      return;
+    }
+
     const token = await response.text();
     localStorage.setItem('token', token);
     window.location.replace('/');
