@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
-import styles from './AlertDetail.module.css';
+import styles from './NoticeDetail.module.css';
 
-const AlertDetail = () => {
+const NoticeDetail = () => {
     // 상태 관리 (좋아요 기능)
     const [isLiked, setIsLiked] = useState(false);
     const [likeCount, setLikeCount] = useState(128);
@@ -82,7 +82,7 @@ const AlertDetail = () => {
 
                     {/* 목록 버튼 */}
                     <div className={styles.bottomActions}>
-                        <a href="/alert" className={styles.btnList}>
+                        <a href="/" className={styles.btnList}>
                             <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6" /></svg>
                             목록으로
                         </a>
@@ -93,4 +93,4 @@ const AlertDetail = () => {
     );
 };
 
-export default AlertDetail;
+export default NoticeDetail;

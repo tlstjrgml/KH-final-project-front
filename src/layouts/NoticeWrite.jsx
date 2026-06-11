@@ -16,12 +16,12 @@ const NoticeWrite = () =>{
                 <input type="hidden" name="board_type" value="NOT"/>
 
                 <div className={styles.field}>
-                    <label htmlfor="board_title">제목<span className={styles.req}>*</span></label>
+                    <label htmlFor="board_title">제목<span className={styles.req}>*</span></label>
                     <input type="text" id="board_title" name="board_title" placeholder="공지사항 제목을 입력해주세요" required/>
                 </div>
 
                 <div className={styles.field}>
-                    <label htmlfor="board_content">내용<span className={styles.req}>*</span></label>
+                    <label htmlFor="board_content">내용<span className={styles.req}>*</span></label>
                     <textarea id="board_content" name="board_content" placeholder="공지사항 내용을 상세히 입력해주세요." required=""></textarea>
                 </div>
 
@@ -53,7 +53,7 @@ const NoticeWrite = () =>{
                 </div>
 
                 <div className={styles.formActions}>
-                    <button type="button" className={styles.btnCancel} onClick={() => {history.back()}}>취소</button>
+                    <button type="button" className={styles.btnCancel} onClick={() => {window.history.back()}}>취소</button>
                     <button type="button" id="submitAttm" className={styles.btnSubmit}>
                     <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="#fff" strokeWidth="2">
                         <path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"></path>

@@ -1,7 +1,8 @@
 import styles from './NoticeBoard.module.css';
+import { useNavigate } from 'react-router-dom'
 
 const NoticeBoard = () =>{
-    
+    const navigate = useNavigate()
      const pageList = [1, 2, 3, 4, 5];
 
     return(
@@ -14,9 +15,7 @@ const NoticeBoard = () =>{
                     {/* 게시판 헤더 */}
                     <div className={styles.boardHeader}>
                         <h2 className={styles.boardTitle}>공지사항</h2>
-                        
-                        {/* 관리자 등 특정 권한 사용자만 글쓰기 버튼 노출 (임시로 session 조건 적용) */}
-                        <button type="button" className={styles.btnWrite} onClick={() => {location.href=' '}}>
+                        <button type="button" className={styles.btnWrite} onClick={() => navigate('/noticewrite')}>
                         <svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
                         글쓰기
                         </button>
