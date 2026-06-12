@@ -17,11 +17,17 @@ const WelfareDetail = () => {
   const navigate = useNavigate()
   const [w, setW] = useState(null)
   const [wished, setWished] = useState(false)
+  const [related, setRelated] = useState([])
 
   useEffect(() => {
     fetch(`http://localhost:8080/api/welfare/detail/${id}`)
       .then(res => res.json())
-      .then(data => setW(data))
+      .then(data => {
+        setW(data)
+        return fetch(`http://localhost:8080/api/welfare/related?lclsfNm=${encodeURIComponent(data.lclsfNm)}&excludeId=${id}`)
+      })
+      .then(res => res.json())
+      .then(data => setRelated(data))
   }, [id])
 
   if (!w) return <div>로딩 중...</div>
@@ -30,6 +36,7 @@ const WelfareDetail = () => {
     <div className={styles.pageBg}>
       <div className={styles.detailWrap}>
         <div className={styles.dcard}>
+          <button className={styles.btnBack} onClick={() => navigate('/welfarelist')}>←</button>
           <div className={styles.detailBadgeRow}>
             <span className={`${styles.badge} ${BADGE_CLASS[w.lclsfNm] || styles.badgeGray}`}>{w.lclsfNm}</span>
           </div>
@@ -71,13 +78,23 @@ const WelfareDetail = () => {
             }
           </div>
         </div>
-
-        <div className={styles.dcard}>
-          <button className={styles.btnList} onClick={() => navigate(-1)}>
-            ← 목록으로
-          </button>
+              <div className={styles.dcard}>
+        <div className={styles.secHd}>
+          <span className={styles.secTitle}>관련 복지 추천</span>
+          <span className={styles.relSub}>같은 카테고리 · {w.lclsfNm}</span>
         </div>
-
+        <div className={styles.relGrid}>
+          {related.map(r => (
+            <div key={r.welfareId} className={styles.wcard} onClick={() => { window.scrollTo(0, 0); navigate(`/welfaredetail/${r.welfareId}`) }}>
+              <div className={styles.wcardTitle}>{r.plcyNm}</div>
+              <div className={styles.wcardMeta}>
+                <span>{r.sprvsnInstCdNm}</span>
+                <span>신청: {r.aplyYmd || '상시'}</span>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
       </div>
     </div>
   )
