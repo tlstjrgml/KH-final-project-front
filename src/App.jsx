@@ -1,8 +1,32 @@
+import React from 'react';
+import { BrowserRouter, Routes, Route, useSearchParams, Navigate } from 'react-router-dom';
+import { useEffect } from 'react';
+import Navbar from './components/common/Navbar';
+import Login from './layouts/Login';
+import Signup from './layouts/Signup';
+import Main from './layouts/Main';
+import EditProfile from './layouts/EditProfile';
+import AdminPage from './layouts/AdminPage';
+import MyPage from './layouts/MyPage';
+import BoardReview from './layouts/BoardReview';
+import BoardReviewEdit from './layouts/BoardReviewEdit';
+import BoardReviewWrite from './layouts/BoardReviewWrite';
+import BoardReviewDetail from './layouts/BoardReviewDetail';
+import NoticeDetail from './layouts/NoticeDetail';
+import WelfareList from './layouts/WelfareList';
+import WelfareDetail from './layouts/WelfareDetail';
+import Persona from './layouts/Persona';
+import BoardFree from './layouts/BoardFree';
+import BoardFreeDetail from './layouts/BoardFreeDetail';
+import BoardFreeWrite from './layouts/BoardFreeWrite';
+import NoticeBoard from './layouts/NoticeBoard';
+import NoticeWrite from './layouts/NoticeWrite';
+
 const PrivateRoute = ({element}) => {
   const token = localStorage.getItem('token');
   if(!token){
     alert('로그인이 필요한 페이지입니다. 로그인을 해주세요');
-    return <Navigate to="/login"/>
+    return <Navigate to="/login"/>;
   }
   return element;
 }
@@ -29,7 +53,6 @@ const AppInner = () => {
         <Route path="/edit-profile" element={<PrivateRoute element={<EditProfile />} />} />
         <Route path="/mypage" element={<PrivateRoute element={<MyPage />} />} />
         <Route path="/admin" element={<AdminPage />} />
-
         <Route path="/boardreview" element={<BoardReview />} />
         <Route path="/boardreview/write" element={<PrivateRoute element={<BoardReviewWrite />} />} />
         <Route path="/boardreview/edit" element={<PrivateRoute element={<BoardReviewEdit />} />} />
@@ -47,3 +70,13 @@ const AppInner = () => {
     </>
   );
 }
+
+function App() {
+  return (
+    <BrowserRouter>
+      <AppInner />
+    </BrowserRouter>
+  );
+}
+
+export default App;
