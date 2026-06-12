@@ -22,6 +22,8 @@ import BoardFreeWrite from './layouts/BoardFreeWrite';
 import NoticeBoard from './layouts/NoticeBoard';
 import NoticeWrite from './layouts/NoticeWrite';
 
+
+
 const PrivateRoute = ({element}) => {
   const token = localStorage.getItem('token');
   if(!token){
@@ -54,6 +56,7 @@ const AppInner = () => {
         <Route path="/mypage" element={<PrivateRoute element={<MyPage />} />} />
         <Route path="/admin" element={<AdminPage />} />
         <Route path="/boardreview" element={<BoardReview />} />
+     
         <Route path="/boardreview/write" element={<PrivateRoute element={<BoardReviewWrite />} />} />
         <Route path="/boardreview/edit" element={<PrivateRoute element={<BoardReviewEdit />} />} />
         <Route path="/boardreview/detail" element={<PrivateRoute element={<BoardReviewDetail />} />} />
