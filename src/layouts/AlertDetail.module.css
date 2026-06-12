@@ -1,0 +1,224 @@
+.page {
+    min-height: 100vh;
+    padding: 80px 2rem 4rem;
+    max-width: 1280px;
+    margin: 0 auto;
+    display: flex;
+    justify-content: center;
+}
+
+.contentWrapper {
+    width: 100%;
+    max-width: 900px;
+    height: fit-content;
+}
+
+.categoryLabel {
+    display: inline-block;
+    background: #E6F1FB;
+    color: #185FA5;
+    padding: 4px 12px;
+    border-radius: 99px;
+    font-size: 12px;
+    font-weight: 500;
+    margin-bottom: 12px;
+}
+
+.detailCard {
+    background: #FFFFFF;
+    border-radius: 16px;
+    box-shadow: 0 1px 8px rgba(0, 0, 0, 0.06);
+    border: 1px solid #DEE2E6;
+    padding: 2rem;
+}
+
+.postHeader {
+    margin-bottom: 1.75rem;
+    padding-bottom: 1.25rem;
+    border-bottom: 1px solid #DEE2E6;
+}
+
+.postTitle {
+    font-size: 22px;
+    font-weight: 600;
+    color: #1A1D23;
+    line-height: 1.4;
+    margin-bottom: 1rem;
+    padding-left: 10px;
+    border-left: 3px solid #378ADD;
+}
+
+.postMetaContainer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.postMetaRight {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 8px;
+    white-space: nowrap;
+}
+
+.metaDivider {
+    color: #E9ECEF;
+}
+
+.actionBtn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: #6C757D;
+    font-size: 13px;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px 8px;
+    border-radius: 6px;
+}
+
+.actionBtn:hover {
+    color: #185FA5;
+    background: #E6F1FB;
+}
+
+.danger:hover {
+    color: #E24B4A;
+    background: #FCEBEB;
+}
+
+.postContent {
+    font-size: 15px;
+    color: #1A1D23;
+    line-height: 1.8;
+    margin-bottom: 2rem;
+    min-height: 200px;
+    padding: 1.25rem;
+    background: #F8F9FA;
+    border-radius: 10px;
+}
+
+.attachmentBox {
+    background: #F8F9FA;
+    border: 1px solid #DEE2E6;
+    border-radius: 10px;
+    padding: 1.25rem;
+    margin-bottom: 1.5rem;
+}
+
+.attachmentTitle {
+    font-size: 13px;
+    font-weight: 600;
+    color: #6C757D;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.attachmentTitle svg {
+    width: 14px;
+    height: 14px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2;
+}
+
+.attachmentList {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.attachmentLink {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 13px;
+    color: #185FA5;
+    text-decoration: none;
+}
+
+.attachmentLink:hover {
+    text-decoration: underline;
+}
+
+.attachmentSize {
+    color: #ADB5BD;
+    font-size: 12px;
+}
+
+.likeActionArea {
+    display: flex;
+    justify-content: flex-end;
+    margin-bottom: 0.5rem;
+}
+
+.btnLike {
+    height: 40px;
+    padding: 0 20px;
+    background: #FFFFFF;
+    color: #185FA5;
+    border: 1px solid #378ADD;
+    border-radius: 99px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.btnLike:hover {
+    background: #E6F1FB;
+}
+
+.btnLike.liked {
+    background: #185FA5;
+    color: #fff;
+    border-color: #185FA5;
+}
+
+.btnLike svg {
+    width: 16px;
+    height: 16px;
+    fill: currentColor;
+}
+
+.bottomActions {
+    display: flex;
+    justify-content: center;
+    margin-top: 2rem;
+}
+
+.btnList {
+    height: 44px;
+    padding: 0 28px;
+    background: #FFFFFF;
+    color: #6C757D;
+    border: 1px solid #DEE2E6;
+    border-radius: 99px;
+    font-size: 14px;
+    font-weight: 500;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.btnList:hover {
+    background: #F8F9FA;
+    border-color: #ADB5BD;
+    color: #1A1D23;
+}
+
+.btnList svg {
+    width: 14px;
+    height: 14px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2;
+}
