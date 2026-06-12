@@ -1,6 +1,6 @@
-import { useState } from 'react'
-import styles from './MyPage.module.css'
-import { Link, useNavigate} from 'react-router-dom'
+  import { useState } from 'react'
+  import styles from './MyPage.module.css'
+  import { Link, useNavigate} from 'react-router-dom'
 
 const MyPage = () => {
   const [isOpen, setIsOpen] = useState(false)

@@ -1,6 +1,6 @@
-import React from 'react';
-import styles from './Navbar.module.css';
-import { Link, useNavigate} from 'react-router-dom'
+  import React from 'react';
+  import styles from './Navbar.module.css';
+  import { Link, useNavigate } from 'react-router-dom'
 
 function Navbar({ isLoggedIn = false, nickname = '' }) {
   const navigate = useNavigate();
