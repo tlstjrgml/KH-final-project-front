@@ -1,8 +1,9 @@
 import React from 'react';
 import styles from './Navbar.module.css';
-import { Link } from 'react-router-dom'
+import { Link, useNavigate} from 'react-router-dom'
 
 function Navbar({ isLoggedIn = false, nickname = '' }) {
+  const navigate = useNavigate();
   return (
     <header className={styles.gnb}>
       
@@ -32,7 +33,7 @@ function Navbar({ isLoggedIn = false, nickname = '' }) {
             <>
               <span className={styles.welcome}>{nickname}님 환영합니다</span>
               
-              <button className={`${styles.btn} ${styles.btnOutline}`}>마이페이지</button>
+              <button className={`${styles.btn} ${styles.btnOutline}`} onClick={()=>{navigate('/MyPage')}}>마이페이지</button>
               <button className={`${styles.btn} ${styles.btnGhost}`} onClick={()=>{
                 localStorage.removeItem('token');
                 window.location.replace('/');

@@ -1,9 +1,9 @@
 import styles from './BoardReview.module.css'
-
+import { useNavigate } from 'react-router-dom';
 const BoardReview = () => {
 
     const pages = [1, 2, 3, 4, 5];
-
+    const navigate = useNavigate();
     return (
         <main className={styles.page}>
             <div className={styles.boardCard}>
@@ -12,7 +12,10 @@ const BoardReview = () => {
                 <div className={styles.boardHeader}>
                     <h2 className={styles.boardTitle}>후기 게시판</h2>
 
-                    <button type="button" className={styles.btnWrite} onClick={() => { location.href = '' }}>
+                    <button 
+                        type="button"
+                        className={styles.btnWrite} 
+                        onClick={()=>{navigate('/board/write');}}>
                         <svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14" /></svg>
                         글쓰기
                     </button>
