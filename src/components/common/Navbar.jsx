@@ -1,8 +1,8 @@
-  import React from 'react';
-  import styles from './Navbar.module.css';
-  import { Link, useNavigate } from 'react-router-dom'
+import React from 'react';
+import styles from './Navbar.module.css';
+import { Link, useNavigate } from 'react-router-dom'
 
-function Navbar({ isLoggedIn = false, nickname = '' }) {
+function Navbar({ isLoggedIn = false, nickname = '' , isAdmin = false}) {
   const navigate = useNavigate();
   return (
     <header className={styles.gnb}>
@@ -12,7 +12,6 @@ function Navbar({ isLoggedIn = false, nickname = '' }) {
         {/* 로고 영역 (.logo) */}
         <Link to="/" className={styles.logo}>
           <div className={styles.logoIcon}>
-            
             <svg viewBox="0 0 24 24" width="18" height="18" fill="#ffffff">
               <path d="M12 21C12 21 3 14 3 8a5 5 0 0 1 9-3 5 5 0 0 1 9 3c0 6-9 13-9 13z" />
             </svg>
@@ -33,6 +32,10 @@ function Navbar({ isLoggedIn = false, nickname = '' }) {
             <>
               <span className={styles.welcome}>{nickname}님 환영합니다</span>
               
+              {isAdmin && (
+                <button className={`${styles.btn} ${styles.btnOutline}`} onClick={()=>{navigate('/admin')}}>관리자 페이지</button>
+              )}
+
               <button className={`${styles.btn} ${styles.btnOutline}`} onClick={()=>{navigate('/MyPage')}}>마이페이지</button>
               <button className={`${styles.btn} ${styles.btnGhost}`} onClick={()=>{
                 localStorage.removeItem('token');

@@ -59,6 +59,7 @@
   padding: 22px;
   margin-bottom: 14px;
   box-shadow: 0 2px 16px rgba(55,138,221,0.08), 0 1px 4px rgba(0,0,0,0.04);
+  position: relative;
 }
 
 /* 뱃지 */
@@ -270,3 +271,26 @@
 
 .heartBtn:hover { color: #D4537E; }
 .heartBtn.on    { color: #D4537E; }
+
+.btnBack {
+  position: absolute;
+  top: 22px;
+  right: 22px;
+  background: none;
+  border: 1px solid #DEE2E6;
+  border-radius: 8px;
+  width: 34px;
+  height: 34px;
+  font-size: 16px;
+  cursor: pointer;
+  color: #378ADD;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s;
+}
+
+.btnBack:hover {
+  background: #F8F9FA;
+  border-color: #ADB5BD;
+}

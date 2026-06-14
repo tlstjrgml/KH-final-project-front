@@ -1,11 +1,11 @@
 import { useState, useEffect } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useSearchParams } from 'react-router-dom'
 import styles from './WelfareList.module.css'
 
-const CATEGORIES = ['주거', '일자리', '생활', '교육', '금융', '참여･기반', '금융･복지･문화']
+const CATEGORIES = ['주거', '일자리', '교육', '참여･기반', '금융･복지･문화']
 const REGIONS = ['전국', '서울', '부산', '대구', '인천', '광주', '대전', '울산', '세종', '경기', '강원', '충북', '충남', '전북', '전남', '경북', '경남', '제주']
 const AGE_OPTIONS = ['19~24세', '25~29세', '30~34세', '35~39세']
-const INCOME_OPTIONS = ['기초/차상위', '1~3분위', '4~6분위', '7분위 이상']
+const INCOME_OPTIONS = ['무관', '연소득', '기타']
 const JOB_OPTIONS = ['미취업', '재직중', '자영업']
 
 const BADGE_CLASS = {
@@ -19,8 +19,6 @@ const BADGE_CLASS = {
 }
 
 const WelfareList = () => {
-  const navigate = useNavigate()
-  const [selectedCats, setSelectedCats] = useState([])
   const [selectedRegions, setSelectedRegions] = useState(['전국'])
   const [selectedAges, setSelectedAges] = useState([])
   const [selectedIncomes, setSelectedIncomes] = useState([])
@@ -34,9 +32,25 @@ const WelfareList = () => {
   const [total, setTotal] = useState(0)
   const [totalPages, setTotalPages] = useState(1)
 
+  const navigate = useNavigate()
+  const [searchParams] = useSearchParams()
+
+  const [selectedCats, setSelectedCats] = useState(
+  searchParams.getAll('lclsfNm').length > 0 ? searchParams.getAll('lclsfNm') : []
+  ) 
+
+  const displayLclsf = (lclsfNm) => {
+  const parts = lclsfNm.split(',')
+  const unique = [...new Set(parts.map(p => p.trim()))]
+  return unique.join(',')
+  }
+
   useEffect(() => {
-    const lclsfNm = selectedCats.length === 1 ? selectedCats[0] : ''
-    fetch(`http://localhost:8080/api/welfare/list?keyword=${keyword}&lclsfNm=${encodeURIComponent(lclsfNm)}&page=${currentPage}`)
+    const lclsfNmParams = selectedCats.length > 0
+      ? selectedCats.map(c => `lclsfNm=${encodeURIComponent(c)}`).join('&')
+      : ''
+    const url = `http://localhost:8080/api/welfare/list?keyword=${keyword}&${lclsfNmParams}&page=${currentPage}`
+    fetch(url)
       .then(res => res.json())
       .then(data => {
         setWelfareList(data.list)
@@ -46,9 +60,16 @@ const WelfareList = () => {
   }, [keyword, selectedCats, currentPage])
 
   const toggleCheck = (val, setList) => {
-    setList(prev => prev.includes(val) ? prev.filter(v => v !== val) : [...prev, val])
-    setCurrentPage(1)
-  }
+  setList(prev => {
+    const next = prev.includes(val) ? prev.filter(v => v !== val) : [...prev, val]
+    if (setList === setSelectedCats) {
+      const params = next.map(c => `lclsfNm=${encodeURIComponent(c)}`).join('&')
+      window.history.replaceState(null, '', `/welfarelist?${params}`)
+    }
+    return next
+  })
+  setCurrentPage(1)
+}
 
   const resetFilters = () => {
     setSelectedCats([])
@@ -193,7 +214,9 @@ const WelfareList = () => {
                 return (
                   <div key={w.welfareId} className={styles.wcard} onClick={() => navigate(`/welfaredetail/${w.welfareId}`)}>
                     <div className={styles.wcardTop}>
-                      <span className={`${styles.badge} ${BADGE_CLASS[w.lclsfNm] || styles.badgeGray}`}>{w.lclsfNm}</span>
+                      <span className={`${styles.badge} ${BADGE_CLASS[w.lclsfNm] || styles.badgeGray}`}>
+                        {displayLclsf(w.lclsfNm)}
+                      </span>
                       <button className={`${styles.heartBtn} ${isWished ? styles.on : ''}`} onClick={(e) => toggleWish(w.welfareId, e)}>
                         {isWished ? '♥' : '♡'}
                       </button>

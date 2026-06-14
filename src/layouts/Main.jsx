@@ -41,27 +41,27 @@ const Main = () => {
         </div>
       </section>
 
-      <nav className={styles.catRow} aria-label="복지 카테고리">
-        <Link to="/welfarelist" className={styles.catChip}>
-          <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
-          주거
-        </Link>
-        <Link to="/welfarelist" className={styles.catChip}>
-          <svg viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
-          일자리
-        </Link>
-        <Link to="/welfarelist" className={styles.catChip}>
-          <svg viewBox="0 0 24 24"><path d="M12 21C12 21 3 14 3 8a5 5 0 0 1 9-3 5 5 0 0 1 9 3c0 6-9 13-9 13z"/></svg>
-          생활
-        </Link>
-        <Link to="/welfarelist" className={styles.catChip}>
-          <svg viewBox="0 0 24 24"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg>
-          교육
-        </Link>
-        <Link to="/welfarelist" className={styles.catChip}>
-          <svg viewBox="0 0 24 24"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
-          금융
-        </Link>
+          <nav className={styles.catRow} aria-label="복지 카테고리">
+            <div onClick={() => navigate(`/welfarelist?lclsfNm=${encodeURIComponent('주거')}`)} className={styles.catChip}>
+              <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+              주거
+            </div>
+            <div onClick={() => navigate(`/welfarelist?lclsfNm=${encodeURIComponent('일자리')}`)} className={styles.catChip}>
+              <svg viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
+              일자리
+            </div>
+            <div onClick={() => navigate(`/welfarelist?lclsfNm=${encodeURIComponent('참여･기반')}`)} className={styles.catChip}>
+              <svg viewBox="0 0 24 24"><path d="M12 21C12 21 3 14 3 8a5 5 0 0 1 9-3 5 5 0 0 1 9 3c0 6-9 13-9 13z"/></svg>
+              참여･기반
+            </div>
+            <div onClick={() => navigate(`/welfarelist?lclsfNm=${encodeURIComponent('교육')}`)} className={styles.catChip}>
+              <svg viewBox="0 0 24 24"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg>
+              교육
+            </div>
+            <div onClick={() => navigate(`/welfarelist?lclsfNm=${encodeURIComponent('금융･복지･문화')}`)} className={styles.catChip}>
+              <svg viewBox="0 0 24 24"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+              금융･복지･문화
+            </div>
       </nav>
 
       <div className={styles.mainGrid}>

@@ -22,6 +22,8 @@ import BoardFreeWrite from './layouts/BoardFreeWrite';
 import NoticeBoard from './layouts/NoticeBoard';
 import NoticeWrite from './layouts/NoticeWrite';
 
+
+
 const PrivateRoute = ({element}) => {
   const token = localStorage.getItem('token');
   if(!token){
@@ -35,7 +37,7 @@ const AppInner = () => {
   const [searchParams] = useSearchParams();
   const token = searchParams.get('token');
   const isLoggedIn = localStorage.getItem('token') ? true : false;
-
+  const isAdmin = isLoggedIn ? JSON.parse(atob(localStorage.getItem('token').split('.')[1])).isAdmin === 'Y' : false;
   useEffect(() => {
     if (token) {
       localStorage.setItem('token', token);
@@ -45,7 +47,7 @@ const AppInner = () => {
 
   return (
     <>
-      <Navbar isLoggedIn={isLoggedIn} nickname="석희" />
+      <Navbar isLoggedIn={isLoggedIn} isAdmin={isAdmin} nickname="석희" />
       <Routes>
         <Route path="/" element={<Main />} />
         <Route path="/login" element={<Login />} />
@@ -54,6 +56,7 @@ const AppInner = () => {
         <Route path="/mypage" element={<PrivateRoute element={<MyPage />} />} />
         <Route path="/admin" element={<AdminPage />} />
         <Route path="/boardreview" element={<BoardReview />} />
+     
         <Route path="/boardreview/write" element={<PrivateRoute element={<BoardReviewWrite />} />} />
         <Route path="/boardreview/edit" element={<PrivateRoute element={<BoardReviewEdit />} />} />
         <Route path="/boardreview/detail" element={<PrivateRoute element={<BoardReviewDetail />} />} />
@@ -64,7 +67,7 @@ const AppInner = () => {
         <Route path="/boardfreedetail" element={<PrivateRoute element={<BoardFreeDetail />} />} />
         <Route path="/boardfreewrite" element={<PrivateRoute element={<BoardFreeWrite />} />} />
         <Route path="/noticeboard" element={<NoticeBoard />} />
-        <Route path="/noticewrite" element={<PrivateRoute element={<NoticeWrite />} />} />
+        <Route path="/notice/write" element={<PrivateRoute element={<NoticeWrite />} />} />
         <Route path="/notice/detail" element={<NoticeDetail />} />
       </Routes>
     </>
