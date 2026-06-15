@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import styles from './AdminPage.module.css';
+import styles from './ReportModals.module.css'; // 나중에 일괄 세팅할 CSS
 
 function ReportModals({ report, onClose, onComplete }) {
     // step: 'detail' (상세 모달) 또는 'process' (처리 모달)
@@ -22,10 +22,8 @@ function ReportModals({ report, onClose, onComplete }) {
             return;
         }
         
-        // DB STATUS 컬럼에 맞게 영어 코드로 변환
+        // DB STATUS 컬럼에 맞게 영어 코드로 변환 (기존 로직 유지)
         const statusCode = processResult === '처리완료' ? 'DONE' : 'REJECT';
-
-        // 부모에게 번호, 상태코드, 처리사유 3가지를 모두 넘겨줍니다.
         onComplete(report.no, statusCode, processReason);
     };
 
