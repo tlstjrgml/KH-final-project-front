@@ -8,7 +8,7 @@ function AdminWelfare() {
     return (
         <section className={`${styles['tab-content']} ${styles['active-tab']}`}>
             <h2>복지게시판관리</h2>
-            <div className={styles.card} style={{ textAlign: 'center', padding: '80px 20px' }}>
+            <div className={styles.card} style={{ textAlign: 'center', padding: '70px 20px' }}>
                 <h3 style={{ marginBottom: '15px', color: '#333', fontSize: '1.2rem' }}>복지 서비스 관리 안내</h3>
                 <p style={{ marginBottom: '30px', color: '#6C757D', lineHeight: '1.6' }}>
                     복지 서비스 신규 등록 및 기존 게시글의 수정/삭제는<br />
