@@ -1,7 +1,11 @@
 import React, { useState } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
 import styles from './BoardReviewDetail.module.css';
 
 const BoardReviewDetail = () => {
+    const { id } = useParams();
+    const navigate = useNavigate();
+
     const [isPostLiked, setIsPostLiked] = useState(false);
     const [postLikes, setPostLikes] = useState(15);
     const [activeReplyForm, setActiveReplyForm] = useState(null);
@@ -25,7 +29,11 @@ const BoardReviewDetail = () => {
                         <div className={styles.welfareInfo}>
                             <strong>대상 복지 서비스:</strong> 청년 월세 지원 사업
                         </div>
-                        <button className={styles.btnShortcut}>복지 서비스 글 바로가기</button>
+                        <button
+                            className={styles.btnShortcut}
+                            onClick={() => navigate('/welfaredetail/1')}>
+                            복지 서비스 글 바로가기
+                        </button>
                     </div>
 
                     <div className={styles.postHeader}>
@@ -39,7 +47,11 @@ const BoardReviewDetail = () => {
                                 <span>2024.05.20 14:30</span>
                             </div>
                             <div className={styles.postMetaRight}>
-                                <button className={styles.actionBtn}>수정</button>
+                                <button
+                                    className={styles.actionBtn}
+                                    onClick={() => navigate(`/boardreview/edit`)}>
+                                    수정
+                                </button>
                                 <span className={styles.metaDivider}>|</span>
                                 <button className={`${styles.actionBtn} ${styles.danger}`}>삭제</button>
                                 <span className={styles.metaDivider}>|</span>
@@ -102,12 +114,11 @@ const BoardReviewDetail = () => {
                             <button className={styles.pageItem}>4</button>
                             <button className={styles.pageItem}>&gt;</button>
                         </div>
-
                     </div>
                 </div>
 
                 <div className={styles.bottomActions}>
-                    <button className={styles.btnList} onClick={() => window.history.back()}>목록으로</button>
+                    <button className={styles.btnList} onClick={() => navigate('/boardreview')}>목록으로</button>
                 </div>
             </div>
         </main>
