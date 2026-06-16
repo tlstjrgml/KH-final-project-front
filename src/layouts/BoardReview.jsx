@@ -1,27 +1,25 @@
-import styles from './BoardReview.module.css'
+import styles from './BoardReview.module.css';
 import { useNavigate } from 'react-router-dom';
-const BoardReview = () => {
 
+const BoardReview = () => {
     const pages = [1, 2, 3, 4, 5];
     const navigate = useNavigate();
+
     return (
         <main className={styles.page}>
             <div className={styles.boardCard}>
 
-                {/*게시판 헤더 */}
                 <div className={styles.boardHeader}>
                     <h2 className={styles.boardTitle}>후기 게시판</h2>
-
-                    <button 
+                    <button
                         type="button"
-                        className={styles.btnWrite} 
-                        onClick={()=>{navigate('/board/write');}}>
+                        className={styles.btnWrite}
+                        onClick={() => { navigate('/boardreview/write'); }}>
                         <svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14" /></svg>
                         글쓰기
                     </button>
                 </div>
 
-                {/*게시판 목록 테이블 */}
                 <table className={styles.boardTable}>
                     <thead>
                         <tr>
@@ -32,46 +30,34 @@ const BoardReview = () => {
                             <th className={styles.colViews}>조회수</th>
                         </tr>
                     </thead>
-
                     <tbody id="board-tbody">
                         {[...Array(10)].map((_, index) => (
-                            <tr key={index} className={styles.dataRow}>
-                                <td className={`${styles.colId} ${styles.boardId}`}> user01 </td>
-                                <td className={styles.colTitle}> 안녕하세요 </td>
+                            <tr
+                                key={index}
+                                className={styles.dataRow}
+                                onClick={() => navigate(`/boardreview/detail/${index + 1}`)}
+                                style={{ cursor: 'pointer' }}
+                            >
+                                <td className={`${styles.colId} ${styles.boardId}`}>user01</td>
+                                <td className={styles.colTitle}>안녕하세요</td>
                                 <td className={styles.colAuthor}>건강최고</td>
                                 <td className={styles.colDate}>2026-06-08</td>
                                 <td className={styles.colViews}>10</td>
                             </tr>
                         ))}
                     </tbody>
-
                 </table>
 
-                {/* 페이지네이션 (백엔드 연동) */}
-                <div className={styles.pagination} id="pagination-container" >
-                    <a className={styles.pageItem} aria-label="Previous">
-                        &lt;
-                    </a>
-
+                <div className={styles.pagination} id="pagination-container">
+                    <a className={styles.pageItem} aria-label="Previous">&lt;</a>
                     {pages.map((p) => (
-                        <a
-                            key={p}
-                            className={styles.pageItem}
-                        >
-                            {p}
-                        </a>
+                        <a key={p} className={styles.pageItem}>{p}</a>
                     ))}
-
-                    <a className={styles.pageItem} aria-label="Next">
-                        &gt;
-                    </a>
-
+                    <a className={styles.pageItem} aria-label="Next">&gt;</a>
                 </div>
 
-                { /*미리보기용 페이지네이션 (JS에서 컨트롤) */}
                 <div className={styles.pagination} id="dummy-pagination-container" style={{ display: 'none' }}></div>
 
-                {/*검색 영역 */}
                 <div className={styles.searchBar}>
                     <select className={styles.searchSelect}>
                         <option value="title">제목</option>
@@ -84,8 +70,7 @@ const BoardReview = () => {
 
             </div>
         </main>
-
-    )
+    );
 }
 
 export default BoardReview;
