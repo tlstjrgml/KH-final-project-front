@@ -1,6 +1,6 @@
 import React from 'react';
 import { BrowserRouter, Routes, Route, useSearchParams, Navigate } from 'react-router-dom';
-import { useEffect } from 'react';
+import { useState, useEffect  } from 'react';
 import Navbar from './components/common/Navbar';
 import Login from './layouts/Login';
 import Signup from './layouts/Signup';
@@ -37,7 +37,10 @@ const AppInner = () => {
   const [searchParams] = useSearchParams();
   const token = searchParams.get('token');
   const isLoggedIn = localStorage.getItem('token') ? true : false;
-  const isAdmin = isLoggedIn ? JSON.parse(atob(localStorage.getItem('token').split('.')[1])).isAdmin === 'Y' : false;
+  const isAdmin = isLoggedIn ? JSON.parse(atob(localStorage.getItem('token').split('.')[1])).
+  isAdmin === 'Y' : false;
+  const [nickname, setNickname] = useState('')
+
   useEffect(() => {
     if (token) {
       localStorage.setItem('token', token);
@@ -45,9 +48,20 @@ const AppInner = () => {
     }
   }, []);
 
+    useEffect(() => {
+    if (isLoggedIn) {
+      fetch('http://localhost:8080/member/me', {
+        headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+      })
+        .then(res => res.json())
+        .then(data => setNickname(data.nickname))
+    }
+  }, [])
+
+
   return (
     <>
-      <Navbar isLoggedIn={isLoggedIn} isAdmin={isAdmin} nickname="석희" />
+      <Navbar isLoggedIn={isLoggedIn} isAdmin={isAdmin} nickname={nickname} />
       <Routes>
         <Route path="/" element={<Main />} />
         <Route path="/login" element={<Login />} />
