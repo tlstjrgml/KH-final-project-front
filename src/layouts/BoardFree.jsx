@@ -44,6 +44,7 @@ const BoardFree = () =>{
                                 key={index} 
                                 className="dataRow"
                                 onClick={() => handleRowClick(index)} // 클릭 이벤트 추가
+                                 style={{ cursor: 'pointer' }}
                             >
                                 <td className="colId boardId"> 
                                     {10 - index} 
