@@ -58,7 +58,7 @@ const AppInner = () => {
         <Route path="/boardreview/list" element={<BoardReview />} />
         <Route path="/boardreview/write" element={<PrivateRoute element={<BoardReviewWrite />} />} />
         <Route path="/boardreview/edit" element={<PrivateRoute element={<BoardReviewEdit />} />} />
-        <Route path="/boardreview/detail" element={<BoardReviewDetail />} />
+        <Route path="/boardreview/detail/:id" element={<PrivateRoute element={<BoardReviewDetail />} />} />
         <Route path="/welfarelist" element={<WelfareList />} />
         <Route path="/welfaredetail/:id" element={<WelfareDetail />} />
         <Route path="/persona" element={<PrivateRoute element={<Persona />} />} />
