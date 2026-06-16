@@ -1,9 +1,13 @@
-import styles from './NoticeBoard.module.css';
+import styles from './Notice.module.css';
 import { useNavigate } from 'react-router-dom'
 
 const NoticeBoard = () =>{
     const navigate = useNavigate()
      const pageList = [1, 2, 3, 4, 5];
+
+     const handleRowClick = (index) => {
+        navigate('/notice/detail');
+    };
 
     return(
         <main className={styles.page}>
@@ -15,7 +19,7 @@ const NoticeBoard = () =>{
                     {/* 게시판 헤더 */}
                     <div className={styles.boardHeader}>
                         <h2 className={styles.boardTitle}>공지사항</h2>
-                        <button type="button" className={styles.btnWrite} onClick={() => navigate('/noticewrite')}>
+                        <button type="button" className={styles.btnWrite} onClick={() => navigate('/notice/write')}>
                         <svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
                         글쓰기
                         </button>
@@ -35,7 +39,7 @@ const NoticeBoard = () =>{
                         <tbody id="board-tbody">
                         {/* 1. 백엔드 연동용 데이터 출력 */}
                         {[...Array(10)].map((_, index) => (
-                        <tr key={index} className={styles.dataRow}>
+                        <tr key={index} className={styles.dataRow} onClick={() => handleRowClick(index)}>
                             <td className={`${styles.colId} ${styles.boardId}`} >1</td>
                             <td className={styles.colTitle} >이번주 공지사항</td>
                             <td className={styles.colauthor} >관리자</td>
