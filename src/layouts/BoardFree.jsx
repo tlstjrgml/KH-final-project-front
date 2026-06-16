@@ -1,8 +1,15 @@
+import { useNavigate } from 'react-router-dom';
 import styles from './BoardFree.module.css'
 
 const BoardFree = () =>{
     
+    const navigate = useNavigate()
     const pages = [1, 2, 3, 4, 5];
+
+    // 행 클릭 시 실행될 함수
+    const handleRowClick = (index) => {
+        navigate('/boardfree/detail');
+    };
 
     return(
             <main className="page">
@@ -12,7 +19,7 @@ const BoardFree = () =>{
                     <div className={styles.boardHeader}>
                         <h2 className={styles.boardTitle}>자유게시판</h2>
                         
-                        <button type="button" className={styles.btnWrite}  onClick={() =>{ location.href=''}}>
+                        <button type="button" className={styles.btnWrite}  onClick={() =>{ location.href='/boardfree/write'}}>
                             <svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
                               글쓰기
                         </button>
@@ -30,18 +37,34 @@ const BoardFree = () =>{
                             </tr>
                         </thead>
 
-                    <tbody id="board-tbody">
-                            {[...Array(10)].map((_, index) => (
-                                <tr key={index} className={styles.dataRow}>
-                                    <td className={`${styles.colId} ${styles.boardId}`}> user01 </td>
-                                    <td className={styles.colTitle}> 안녕하세요 </td>
-                                    <td className={styles.colAuthor}>건강최고</td>
-                                    <td className={styles.colDate}>2026-06-08</td>
-                                    <td className={styles.colViews}>10</td>
-                                </tr>
-                            ))}
-                        </tbody>
-                    
+                         <tbody id="board-tbody">
+                        {[...Array(10)].map((_, index) => (
+                            <tr 
+                                type="button"
+                                key={index} 
+                                className="dataRow"
+                                onClick={() => handleRowClick(index)} // 클릭 이벤트 추가
+                                 style={{ cursor: 'pointer' }}
+                            >
+                                <td className="colId boardId"> 
+                                    {10 - index} 
+                                </td>
+                                <td className="colTitle"> 
+                                    {index === 0 ? '청년 주거지원 정책 관련해서 질문 있습니다!' : '안녕하세요'} 
+                                </td>
+                                <td className="colAuthor">
+                                    {index === 0 ? '김청년' : '건강최고'}
+                                </td>
+                                <td className="colDate">
+                                    {index === 0 ? '2026-06-15' : '2026-06-08'}
+                                </td>
+                                <td className="colViews">
+                                    {index === 0 ? '152' : '10'}
+                                </td>
+                            </tr>
+                        ))}
+                    </tbody>
+
                     </table>
 
                     {/* 페이지네이션 (백엔드 연동) */}
