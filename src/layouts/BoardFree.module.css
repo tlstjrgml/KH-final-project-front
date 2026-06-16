@@ -190,3 +190,14 @@
 
     cursor: pointer;
 }
+
+/* 게시글 행 */
+.boardTable tbody tr {
+    transition: background-color 0.2s ease;
+}
+
+/* 마우스 올렸을 때 */
+.boardTable tbody tr:hover {
+    cursor: pointer;
+    background-color: #f5f7fa;
+}
