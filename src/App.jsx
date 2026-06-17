@@ -61,17 +61,25 @@ const AppInner = () => {
      
         <Route path="/boardreview/write" element={<PrivateRoute element={<BoardReviewWrite />} />} />
         <Route path="/boardreview/edit" element={<PrivateRoute element={<BoardReviewEdit />} />} />
-        <Route path="/boardreview/detail" element={<BoardReviewDetail />} />
+        <Route path="/boardreview/detail/:id" element={<PrivateRoute element={<BoardReviewDetail />} />} />
         <Route path="/welfarelist" element={<WelfareList />} />
         <Route path="/welfaredetail/:id" element={<WelfareDetail />} />
         <Route path="/persona" element={<PrivateRoute element={<Persona />} />} />
         <Route path="/boardfree" element={<BoardFree />} />
+
         <Route path="/boardfree/detail" element={<BoardFreeDetail />} />
         <Route path="/boardfree/write" element={<PrivateRoute element={<BoardFreeWrite />} />} />
         <Route path="/noticeboard" element={<NoticeBoard />} />
         <Route path="/notice/write" element={<PrivateRoute element={<NoticeBoardWrite />} />} />
         <Route path="/notice/detail" element={<NoticeBoardDetail />} />
         <Route path="/notice/eidt" element={<PrivateRoute element={<NoticeBoardEdit />} />} />
+
+        <Route path="/boardfree/edit" element={<PrivateRoute element={<BoardFreeEdit />} />} />
+        <Route path="/notice/write" element={<PrivateRoute element={<NoticeBoardWrite />} />} />
+        <Route path="/notice/detail" element={<NoticeBoardDetail />} />
+        <Route path="/notice/edit" element={<PrivateRoute element={<NoticeBoardEdit />} />} />
+        <Route path="/noticeboard" element={<NoticeBoard />} />
+ 
       </Routes>
     </>
   );

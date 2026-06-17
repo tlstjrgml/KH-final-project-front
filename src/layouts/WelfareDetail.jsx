@@ -17,12 +17,42 @@ const WelfareDetail = () => {
   const navigate = useNavigate()
   const [w, setW] = useState(null)
   const [wished, setWished] = useState(false)
+  const [related, setRelated] = useState([])
+  const token = localStorage.getItem('token')
 
   useEffect(() => {
     fetch(`http://localhost:8080/api/welfare/detail/${id}`)
       .then(res => res.json())
-      .then(data => setW(data))
+      .then(data => {
+        setW(data)
+        return fetch(`http://localhost:8080/api/welfare/related?lclsfNm=${encodeURIComponent(data.lclsfNm)}&excludeId=${id}`)
+      })
+      .then(res => res.json())
+      .then(data => setRelated(data))
+
+    if (token) {
+      fetch(`http://localhost:8080/api/wish/check/${id}`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      })
+        .then(res => res.json())
+        .then(data => setWished(data))
+    }
   }, [id])
+
+  const toggleWish = async () => {
+  if (!token) {
+    alert('로그인이 필요합니다.')
+    navigate('/login')
+    return
+  }
+  const method = wished ? 'DELETE' : 'POST'
+  await fetch(`http://localhost:8080/api/wish/${id}`, {
+    method,
+    headers: { 'Authorization': `Bearer ${token}` }
+  })
+  setWished(prev => !prev)
+  setW(prev => ({ ...prev, wishCount: wished ? prev.wishCount - 1 : prev.wishCount + 1 }))
+ } 
 
   if (!w) return <div>로딩 중...</div>
 
@@ -30,6 +60,7 @@ const WelfareDetail = () => {
     <div className={styles.pageBg}>
       <div className={styles.detailWrap}>
         <div className={styles.dcard}>
+          <button className={styles.btnBack} onClick={() => navigate('/welfarelist')}>←</button>
           <div className={styles.detailBadgeRow}>
             <span className={`${styles.badge} ${BADGE_CLASS[w.lclsfNm] || styles.badgeGray}`}>{w.lclsfNm}</span>
           </div>
@@ -46,7 +77,7 @@ const WelfareDetail = () => {
             </tbody>
           </table>
           <div className={styles.btnRow}>
-            <button className={`${styles.btnHeart} ${wished ? styles.on : ''}`} onClick={() => setWished(p => !p)}>
+            <button className={`${styles.btnHeart} ${wished ? styles.on : ''}`} onClick={toggleWish}>
               {wished ? '♥ 찜 해제' : '♡ 찜하기'}
             </button>
             {w.aplyUrlAddr && (
@@ -55,6 +86,7 @@ const WelfareDetail = () => {
               </button>
             )}
           </div>
+          <div className={styles.wishCount}>총 <span>{w.wishCount}</span>명이 찜했어요</div>
         </div>
 
         <div className={styles.dcard}>
@@ -73,9 +105,21 @@ const WelfareDetail = () => {
         </div>
 
         <div className={styles.dcard}>
-          <button className={styles.btnList} onClick={() => navigate(-1)}>
-            ← 목록으로
-          </button>
+          <div className={styles.secHd}>
+            <span className={styles.secTitle}>관련 복지 추천</span>
+            <span className={styles.relSub}>같은 카테고리 · {w.lclsfNm}</span>
+          </div>
+          <div className={styles.relGrid}>
+            {related.map(r => (
+              <div key={r.welfareId} className={styles.wcard} onClick={() => { window.scrollTo(0, 0); navigate(`/welfaredetail/${r.welfareId}`) }}>
+                <div className={styles.wcardTitle}>{r.plcyNm}</div>
+                <div className={styles.wcardMeta}>
+                  <span>{r.sprvsnInstCdNm}</span>
+                  <span>신청: {r.aplyYmd || '상시'}</span>
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
 
       </div>
