@@ -66,7 +66,7 @@ const BoardReviewDetail = () => {
                                 <span className={styles.metaDivider}>|</span>
                                 <span>조회수: {post.views}</span>
                                 <span className={styles.metaDivider}>|</span>
-                                <span>{post.createDate}</span>
+                                <span>{post.createDate.split('T')[0]}</span>
                             </div>
                             <div className={styles.postMetaRight}>
                                 {post.isOwner && (
