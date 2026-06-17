@@ -12,7 +12,6 @@ import BoardReview from './layouts/BoardReview';
 import BoardReviewEdit from './layouts/BoardReviewEdit';
 import BoardReviewWrite from './layouts/BoardReviewWrite';
 import BoardReviewDetail from './layouts/BoardReviewDetail';
-import NoticeDetail from './layouts/NoticeDetail';
 import WelfareList from './layouts/WelfareList';
 import WelfareDetail from './layouts/WelfareDetail';
 import Persona from './layouts/Persona';
@@ -20,7 +19,10 @@ import BoardFree from './layouts/BoardFree';
 import BoardFreeDetail from './layouts/BoardFreeDetail';
 import BoardFreeWrite from './layouts/BoardFreeWrite';
 import NoticeBoard from './layouts/NoticeBoard';
-import NoticeWrite from './layouts/NoticeWrite';
+import NoticeBoardWrite from './layouts/NoticeBoardWrite';
+import NoticeBoardEdit from './layouts/NoticeBoardEdit';
+import NoticeBoardDetail from './layouts/NoticeBoardDetail';
+
 
 
 
@@ -66,9 +68,13 @@ const AppInner = () => {
         <Route path="/boardfree" element={<BoardFree />} />
         <Route path="/boardfree/detail" element={<PrivateRoute element={<BoardFreeDetail />} />} />
         <Route path="/boardfree/write" element={<PrivateRoute element={<BoardFreeWrite />} />} />
+
+        <Route path="/boardfree/edit" element={<PrivateRoute element={<BoardFreeEdit />} />} />
+        <Route path="/notice/write" element={<PrivateRoute element={<NoticeBoardWrite />} />} />
+        <Route path="/notice/detail" element={<NoticeBoardDetail />} />
+        <Route path="/notice/edit" element={<PrivateRoute element={<NoticeBoardEdit />} />} />
         <Route path="/noticeboard" element={<NoticeBoard />} />
-        <Route path="/notice/write" element={<PrivateRoute element={<NoticeWrite />} />} />
-        <Route path="/notice/detail" element={<NoticeDetail />} />
+ 
       </Routes>
     </>
   );

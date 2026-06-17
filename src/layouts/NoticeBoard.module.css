@@ -1,150 +1,215 @@
- *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
-  html, body {
-    height: 100%;
-    font-family: 'Pretendard', -apple-system, sans-serif;
-    background: #F4F7FB;
-    color: #1A1D23;
-  }
-
-  /* ── 메인 레이아웃 ── */
-  .page {
+/* ── 메인 레이아웃 ── */
+.page {
     min-height: 100vh;
     padding: 80px 2rem 4rem;
     max-width: 1280px;
     margin: 0 auto;
+    background: #F4F7FB;
+    font-family: 'Pretendard', -apple-system, sans-serif;
+}
+
+/* 게시판 영역 래퍼 */
+.boardCard, .contentWrapper {
+   width: 90%;
+    max-width: 1500px;
+    margin: 40px auto;
+    background: #fff;
+    padding: 30px;
+    border-radius: 12px;
+}
+
+/* ── 게시판 헤더 ── */
+.boardHeader {
+   display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+}
+
+/* ── 타이틀 ── */
+.boardTitle {
+    font-size: 28px;
+    font-weight: 700;
+    color: #1A1D23;
+    padding-left: 0;
+    border-left: none;
+    margin: 0;
+}
+
+/* ── 글쓰기 버튼 ── */
+.btnWrite {
+    height: 40px;
+    padding: 0 18px;
+    /* 자유게시판 스타일: 짙은 네이비색 배경, 살짝 둥근 모서리 */
+    background: #1E3A8A;
+    color: #fff;
+    border: none;
+    border-radius: 6px; 
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.15s;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    text-decoration: none;
+    font-family: inherit;
+}
+
+.btnWrite:hover {
+    background: #152C69;
+}
+
+.btnWrite svg {
+    width: 16px;
+    height: 16px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2.5;
+}
+
+/* ── 게시판 테이블 ── */
+.boardTable {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.boardTable thead tr {
+    border-bottom: 3px solid #333;
+}
+.boardTable th {
+     padding: 18px 10px;
+    font-size: 15px;
+    font-weight: 700;
+    color: #444;
+}
+
+.boardTable td {
+    padding: 22px 10px;
+    border-bottom: 1px solid #e5e5e5;
+    color: #666;
+    font-size: 15px;
+}
+
+.dataRow {
+    cursor: pointer;
+}
+
+.dataRow:hover td {
+    background: #F8F9FA;
+}
+
+/* ── 열 너비 및 정렬 ── */
+.colId {
+    width: 100px;
+    text-align: center;
+}
+
+/* ── 열 너비 및 정렬 ── */
+.boardTable th, 
+.boardTable td {
+    text-align: center; /* 전체 셀 중앙 정렬 기본값 설정 */
+}
+
+.colId {
+    width: 100px;
+}
+
+.colTitle {
+    text-align: left !important;      /* th, td 상관없이 무조건 왼쪽 정렬 */
+    padding-left: 30px !important;    /* th, td 모두 똑같은 위치에서 시작하도록 강제 */
+}
+
+/* 대소문자 주의 (JSX와 완벽하게 일치해야 합니다) */
+.colAuthor {
+    width: 120px;
+}
+
+.colDate {
+    width: 150px;
+}
+
+.colViews {
+    width: 100px;
+}
+/* ── 페이지네이션 ── */
+.pagination {
     display: flex;
     justify-content: center;
-  }
+    align-items: center;
+    gap: 8px;
 
-  .contentWrapper {
-    width: 100%;
-    max-width: 1000px;
-    height: fit-content;
-  }
+    margin-top: 30px;
+    margin-bottom: 40px;
+}
 
-  /* 카테고리 라벨 */
-  .categoryLabel {
-    display: inline-block;
-    background: #E6F1FB;
-    color: #185FA5;
-    padding: 4px 12px;
-    border-radius: 99px;
-    font-size: 12px;
-    font-weight: 500;
-    margin-bottom: 12px;
-  }
+.pageItem {
+    width: 42px;
+    height: 42px;
 
-  /* ── 게시판 카드 ── */
-  .boardCard {
-    background: #FFFFFF;
-    border-radius: 16px;
-    box-shadow: 0 1px 8px rgba(0,0,0,0.06);
-    border: 1px solid #DEE2E6;
-    padding: 2rem;
-  }
+    border: 1px solid #d9d9d9;
+    border-radius: 8px;
 
-  .boardHeader {
-    display: flex; justify-content: space-between; align-items: center;
-    margin-bottom: 1.5rem;
-    padding-bottom: 1rem;
-    border-bottom: 1px solid #DEE2E6;
-  }
+    background: white;
 
-  .boardTitle {
-    font-size: 20px; font-weight: 600; color: #1A1D23;
-    padding-left: 10px;
-    border-left: 3px solid #378ADD;
-  }
+    display: flex;
+    justify-content: center;
+    align-items: center;
 
-  .btnWrite {
-    height: 38px; padding: 0 18px;
-    background: #378ADD; color: #fff;
-    border: none; border-radius: 99px;
-    font-size: 13px; font-weight: 500;
-    cursor: pointer; transition: background 0.15s;
-    display: flex; align-items: center; gap: 6px;
-    text-decoration: none; font-family: inherit;
-  }
-  .btnWrite:hover { background: #185FA5; }
-  .btnWrite svg { width: 15px; height: 15px; fill: none; stroke: currentColor; stroke-width: 2.5; }
+    color: #666;
+    font-size: 15px;
+    text-decoration: none;
 
-  /* ── 테이블 ── */
-  .boardTable {
-    width: 100%; border-collapse: collapse;
-    text-align: center; margin-bottom: 1.5rem;
-  }
+    cursor: pointer;
+}
 
-  .boardTable th {
-    padding: 12px 10px;
-    font-size: 13px; font-weight: 600;
-    color: #6C757D;
-    border-bottom: 2px solid #1A1D23;
-    background: transparent;
-  }
+/* 현재 페이지 */
+.pageItem:nth-child(2) {
+    background: #4d7ec7;
+    color: white;
+    border-color: #4d7ec7;
+}
 
-  .boardTable td {
-    padding: 14px 10px;
-    font-size: 14px; color: #6C757D;
-    border-bottom: 1px solid #E9ECEF;
-    transition: background 0.15s;
-  }
 
-  .dataRow { cursor: pointer; }
-  .dataRow:hover td { background: #E6F1FB; }
-  .dataRow:hover .colTitle { color: #185FA5; }
+/* ── 검색 영역 ── */
+.searchBar {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+}
 
-  .colId    { width: 80px; font-weight: 500; color: #1A1D23 !important; }
-  .colTitle { width: auto; text-align: left; padding-left: 20px !important; color: #1A1D23; font-weight: 500; }
-  .colAuthor { width: 120px; }
-  .colDate  { width: 120px; }
-  .colViews { width: 80px; }
-
-  /* ── 페이지네이션 ── */
-  .pagination {
-    display: flex; justify-content: center; align-items: center;
-    gap: 6px; margin-bottom: 1.5rem;
-  }
-
-  .pageItem {
-    width: 34px; height: 34px;
-    display: flex; justify-content: center; align-items: center;
-    border: 1px solid #DEE2E6; border-radius: 6px;
-    background: #FFFFFF; color: #6C757D;
-    font-size: 13px; font-weight: 500;
-    text-decoration: none; transition: all 0.15s; cursor: pointer;
-  }
-  .pageItem:hover { border-color: #378ADD; color: #185FA5; background: #E6F1FB; }
-  .pageItem.active { background: #378ADD; border-color: #378ADD; color: #fff; }
-
-  /* ── 검색 영역 ── */
-  .searchBar {
-    display: flex; justify-content: center; align-items: center; gap: 8px;
-  }
-
-  .searchSelect, .searchInput {
+.searchSelect, .searchInput {
     height: 44px;
     border: none;
     border-radius: 10px;
     padding: 0 14px;
-    font-size: 14px; color: #1A1D23;
+    font-size: 14px;
+    color: #1A1D23;
     background: #fff;
     outline: none;
     box-shadow: 0 0 0 1px #E9ECEF;
     transition: box-shadow 0.15s;
     font-family: inherit;
-  }
-  .searchSelect { width: 120px; cursor: pointer; }
-  .searchInput  { width: 300px; }
-  .searchSelect:focus, .search-input:focus { box-shadow: 0 0 0 2px #378ADD; }
-  .searchInput::placeholder { color: #ADB5BD; }
+}
 
-  .btnSearch {
-    height: 44px; padding: 0 22px;
-    background: #0C447C; color: #fff;
-    border: none; border-radius: 10px;
-    font-size: 14px; font-weight: 600;
-    cursor: pointer; transition: background 0.15s;
+.searchSelect { width: 120px; cursor: pointer; }
+.searchInput { width: 300px; }
+.searchSelect:focus, .searchInput:focus { box-shadow: 0 0 0 2px #378ADD; }
+.searchInput::placeholder { color: #ADB5BD; }
+
+.btnSearch {
+    height: 44px;
+    padding: 0 22px;
+    background: #0C447C;
+    color: #fff;
+    border: none;
+    border-radius: 10px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.15s;
     font-family: inherit;
-  }
-  .btnSearch:hover { background: #185FA5; }
+}
+
+.btnSearch:hover { background: #185FA5; }
