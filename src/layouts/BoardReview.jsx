@@ -43,7 +43,6 @@ const BoardReview = () => {
                     </button>
                 </div>
 
-                {/*게시판 목록 테이블 */}
                 <table className={styles.boardTable}>
                     <thead>
                         <tr>
@@ -54,7 +53,6 @@ const BoardReview = () => {
                             <th className={styles.colViews}>조회수</th>
                         </tr>
                     </thead>
-
                     <tbody id="board-tbody">
                         {boardList.length === 0 ? (
                             <tr>
@@ -77,46 +75,43 @@ const BoardReview = () => {
                             ))
                         )}
                     </tbody>
-
                 </table>
 
-                <div className={styles.pagination} id="pagination-container" >
+                <div className={styles.pagination} id="pagination-container">
                     <a className={styles.pageItem} aria-label="Previous" onClick={() => currentPage > 1 && setCurrentPage(currentPage - 1)}>
                         &lt;
                     </a>
 
                     {pages.map((p) => (
                         <a
-                        key = { p }
-                            className = {`${styles.pageItem} ${p === currentPage ? styles.active : ''}`}
-                    onClick={() => setCurrentPage(p)}
+                            key={p}
+                            className={`${styles.pageItem} ${p === currentPage ? styles.active : ''}`}
+                            onClick={() => setCurrentPage(p)}
                         >
-                    {p}
-                </a>
+                            {p}
+                        </a>
                     ))}
 
-                <a className={styles.pageItem} aria-label="Next" onClick={() => setCurrentPage(currentPage + 1)}>
-                    &gt;
-                </a>
+                    <a className={styles.pageItem} aria-label="Next" onClick={() => setCurrentPage(currentPage + 1)}>
+                        &gt;
+                    </a>
+                </div>
+
+                <div className={styles.pagination} id="dummy-pagination-container" style={{ display: 'none' }}></div>
+
+                <div className={styles.searchBar}>
+                    <select className={styles.searchSelect}>
+                        <option value="title">제목</option>
+                        <option value="content">내용</option>
+                        <option value="author">작성자</option>
+                    </select>
+                    <input type="text" className={styles.searchInput} placeholder="검색어를 입력해주세요" />
+                    <button type="button" className={styles.btnSearch}>검색</button>
+                </div>
 
             </div>
-
-            <div className={styles.pagination} id="dummy-pagination-container" style={{ display: 'none' }}></div>
-
-            <div className={styles.searchBar}>
-                <select className={styles.searchSelect}>
-                    <option value="title">제목</option>
-                    <option value="content">내용</option>
-                    <option value="author">작성자</option>
-                </select>
-                <input type="text" className={styles.searchInput} placeholder="검색어를 입력해주세요" />
-                <button type="button" className={styles.btnSearch}>검색</button>
-            </div>
-
-        </div>
-        </main >
-
-    )
+        </main>
+    );
 }
 
 export default BoardReview;
