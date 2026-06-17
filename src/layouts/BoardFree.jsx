@@ -11,7 +11,7 @@ const BoardFree = () => {
     };
 
     return (
-        <main className="page">
+        <main className={styles.page}>
             <div className={styles.boardCard}>
                 <div className={styles.boardHeader}>
                     <h2 className={styles.boardTitle}>자유게시판</h2>
@@ -34,11 +34,12 @@ const BoardFree = () => {
                     <tbody>
                         {[...Array(10)].map((_, index) => (
                             <tr key={index} className={styles.dataRow} onClick={handleRowClick} style={{ cursor: 'pointer' }}>
-                                <td>{10 - index}</td>
-                                <td>{index === 0 ? '청년 주거지원 정책 관련해서 질문 있습니다!' : '안녕하세요'}</td>
-                                <td>{index === 0 ? '김청년' : '건강최고'}</td>
-                                <td>{index === 0 ? '2026-06-15' : '2026-06-08'}</td>
-                                <td>{index === 0 ? '152' : '10'}</td>
+                                {/* 각 td에 알맞은 스타일 클래스를 추가했습니다. */}
+                                <td className={styles.colId}>{10 - index}</td>
+                                <td className={styles.colTitle}>{index === 0 ? '청년 주거지원 정책 관련해서 질문 있습니다!' : '안녕하세요'}</td>
+                                <td className={styles.colAuthor}>{index === 0 ? '김청년' : '건강최고'}</td>
+                                <td className={styles.colDate}>{index === 0 ? '2026-06-15' : '2026-06-08'}</td>
+                                <td className={styles.colViews}>{index === 0 ? '152' : '10'}</td>
                             </tr>
                         ))}
                     </tbody>
