@@ -12,7 +12,6 @@ import BoardReview from './layouts/BoardReview';
 import BoardReviewEdit from './layouts/BoardReviewEdit';
 import BoardReviewWrite from './layouts/BoardReviewWrite';
 import BoardReviewDetail from './layouts/BoardReviewDetail';
-import NoticeDetail from './layouts/NoticeDetail';
 import WelfareList from './layouts/WelfareList';
 import WelfareDetail from './layouts/WelfareDetail';
 import Persona from './layouts/Persona';
@@ -20,7 +19,10 @@ import BoardFree from './layouts/BoardFree';
 import BoardFreeDetail from './layouts/BoardFreeDetail';
 import BoardFreeWrite from './layouts/BoardFreeWrite';
 import NoticeBoard from './layouts/NoticeBoard';
-import NoticeWrite from './layouts/NoticeWrite';
+import NoticeBoardWrite from './layouts/NoticeBoardWrite';
+import NoticeBoardEdit from './layouts/NoticeBoardEdit';
+import NoticeBoardDetail from './layouts/NoticeBoardDetail';
+
 
 
 
