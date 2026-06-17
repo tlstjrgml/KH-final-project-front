@@ -1,21 +1,43 @@
+import { useState, useEffect } from 'react';
 import styles from './BoardReview.module.css'
 import { useNavigate } from 'react-router-dom';
+
 const BoardReview = () => {
 
-    const pages = [1, 2, 3, 4, 5];
     const navigate = useNavigate();
+    const [boardList, setBoardList] = useState([]);
+    const [pages, setPages] = useState([1]);
+    const [currentPage, setCurrentPage] = useState(1);
+
+    useEffect(() => {
+        const fetchBoardList = async () => {
+            try {
+                const res = await fetch(`/react/board/list?boardType=REV&page=${currentPage}`);
+                const data = await res.json();
+                console.log('받은 데이터:', data);
+
+                setBoardList(data.content || []);
+
+                const maxPage = data.pagination?.endPage || 1;
+                setPages(Array.from({ length: maxPage }, (_, i) => i + 1));
+            } catch (err) {
+                console.error('목록 조회 실패:', err);
+            }
+        };
+        fetchBoardList();
+    }, [currentPage]);
+
     return (
         <main className={styles.page}>
             <div className={styles.boardCard}>
 
-                {/*게시판 헤더 */}
                 <div className={styles.boardHeader}>
                     <h2 className={styles.boardTitle}>후기 게시판</h2>
 
-                    <button 
+                    <button
                         type="button"
-                        className={styles.btnWrite} 
-                        onClick={()=>{navigate('/board/write');}}>
+                        className={styles.btnWrite}
+                        onClick={() => { navigate('/boardreview/write'); }}>
                         <svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14" /></svg>
                         글쓰기
                     </button>
@@ -34,56 +56,65 @@ const BoardReview = () => {
                     </thead>
 
                     <tbody id="board-tbody">
-                        {[...Array(10)].map((_, index) => (
-                            <tr key={index} className={styles.dataRow}>
-                                <td className={`${styles.colId} ${styles.boardId}`}> user01 </td>
-                                <td className={styles.colTitle}> 안녕하세요 </td>
-                                <td className={styles.colAuthor}>건강최고</td>
-                                <td className={styles.colDate}>2026-06-08</td>
-                                <td className={styles.colViews}>10</td>
+                        {boardList.length === 0 ? (
+                            <tr>
+                                <td colSpan="5" style={{ textAlign: 'center' }}>등록된 게시글이 없습니다.</td>
                             </tr>
-                        ))}
+                        ) : (
+                            boardList.map((board) => (
+                                <tr
+                                    key={board.boardId}
+                                    className={styles.dataRow}
+                                    onClick={() => navigate(`/boardreview/detail/${board.boardId}`)}
+                                    style={{ cursor: 'pointer' }}
+                                >
+                                    <td className={`${styles.colId} ${styles.boardId}`}>{board.boardId}</td>
+                                    <td className={styles.colTitle}>{board.boardTitle}</td>
+                                    <td className={styles.colAuthor}>{board.writerNickname}</td>
+                                    <td className={styles.colDate}>{board.createDate.split('T')[0]}</td>
+                                    <td className={styles.colViews}>{board.views}</td>
+                                </tr>
+                            ))
+                        )}
                     </tbody>
 
                 </table>
 
-                {/* 페이지네이션 (백엔드 연동) */}
                 <div className={styles.pagination} id="pagination-container" >
-                    <a className={styles.pageItem} aria-label="Previous">
+                    <a className={styles.pageItem} aria-label="Previous" onClick={() => currentPage > 1 && setCurrentPage(currentPage - 1)}>
                         &lt;
                     </a>
 
                     {pages.map((p) => (
                         <a
-                            key={p}
-                            className={styles.pageItem}
+                        key = { p }
+                            className = {`${styles.pageItem} ${p === currentPage ? styles.active : ''}`}
+                    onClick={() => setCurrentPage(p)}
                         >
-                            {p}
-                        </a>
+                    {p}
+                </a>
                     ))}
 
-                    <a className={styles.pageItem} aria-label="Next">
-                        &gt;
-                    </a>
-
-                </div>
-
-                { /*미리보기용 페이지네이션 (JS에서 컨트롤) */}
-                <div className={styles.pagination} id="dummy-pagination-container" style={{ display: 'none' }}></div>
-
-                {/*검색 영역 */}
-                <div className={styles.searchBar}>
-                    <select className={styles.searchSelect}>
-                        <option value="title">제목</option>
-                        <option value="content">내용</option>
-                        <option value="author">작성자</option>
-                    </select>
-                    <input type="text" className={styles.searchInput} placeholder="검색어를 입력해주세요" />
-                    <button type="button" className={styles.btnSearch}>검색</button>
-                </div>
+                <a className={styles.pageItem} aria-label="Next" onClick={() => setCurrentPage(currentPage + 1)}>
+                    &gt;
+                </a>
 
             </div>
-        </main>
+
+            <div className={styles.pagination} id="dummy-pagination-container" style={{ display: 'none' }}></div>
+
+            <div className={styles.searchBar}>
+                <select className={styles.searchSelect}>
+                    <option value="title">제목</option>
+                    <option value="content">내용</option>
+                    <option value="author">작성자</option>
+                </select>
+                <input type="text" className={styles.searchInput} placeholder="검색어를 입력해주세요" />
+                <button type="button" className={styles.btnSearch}>검색</button>
+            </div>
+
+        </div>
+        </main >
 
     )
 }
