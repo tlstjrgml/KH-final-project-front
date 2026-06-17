@@ -1,6 +1,6 @@
 import React from 'react';
 import { BrowserRouter, Routes, Route, useSearchParams, Navigate } from 'react-router-dom';
-import { useState, useEffect  } from 'react';
+import { useEffect } from 'react';
 import Navbar from './components/common/Navbar';
 import Login from './layouts/Login';
 import Signup from './layouts/Signup';
@@ -39,10 +39,7 @@ const AppInner = () => {
   const [searchParams] = useSearchParams();
   const token = searchParams.get('token');
   const isLoggedIn = localStorage.getItem('token') ? true : false;
-  const isAdmin = isLoggedIn ? JSON.parse(atob(localStorage.getItem('token').split('.')[1])).
-  isAdmin === 'Y' : false;
-  const [nickname, setNickname] = useState('')
-
+  const isAdmin = isLoggedIn ? JSON.parse(atob(localStorage.getItem('token').split('.')[1])).isAdmin === 'Y' : false;
   useEffect(() => {
     if (token) {
       localStorage.setItem('token', token);
@@ -50,20 +47,9 @@ const AppInner = () => {
     }
   }, []);
 
-    useEffect(() => {
-    if (isLoggedIn) {
-      fetch('http://localhost:8080/member/me', {
-        headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
-      })
-        .then(res => res.json())
-        .then(data => setNickname(data.nickname))
-    }
-  }, [])
-
-
   return (
     <>
-      <Navbar isLoggedIn={isLoggedIn} isAdmin={isAdmin} nickname={nickname} />
+      <Navbar isLoggedIn={isLoggedIn} isAdmin={isAdmin} nickname="석희" />
       <Routes>
         <Route path="/" element={<Main />} />
         <Route path="/login" element={<Login />} />
@@ -71,21 +57,24 @@ const AppInner = () => {
         <Route path="/edit-profile" element={<PrivateRoute element={<EditProfile />} />} />
         <Route path="/mypage" element={<PrivateRoute element={<MyPage />} />} />
         <Route path="/admin" element={<AdminPage />} />
-        <Route path="/boardreview/list" element={<BoardReview />} />
+        <Route path="/boardreview" element={<BoardReview />} />
+     
         <Route path="/boardreview/write" element={<PrivateRoute element={<BoardReviewWrite />} />} />
         <Route path="/boardreview/edit" element={<PrivateRoute element={<BoardReviewEdit />} />} />
         <Route path="/boardreview/detail/:id" element={<PrivateRoute element={<BoardReviewDetail />} />} />
         <Route path="/welfarelist" element={<WelfareList />} />
         <Route path="/welfaredetail/:id" element={<WelfareDetail />} />
         <Route path="/persona" element={<PrivateRoute element={<Persona />} />} />
-        <Route path="/boardfree/list" element={<BoardFree />} />
-        <Route path="/boardfree/detail" element={<BoardFreeDetail />} />
+        <Route path="/boardfree" element={<BoardFree />} />
+        <Route path="/boardfree/detail" element={<PrivateRoute element={<BoardFreeDetail />} />} />
         <Route path="/boardfree/write" element={<PrivateRoute element={<BoardFreeWrite />} />} />
+
         <Route path="/boardfree/edit" element={<PrivateRoute element={<BoardFreeEdit />} />} />
-        <Route path="/notice/list" element={<NoticeBoard />} />
         <Route path="/notice/write" element={<PrivateRoute element={<NoticeBoardWrite />} />} />
         <Route path="/notice/detail" element={<NoticeBoardDetail />} />
         <Route path="/notice/edit" element={<PrivateRoute element={<NoticeBoardEdit />} />} />
+        <Route path="/noticeboard" element={<NoticeBoard />} />
+ 
       </Routes>
     </>
   );
