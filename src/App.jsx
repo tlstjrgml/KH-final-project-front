@@ -22,6 +22,7 @@ import NoticeBoard from './layouts/NoticeBoard';
 import NoticeBoardWrite from './layouts/NoticeBoardWrite';
 import NoticeBoardEdit from './layouts/NoticeBoardEdit';
 import NoticeBoardDetail from './layouts/NoticeBoardDetail';
+import BoardFreeEdit from './layouts/BoardFreeEdit';
 
 
 
