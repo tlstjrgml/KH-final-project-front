@@ -1,4 +1,4 @@
-import styles from './Notice.module.css';
+import styles from './NoticeBoard.module.css';
 import { useNavigate } from 'react-router-dom'
 
 const NoticeBoard = () =>{
