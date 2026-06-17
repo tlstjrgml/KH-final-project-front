@@ -1,6 +1,6 @@
-import styles from "./NoticeWrite.module.css";
+import styles from "./NoticeBoardWrite.module.css";
 
-const NoticeWrite = () =>{
+const NoticeBoardWrite = () =>{
     return(
         <>
         <main className={styles.page}>
@@ -80,4 +80,4 @@ const NoticeWrite = () =>{
     )
 }
 
-export default NoticeWrite;
+export default NoticeBoardWrite;

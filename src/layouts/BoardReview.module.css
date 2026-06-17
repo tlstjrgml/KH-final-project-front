@@ -1,6 +1,16 @@
+/* ── 메인 레이아웃 ── */
+.page {
+    min-height: 100vh;
+    padding: 80px 2rem 4rem;
+    max-width: 1280px;
+    margin: 0 auto;
+    background: #F4F7FB;
+    font-family: 'Pretendard', -apple-system, sans-serif;
+}
+
 /* 전체 카드 */
 .boardCard {
-    width: 90%;
+     width: 90%;
     max-width: 1500px;
     margin: 40px auto;
     background: #fff;
