@@ -1,0 +1,124 @@
+/* declaration.module.css */
+
+/* 모달 배경 */
+.reportModalOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(15, 23, 42, 0.45);
+  z-index: 9999;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* 모달 본문 */
+.reportModalContent {
+  background: #ffffff;
+  width: 90%;
+  max-width: 500px;
+  padding: 2.5rem;
+  border-radius: 8px;
+  box-shadow: 0 8px 40px rgba(0, 0, 0, 0.18);
+
+  animation: reportModalSlideUp 0.2s ease;
+}
+
+@keyframes reportModalSlideUp {
+  from {
+    transform: translateY(12px);
+    opacity: 0;
+  }
+
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+/* 제목 */
+.reportModalTitle {
+  font-size: 20px;
+  font-weight: 600;
+  color: #1a1d23;
+  margin-bottom: 1.5rem;
+}
+
+/* 신고 사유 입력 */
+.reportTextarea {
+  width: 100%;
+  height: 160px;
+  padding: 20px;
+
+  border: 2px solid #888888;
+  border-radius: 4px;
+
+  resize: none;
+  outline: none;
+
+  font-size: 15px;
+  font-family: inherit;
+  color: #1a1d23;
+
+  line-height: 1.5;
+  margin-bottom: 2rem;
+
+  transition: border-color 0.15s ease;
+}
+
+.reportTextarea:focus {
+  border-color: #378add;
+}
+
+.reportTextarea::placeholder {
+  color: #343a40;
+  font-weight: 500;
+}
+
+/* 버튼 영역 */
+.reportActions {
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+}
+
+/* 버튼 공통 */
+.modalBtn {
+  width: 120px;
+  height: 48px;
+
+  border-radius: 4px;
+  border: 2px solid #888888;
+
+  font-size: 15px;
+  font-weight: 500;
+  font-family: inherit;
+
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+/* 취소 버튼 */
+.cancel {
+  background: #ffffff;
+  color: #1a1d23;
+}
+
+.cancel:hover {
+  background: #f8f9fa;
+}
+
+/* 확인 버튼 */
+.confirm {
+  background: #378add;
+  border-color: #378add;
+  color: #ffffff;
+}
+
+.confirm:hover {
+  background: #2f79c1;
+  border-color: #2f79c1;
+}
