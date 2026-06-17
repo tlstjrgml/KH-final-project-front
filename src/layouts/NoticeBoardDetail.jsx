@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
-import styles from './NoticeDetail.module.css';
+import styles from './NoticeBoardDetail.module.css';
 
-const NoticeDetail = () => {
+const NoticeBoardDetail = () => {
     // 상태 관리 (좋아요 기능)
     const [isLiked, setIsLiked] = useState(false);
     const [likeCount, setLikeCount] = useState(128);
@@ -93,4 +93,4 @@ const NoticeDetail = () => {
     );
 };
 
-export default NoticeDetail;
+export default NoticeBoardDetail;
