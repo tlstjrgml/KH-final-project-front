@@ -41,6 +41,7 @@ function Navbar({ isLoggedIn = false, nickname = '' , isAdmin = false}) {
               <button className={`${styles.btn} ${styles.btnOutline}`} onClick={()=>{navigate('/MyPage')}}>마이페이지</button>
               <button className={`${styles.btn} ${styles.btnGhost}`} onClick={()=>{
                 localStorage.removeItem('token');
+                sessionStorage.removeItem('extraInfoModalShown');
                 window.location.replace('/');
               }}>로그아웃</button>
             </>
