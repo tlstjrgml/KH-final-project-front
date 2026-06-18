@@ -8,6 +8,7 @@ const BoardReview = () => {
     const [boardList, setBoardList] = useState([]);
     const [pages, setPages] = useState([1]);
     const [currentPage, setCurrentPage] = useState(1);
+    const [endPage, setEndPage] = useState(1);
 
     useEffect(() => {
         const fetchBoardList = async () => {
@@ -19,6 +20,7 @@ const BoardReview = () => {
                 setBoardList(data.content || []);
 
                 const maxPage = data.pagination?.endPage || 1;
+                setEndPage(maxPage);
                 setPages(Array.from({ length: maxPage }, (_, i) => i + 1));
             } catch (err) {
                 console.error('목록 조회 실패:', err);
@@ -78,7 +80,14 @@ const BoardReview = () => {
                 </table>
 
                 <div className={styles.pagination} id="pagination-container">
-                    <a className={styles.pageItem} aria-label="Previous" onClick={() => currentPage > 1 && setCurrentPage(currentPage - 1)}>
+                    <a className={styles.pageItem}
+                        aria-label="Previous"
+                        onClick={() => currentPage > 1 && setCurrentPage(currentPage - 1)}
+                        style={{
+                            pointerEvents: currentPage <= 1 ? 'none' : 'auto',
+                            opacity: currentPage <= 1 ? 0.4 : 1
+                        }}
+                    >
                         &lt;
                     </a>
 
@@ -92,7 +101,14 @@ const BoardReview = () => {
                         </a>
                     ))}
 
-                    <a className={styles.pageItem} aria-label="Next" onClick={() => setCurrentPage(currentPage + 1)}>
+                    <a className={styles.pageItem}
+                        aria-label="Next"
+                        onClick={() => currentPage < endPage && setCurrentPage(currentPage + 1)}
+                        style={{
+                            pointerEvents: currentPage >= endPage ? 'none' : 'auto',
+                            opacity: currentPage >= endPage ? 0.4 : 1
+                        }}
+                    >
                         &gt;
                     </a>
                 </div>
