@@ -14,7 +14,7 @@ function AdminWelfare() {
                     복지 서비스 신규 등록 및 기존 게시글의 수정/삭제는<br />
                     실제 서비스되는 <strong>복지 게시판 페이지</strong>에서 관리자 권한으로 직접 수행하실 수 있습니다.
                 </p>
-                <button className={styles['primary-btn']} onClick={() => navigate('/welfare')}>
+                <button className={styles['primary-btn']} onClick={() => navigate('/welfarelist')}>
                     메인 복지 게시판으로 이동하기 ➔
                 </button>
             </div>

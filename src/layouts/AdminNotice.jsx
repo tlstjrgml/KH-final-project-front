@@ -1,73 +1,117 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import NoticeModal from './NoticeModal';
-import styles from './AdminNotice.module.css'; // 전용 CSS (기존 CSS 복붙)
+import styles from './AdminNotice.module.css';
 
 function AdminNotice() {
-    const rowsPerPage = 5;
+    const [notices, setNotices] = useState([]); 
     const [currentNoticePage, setCurrentNoticePage] = useState(1);
     const [searchNoticeKeyword, setSearchNoticeKeyword] = useState('');
     const [noticeSort, setNoticeSort] = useState('latest');
+
+    // 1. 백엔드 Pagination 객체 구조를 그대로 담을 상태
+    const [pageInfo, setPageInfo] = useState({
+        startPage: 1,
+        endPage: 1,
+        hasPrev: false,
+        hasNext: false,
+        totalPages: 1
+    });
     
-    // 모달 제어 상태 (그대로 유지)
     const [isNoticeModalOpen, setIsNoticeModalOpen] = useState(false);
     const [editingNotice, setEditingNotice] = useState(null);
     const [viewingNotice, setViewingNotice] = useState(null);
 
-    // 공지사항 데이터
-    const [notices, setNotices] = useState(() => {
-        const initialNotices = [];
-        for (let i = 1; i <= 15; i++) {
-            initialNotices.push({
-                boardId: i,
-                boardTitle: `청년복지 MOA 시스템 정기 점검 안내 (${i})`,
-                boardContent: `이것은 ${i}번째 더미 공지사항 내용입니다.\n시스템 점검으로 인해 서비스 이용이 제한될 수 있습니다.`,
-                createDate: `2026-06-${(16 - i).toString().padStart(2, '0')}`,
-                views: Math.floor(Math.random() * 200),
-                isPinned: i <= 2
+    // 2. 백엔드에 10개 단위의 목록 및 페이징 정보 요청
+    const fetchNotices = async () => {
+        try {
+            const token = localStorage.getItem('token');
+            const response = await fetch(`http://localhost:8080/board/list?page=${currentNoticePage}&keyword=${searchNoticeKeyword}&sort=${noticeSort}`, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                }
             });
-        }
-        return initialNotices;
-    });
 
-    let processedNotices = notices.filter(n => n.boardTitle.includes(searchNoticeKeyword));
-    processedNotices.sort((a, b) => {
-        if (noticeSort === 'latest') return new Date(b.createDate) - new Date(a.createDate);
-        if (noticeSort === 'oldest') return new Date(a.createDate) - new Date(b.createDate);
-        if (noticeSort === 'views') return b.views - a.views;
-        return 0;
-    });
-    const totalNoticePages = Math.ceil(processedNotices.length / rowsPerPage);
-    const currentNoticesList = processedNotices.slice((currentNoticePage - 1) * rowsPerPage, currentNoticePage * rowsPerPage);
+            if (!response.ok) throw new Error('목록을 불러오는데 실패했습니다.');
 
-    const handleTogglePin = (boardId) => {
-        setNotices(notices.map(notice => notice.boardId === boardId ? { ...notice, isPinned: !notice.isPinned } : notice));
-    };
-
-    const handleDeleteNotice = (boardId) => {
-        if (window.confirm('해당 공지사항을 정말 삭제하시겠습니까?')) {
-            const updatedNotices = notices.filter(n => n.boardId !== boardId);
-            setNotices(updatedNotices);
-            const newProcessed = updatedNotices.filter(n => n.boardTitle.includes(searchNoticeKeyword));
-            const newTotalPages = Math.ceil(newProcessed.length / rowsPerPage);
-            if (currentNoticePage > newTotalPages && newTotalPages > 0) setCurrentNoticePage(newTotalPages);
+            const data = await response.json();
+            
+            // 백엔드가 PageResponse 객체에 담아준 데이터 세팅
+            setNotices(data.content || []); 
+            if (data.pagination) {
+                setPageInfo(data.pagination);
+            }
+            
+        } catch (error) {
+            console.error('API 호출 에러:', error);
         }
     };
 
-    // NoticeModal에서 저장 성공 후 호출되는 함수 (그대로 유지)
-    const handleSaveNotice = (savedNoticeData) => {
-        if (editingNotice) {
-            setNotices(notices.map(n => n.boardId === savedNoticeData.boardId ? savedNoticeData : n));
-        } else {
-            setNotices([savedNoticeData, ...notices]);
-            setCurrentNoticePage(1);
+    // 3. 페이지 번호나 정렬 조건이 바뀔 때마다 재조회
+    useEffect(() => {
+        fetchNotices();
+    }, [currentNoticePage, noticeSort]);
+
+    // 모달을 띄울 때 상세 내용을 가져오기 위한 단건 조회
+    const fetchNoticeDetail = async (boardId) => {
+        try {
+            const token = localStorage.getItem('token');
+            const response = await fetch(`http://localhost:8080/board/${boardId}`, {
+                method: 'GET',
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            if (!response.ok) throw new Error('상세 조회 실패');
+            return await response.json();
+        } catch (error) {
+            console.error('상세 조회 에러:', error);
+            alert('상세 정보를 불러올 수 없습니다.');
+            return null;
         }
+    };
+
+    const handleDeleteNotice = async (boardId) => {
+        if (window.confirm('정말 삭제하시겠습니까?')) {
+            try {
+                const token = localStorage.getItem('token');
+                const response = await fetch(`http://localhost:8080/board/${boardId}`, {
+                    method: 'DELETE',
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                
+                if (!response.ok) throw new Error('삭제 실패');
+                
+                alert('삭제되었습니다.');
+                setCurrentNoticePage(1); // 삭제 후 1페이지로 이동
+                fetchNotices();
+            } catch (error) {
+                console.error('삭제 에러:', error);
+            }
+        }
+    };
+
+    const handleSaveNotice = () => {
         setIsNoticeModalOpen(false);
         setEditingNotice(null);
+        setCurrentNoticePage(1); // 저장 후 최신 글을 보기 위해 1페이지로 이동
+        fetchNotices(); 
     };
 
     const openCreateModal = () => { setEditingNotice(null); setIsNoticeModalOpen(true); };
-    const openEditModal = (notice) => { setEditingNotice(notice); setIsNoticeModalOpen(true); };
-    const openViewModal = (notice) => { setViewingNotice(notice); };
+    const openEditModal = async (notice) => { 
+        const detailData = await fetchNoticeDetail(notice.boardId);
+        if (detailData) { setEditingNotice(detailData); setIsNoticeModalOpen(true); }
+    };
+    const openViewModal = async (notice) => { 
+        const detailData = await fetchNoticeDetail(notice.boardId);
+        if (detailData) setViewingNotice(detailData); 
+    };
+
+    // 검색 실행 (Enter 키 눌렀을 때만 작동하여 API 과호출 방지)
+    const executeSearch = () => {
+        setCurrentNoticePage(1);
+        fetchNotices();
+    };
 
     return (
         <section className={`${styles['tab-content']} ${styles['active-tab']}`}>
@@ -85,10 +129,11 @@ function AdminNotice() {
                     </select>
                     <input
                         type="text"
-                        placeholder="제목 검색"
+                        placeholder="제목 검색 (Enter)"
                         className={styles['search-input']}
                         value={searchNoticeKeyword}
-                        onChange={(e) => { setSearchNoticeKeyword(e.target.value); setCurrentNoticePage(1); }}
+                        onChange={(e) => setSearchNoticeKeyword(e.target.value)}
+                        onKeyDown={(e) => { if (e.key === 'Enter') executeSearch(); }}
                     />
                     <button className={styles['primary-btn']} onClick={openCreateModal}>
                         + 새 공지 작성
@@ -99,23 +144,18 @@ function AdminNotice() {
             <div className={styles.card}>
                 <table className={styles['report-table']}>
                     <thead>
-                        <tr><th>번호</th><th>제목</th><th>등록일</th><th>조회수</th><th>메인 노출</th><th>관리</th></tr>
+                        <tr><th>번호</th><th>제목</th><th>등록일</th><th>조회수</th><th>관리</th></tr>
                     </thead>
                     <tbody>
-                        {currentNoticesList.length === 0 ? (
-                            <tr><td colSpan="6" style={{ padding: '30px', textAlign: 'center', color: '#6C757D' }}>등록된 공지사항이 없습니다.</td></tr>
+                        {notices.length === 0 ? (
+                            <tr><td colSpan="5" style={{ padding: '30px', textAlign: 'center', color: '#6C757D' }}>게시글이 없습니다.</td></tr>
                         ) : (
-                            currentNoticesList.map(notice => (
+                            notices.map(notice => (
                                 <tr key={notice.boardId}>
                                     <td>{notice.boardId}</td>
                                     <td className={styles['clickable-title']} onClick={() => openViewModal(notice)}>{notice.boardTitle}</td>
-                                    <td>{notice.createDate}</td>
+                                    <td>{notice.createDate ? notice.createDate.substring(0, 10) : '-'}</td>
                                     <td>{notice.views}</td>
-                                    <td>
-                                        <button className={notice.isPinned ? styles['badge-on'] : styles['badge-off']} onClick={() => handleTogglePin(notice.boardId)}>
-                                            {notice.isPinned ? 'ON' : 'OFF'}
-                                        </button>
-                                    </td>
                                     <td>
                                         <div style={{ display: 'flex', gap: '5px' }}>
                                             <button className={styles['detail-btn']} onClick={() => openEditModal(notice)}>수정</button>
@@ -127,30 +167,49 @@ function AdminNotice() {
                         )}
                     </tbody>
                 </table>
-                {totalNoticePages > 0 && (
+                
+                {/* 4. 백엔드의 Pagination 객체에 전적으로 의존하는 하단 버튼 */}
+                {pageInfo.totalPages > 0 && (
                     <div className={styles.pagination}>
-                        {Array.from({ length: totalNoticePages }, (_, i) => i + 1).map(page => (
-                            <button key={page} className={`${styles['page-btn']} ${currentNoticePage === page ? styles['active-page'] : ''}`} onClick={() => setCurrentNoticePage(page)}>{page}</button>
+                        {/* 이전 블록 */}
+                        {pageInfo.hasPrev && (
+                            <button className={styles['page-btn']} onClick={() => setCurrentNoticePage(pageInfo.startPage - 1)}>
+                                &lt;
+                            </button>
+                        )}
+
+                        {/* 숫자 버튼 반복 */}
+                        {Array.from({ length: pageInfo.endPage - pageInfo.startPage + 1 }, (_, i) => pageInfo.startPage + i).map(page => (
+                            <button 
+                                key={page} 
+                                className={`${styles['page-btn']} ${currentNoticePage === page ? styles['active-page'] : ''}`} 
+                                onClick={() => setCurrentNoticePage(page)}
+                            >
+                                {page}
+                            </button>
                         ))}
+
+                        {/* 다음 블록 */}
+                        {pageInfo.hasNext && (
+                            <button className={styles['page-btn']} onClick={() => setCurrentNoticePage(pageInfo.endPage + 1)}>
+                                &gt;
+                            </button>
+                        )}
                     </div>
                 )}
             </div>
 
-            {/* 모달 연동 완벽 유지 */}
+            {/* 모달 연동 */}
             {isNoticeModalOpen && (
                 <NoticeModal
-                    notice={editingNotice}
+                    notice={editingNotice} 
                     onClose={() => { setIsNoticeModalOpen(false); setEditingNotice(null); }}
-                    onSave={handleSaveNotice}
+                    onSave={handleSaveNotice} 
                 />
             )}
 
             {viewingNotice && (
-                <NoticeModal
-                    notice={viewingNotice}
-                    isReadOnly={true}
-                    onClose={() => setViewingNotice(null)}
-                />
+                <NoticeModal notice={viewingNotice} isReadOnly={true} onClose={() => setViewingNotice(null)} />
             )}
         </section>
     );
