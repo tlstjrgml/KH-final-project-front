@@ -30,9 +30,34 @@ const BoardReviewDetail = () => {
         fetchDetail();
     }, [id]);
 
-    const togglePostLike = () => {
-        setIsPostLiked(!isPostLiked);
-        setPostLikes(prev => isPostLiked ? prev - 1 : prev + 1);
+    const togglePostLike = async () => {
+        const token = localStorage.getItem('token');
+        if (!token) {
+            alert('로그인이 필요합니다.');
+            return;
+        }
+
+        const prevLiked = isPostLiked;
+        const prevCount = postLikes;
+
+        setIsPostLiked(!prevLiked);
+        setPostLikes(prevLiked ? prevCount - 1 : prevCount + 1);
+
+        try {
+            const res = await fetch(`/react/board/${id}/likes`, {
+                method: prevLiked ? 'DELETE' : 'POST',
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+
+            if (!res.ok) {
+                throw new Error('좋아요 처리 실패');
+            }
+        } catch (err) {
+            console.error(err);
+            setIsPostLiked(prevLiked);
+            setPostLikes(prevCount);
+            alert('좋아요 처리 중 오류가 발생했습니다.');
+        }
     };
 
     const toggleReplyForm = (replyId) => {
