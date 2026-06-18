@@ -1,9 +1,33 @@
-import styles from './BoardReview.module.css';
+import { useState, useEffect } from 'react';
+import styles from './BoardReview.module.css'
 import { useNavigate } from 'react-router-dom';
 
 const BoardReview = () => {
-    const pages = [1, 2, 3, 4, 5];
+
     const navigate = useNavigate();
+    const [boardList, setBoardList] = useState([]);
+    const [pages, setPages] = useState([1]);
+    const [currentPage, setCurrentPage] = useState(1);
+    const [endPage, setEndPage] = useState(1);
+
+    useEffect(() => {
+        const fetchBoardList = async () => {
+            try {
+                const res = await fetch(`/react/board/list?boardType=REV&page=${currentPage}`);
+                const data = await res.json();
+                console.log('받은 데이터:', data);
+
+                setBoardList(data.content || []);
+
+                const maxPage = data.pagination?.endPage || 1;
+                setEndPage(maxPage);
+                setPages(Array.from({ length: maxPage }, (_, i) => i + 1));
+            } catch (err) {
+                console.error('목록 조회 실패:', err);
+            }
+        };
+        fetchBoardList();
+    }, [currentPage]);
 
     return (
         <main className={styles.page}>
@@ -11,6 +35,7 @@ const BoardReview = () => {
 
                 <div className={styles.boardHeader}>
                     <h2 className={styles.boardTitle}>후기 게시판</h2>
+
                     <button
                         type="button"
                         className={styles.btnWrite}
@@ -31,29 +56,61 @@ const BoardReview = () => {
                         </tr>
                     </thead>
                     <tbody id="board-tbody">
-                        {[...Array(10)].map((_, index) => (
-                            <tr
-                                key={index}
-                                className={styles.dataRow}
-                                onClick={() => navigate(`/boardreview/detail/${index + 1}`)}
-                                style={{ cursor: 'pointer' }}
-                            >
-                                <td className={`${styles.colId} ${styles.boardId}`}>user01</td>
-                                <td className={styles.colTitle}>안녕하세요</td>
-                                <td className={styles.colAuthor}>건강최고</td>
-                                <td className={styles.colDate}>2026-06-08</td>
-                                <td className={styles.colViews}>10</td>
+                        {boardList.length === 0 ? (
+                            <tr>
+                                <td colSpan="5" style={{ textAlign: 'center' }}>등록된 게시글이 없습니다.</td>
                             </tr>
-                        ))}
+                        ) : (
+                            boardList.map((board) => (
+                                <tr
+                                    key={board.boardId}
+                                    className={styles.dataRow}
+                                    onClick={() => navigate(`/boardreview/detail/${board.boardId}`)}
+                                    style={{ cursor: 'pointer' }}
+                                >
+                                    <td className={`${styles.colId} ${styles.boardId}`}>{board.boardId}</td>
+                                    <td className={styles.colTitle}>{board.boardTitle}</td>
+                                    <td className={styles.colAuthor}>{board.writerNickname}</td>
+                                    <td className={styles.colDate}>{board.createDate.split('T')[0]}</td>
+                                    <td className={styles.colViews}>{board.views}</td>
+                                </tr>
+                            ))
+                        )}
                     </tbody>
                 </table>
 
                 <div className={styles.pagination} id="pagination-container">
-                    <a className={styles.pageItem} aria-label="Previous">&lt;</a>
+                    <a className={styles.pageItem}
+                        aria-label="Previous"
+                        onClick={() => currentPage > 1 && setCurrentPage(currentPage - 1)}
+                        style={{
+                            pointerEvents: currentPage <= 1 ? 'none' : 'auto',
+                            opacity: currentPage <= 1 ? 0.4 : 1
+                        }}
+                    >
+                        &lt;
+                    </a>
+
                     {pages.map((p) => (
-                        <a key={p} className={styles.pageItem}>{p}</a>
+                        <a
+                            key={p}
+                            className={`${styles.pageItem} ${p === currentPage ? styles.active : ''}`}
+                            onClick={() => setCurrentPage(p)}
+                        >
+                            {p}
+                        </a>
                     ))}
-                    <a className={styles.pageItem} aria-label="Next">&gt;</a>
+
+                    <a className={styles.pageItem}
+                        aria-label="Next"
+                        onClick={() => currentPage < endPage && setCurrentPage(currentPage + 1)}
+                        style={{
+                            pointerEvents: currentPage >= endPage ? 'none' : 'auto',
+                            opacity: currentPage >= endPage ? 0.4 : 1
+                        }}
+                    >
+                        &gt;
+                    </a>
                 </div>
 
                 <div className={styles.pagination} id="dummy-pagination-container" style={{ display: 'none' }}></div>

@@ -5,6 +5,51 @@ import styles from './BoardReviewWrite.module.css';
 const BoardReviewWrite = () => {
     const navigate = useNavigate();
     const [rating, setRating] = useState(0);
+    const [boardTitle, setBoardTitle] = useState('');
+    const [boardContent, setBoardContent] = useState('');
+
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+
+        if (!boardTitle.trim()) {
+            alert('제목을 입력해주세요.');
+            return;
+        }
+        if (!boardContent.trim()) {
+            alert('후기 내용을 입력해주세요.');
+            return;
+        }
+
+        const token = localStorage.getItem('token');
+
+        try {
+            const res = await fetch('/react/board/write', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify({
+                    boardTitle: boardTitle,
+                    boardContent: boardContent,
+                    boardType: 'REV',
+                    welfareId: null,
+                    rating: rating
+                })
+            });
+
+            if (!res.ok) {
+                throw new Error('등록 실패');
+            }
+
+            const data = await res.json();
+            alert('등록되었습니다.');
+            navigate('/boardreview');
+        } catch (err) {
+            console.error(err);
+            alert('등록 중 오류가 발생했습니다.');
+        }
+    };
 
     return (
         <div className={styles.page}>
@@ -13,7 +58,7 @@ const BoardReviewWrite = () => {
                     <h2 className={styles.writeTitle}>후기게시판 글 작성</h2>
                 </div>
 
-                <form>
+                <form onSubmit={handleSubmit}>
                     <input type="hidden" name="board_type" value="REV" />
 
                     {/* 복지 서비스명 */}
@@ -25,24 +70,16 @@ const BoardReviewWrite = () => {
                     {/* 제목 */}
                     <div className={styles.field}>
                         <label>제목<span className={styles.req}>*</span></label>
-                        <input type="text" placeholder="게시글 제목을 입력해주세요" />
+                        <input
+                            type="text"
+                            placeholder="게시글 제목을 입력해주세요"
+                            value={boardTitle}
+                            onChange={(e) => setBoardTitle(e.target.value)}
+                        />
                     </div>
 
                     {/* 만족도 & 불러오기 */}
-                    <div className={styles.row}>
-                        <div className={styles.field} style={{ flex: 1 }}>
-                            <label>만족도</label>
-                            <div className={styles.starContainer}>
-                                {[1, 2, 3, 4, 5].map((star) => (
-                                    <span
-                                        key={star}
-                                        className={star <= rating ? styles.starFilled : styles.starEmpty}
-                                        onClick={() => setRating(star)}
-                                    >★</span>
-                                ))}
-                            </div>
-                            <input type="hidden" name="rating" value={rating} />
-                        </div>
+                    <div className={styles.row}>                       
                         <div className={styles.field} style={{ flex: 1 }}>
                             <label>&nbsp;</label>
                             <button type="button" className={styles.btnLoad}>후기 해당 복지글 불러오기</button>
@@ -52,7 +89,11 @@ const BoardReviewWrite = () => {
                     {/* 후기 내용 */}
                     <div className={styles.field}>
                         <label>후기 내용<span className={styles.req}>*</span></label>
-                        <textarea placeholder="복지 서비스를 이용하신 소감을 작성해주세요."></textarea>
+                        <textarea
+                            placeholder="복지 서비스를 이용하신 소감을 작성해주세요."
+                            value={boardContent}
+                            onChange={(e) => setBoardContent(e.target.value)}
+                        ></textarea>
                     </div>
 
                     {/* 파일 첨부 */}
