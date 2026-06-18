@@ -29,18 +29,19 @@ function NoticeModal({ notice, onClose, onSave, isReadOnly = false }) {
             return; 
         }
 
-        // 백엔드로 보낼 공통 데이터
+        // 💡 1. 모드 판별을 가장 먼저 실행합니다. (에러 해결 핵심 포인트)
+        const isEditMode = notice && notice.boardId;
+
+        // 💡 2. 이제 에러 없이 isEditMode와 notice.boardId를 사용할 수 있습니다.
+        // 백엔드로 보낼 JSON 데이터 (memberId: 999 삭제, boardId 추가)
         const requestBody = {
+            boardId: isEditMode ? notice.boardId : null,
             boardTitle: boardTitle,
             boardContent: boardContent,
-            boardType: "NOT", 
-            memberId: 999 
+            boardType: "NOT" 
         };
-
-        // 핵심 로직: notice 객체 안에 boardId가 존재하면 '수정', 없으면 '새 글 작성'
-        const isEditMode = notice && notice.boardId;
         
-        // 모드에 따라 URL과 HTTP 메서드를 다르게 설정합니다.
+        // 3. 모드에 따라 URL과 HTTP 메서드를 다르게 설정합니다.
         const url = isEditMode 
             ? `http://localhost:8080/board/${notice.boardId}` // 수정 (PUT)
             : `http://localhost:8080/board/write`;            // 작성 (POST)
@@ -49,7 +50,7 @@ function NoticeModal({ notice, onClose, onSave, isReadOnly = false }) {
 
         try {
             const response = await fetch(url, {
-                method: method, // PUT 또는 POST가 동적으로 들어감
+                method: method, 
                 headers: {
                     'Content-Type': 'application/json',
                     'Authorization': `Bearer ${token}` 
@@ -58,17 +59,18 @@ function NoticeModal({ notice, onClose, onSave, isReadOnly = false }) {
             });
 
             if (!response.ok) {
-                throw new Error(isEditMode ? "서버 수정 실패" : "서버 등록 실패");
+                // 추가 팁: 백엔드에서 보낸 에러 메시지(400 에러 사유 등)를 읽어서 띄워주면 디버깅이 더 편합니다.
+                const errorText = await response.text();
+                throw new Error(errorText || (isEditMode ? "서버 수정 실패" : "서버 등록 실패"));
             }
 
-            // 부모 컴포넌트(AdminNotice)의 handleSaveNotice를 호출하여 
-            // 모달을 닫고 목록을 새로고침하게 합니다. (파라미터 전달 불필요)
+            // 부모 컴포넌트(AdminNotice)의 handleSaveNotice를 호출하여 모달 닫기 및 목록 새로고침
             alert(isEditMode ? "수정이 완료되었습니다." : "새 공지사항이 등록되었습니다.");
             onSave(); 
 
         } catch (error) {
-            console.error(error);
-            alert(`공지사항 ${isEditMode ? '수정' : '등록'} 중 에러가 발생했습니다.`);
+            console.error('Submit Error:', error);
+            alert(`에러 발생: ${error.message}`);
         }
     };
 
