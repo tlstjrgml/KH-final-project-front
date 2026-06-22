@@ -52,10 +52,9 @@ const AppInner = () => {
     <>
       <Navbar isLoggedIn={isLoggedIn} isAdmin={isAdmin} nickname="석희" />
       <Routes>
-        {/* <Route path="/" element={<Main />} />
+         <Route path="/" element={<Main />} />
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
-<<<<<<< Updated upstream
         <Route path="/edit-profile" element={<PrivateRoute element={<EditProfile />} />} />
         <Route path="/mypage" element={<PrivateRoute element={<MyPage />} />} />
         <Route path="/admin" element={<AdminPage />} />

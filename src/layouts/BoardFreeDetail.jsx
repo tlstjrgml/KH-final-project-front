@@ -1,8 +1,77 @@
+import { useNavigate, useParams } from 'react-router-dom';
 import styles from './BoardFreeDetail.module.css'
+import { useEffect, useState } from 'react';
 
 
 
 const  BoardFreeDetail = () =>{
+
+    const {id} = useParams();
+    const navigate = useNavigate();
+
+    const [post, setPost] = useState(null);
+    const [isLiked, setIsLiked] = useState(null);
+    const [Likes, setLikes] = useState(0);
+
+    const [reply, setReply] = useState(null);
+    const [replyContent,setReplyContent] = useState(null);
+    const [activeReplyForm, setActiveReplyForm] = useState(null);
+
+    // 현재 로그인한 사용자 정보 (JWT 토큰 디코딩)
+    const [currentUser, setCurrentUser] = useState(null);
+
+    useEffect(() => {
+    // JWT 토큰에서 로그인 유저 정보 추출
+    const token = localStorage.getItem("token");
+
+    if (token) {
+        try {
+            const payload = JSON.parse(atob(token.split(".")[1]));
+            setCurrentUser({
+                id: payload.memberId,
+                nickname: payload.nickname,
+            });
+        } catch (err) {
+            console.error(err);
+        }
+    }
+
+    const fetchBoardDetail = async () => {
+        try {
+            const response = await fetch(
+                `/react/board/${id}`
+            );
+
+            if (!response.ok) {
+                throw new Error("게시글 조회 실패");
+            }
+
+            const data = await response.json();
+
+            setPost(data);
+
+        } catch (err) {
+            console.error(err);
+        }
+    };
+
+    fetchBoardDetail();
+
+    }, [id]);
+
+    const togglePostLike = () =>{
+        setIsPostLiked(!ispostLiked);
+        setPostLikes(prev => ispostLiked ? prev - 1 : prev + 1);
+    }
+
+    const toggleReplyForm = (replyId) =>{
+        setActiveReplyForm(activeReplyForm === replyId ? null : replyId);
+    };
+
+    if(!post) return <div>로딩 중...</div>
+
+
+
      return(
         <main className={styles.page}>
             <div className={styles.contentWrapper}>
@@ -13,14 +82,14 @@ const  BoardFreeDetail = () =>{
 
                 {/* 게시글 헤더 */}
                 <div className={styles.postHeader}>
-                    <h1 className={styles.postTitle}>청년 주거지원 정책 관련해서 질문 있습니다!</h1>
+                    <h1 className={styles.postTitle}>{post.boardTitle}</h1>
                     <div className={styles.postMetaContainer}>
                         <div className={styles.postMetaLeft}>
-                            <span>작성자: <b>김청년</b></span>
+                            <span>작성자: <b>{post.writerNickname}</b></span>
                             <span className={styles.metaDivider}>|</span>
-                            <span>조회수: 152</span>
+                            <span>조회수: {post.views}</span>
                             <span className={styles.metaDivider}>|</span>
-                            <span>2024.05.20 14:30</span>
+                            <span>{post.createDate.split('T')[0]}</span>
                         </div>
                         <div className={styles.postMetaRight}>
                             <button className={styles.actionBtn} onClick={() => {location.href='/boardfree/edit'}}>수정</button>
@@ -34,55 +103,61 @@ const  BoardFreeDetail = () =>{
 
                 {/*게시글 본문 */}
                 <div className={styles.postContent}>
-                    안녕하세요, 이번에 주거지원 정책을 알아보려고 하는데 여러 가지 헷갈리는 부분이 있어서 질문 남깁니다.<br/><br/>
-                    소득 분위 산정 기준이 세전인지 세후인지, 그리고 부모님과 떨어져 살아도 부모님 소득이 합산되는지 궁금합니다.<br/>
-                    혹시 최근에 신청해보신 분 계시면 답변 부탁드리겠습니다! 감사합니다.
+                    {post.boardContent}
                 </div>
 
                 {/* 첨부파일 */}
                 <div className={styles.attachmentBox}>
                     <div className={styles.attachmentTitle}>
-                    <svg viewBox="0 0 24 24"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg>
-                    첨부파일
+                        <svg viewBox="0 0 24 24"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg>
+                        첨부파일
                     </div>
                     <ul className={styles.attachmentList}>
-                    <li>
-                        <a href="#" className={styles.attachmentLink}>주거지원_정책안내_가이드.pdf <span className={styles.attachmentSize}>(1.2MB)</span></a>
-                    </li>
+                        {/* 첨부파일 매핑 구조 예시 */}
+                        <li>
+                            <a href="#" className={styles.attachmentLink} onClick={(e) => e.preventDefault()}>
+                                등록된 첨부파일이 없습니다.
+                            </a>
+                        </li>
                     </ul>
                 </div>
 
                 {/* 좋아요 */}
                 <div className={styles.likeActionArea}>
-                    <button id="btn-post-like" className={styles.btnLike} onClick={() => {togglePostLike()}}>
-                    <svg viewBox="0 0 24 24"><path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3zM7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"/></svg>
-                    좋아요 <span id="post-like-count">15</span>
+                    <button 
+                        id="btn-post-like" 
+                        className={styles.btnLike} 
+                        style={isLiked ? { backgroundColor: '#378ADD', color: '#fff', borderColor: '#378ADD' } : {}}
+                        onClick={togglePostLike}
+                    >
+                        <svg viewBox="0 0 24 24" stroke={isLiked ? "#fff" : "currentColor"}><path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3zM7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"/></svg>
+                        좋아요 <span id="post-like-count">{post.likeCount ?? 0}</span>
                     </button>
                 </div>
 
                 {/*댓글 영역 */}
-                <div className={styles.commentSection}>
-                    <h3 className={styles.commentHeader}>댓글 <span style={{color: '#378ADD'}}>2</span></h3>
+                <div className={styles.replySection}>
+                    <h3 className={styles.replyHeader}>댓글 <span style={{color: '#378ADD'}}>2</span></h3>
 
-                    <form action="/reply/insert" method="POST" className={styles.commentForm}>
+                    <form action="/reply/insert" method="POST" className={styles.replyForm}>
                         <input type="hidden" name="ref_id" value="123"/>
                         <input type="hidden" name="code" value="B"/>
-                        <input type="text" className={styles.commentInput} name="reply_content" placeholder="댓글을 입력해 주세요..." required/>
-                        <button type="submit" className={styles.btnCommentSubmit}>댓글 등록</button>
+                        <input type="text" className={styles.replyInput} name="reply_content" placeholder="댓글을 입력해 주세요..." required/>
+                        <button type="submit" className={styles.btnreplySubmit}>댓글 등록</button>
                     </form>
 
-                    <div className={styles.commentList}>
+                    <div className={styles.replyList}>
 
-                    <div className={styles.commentItem} id="reply-1">
-                        <div className={styles.commentInfo}>
-                        <span className={styles.commentAuthor}>박복지</span>
-                        <span className={styles.commentDate}>2024.05.20 15:00</span>
+                    <div className={styles.replyItem} id="reply-1">
+                        <div className={styles.replyInfo}>
+                        <span className={styles.replyAuthor}></span>
+                        <span className={styles.replyDate}></span>
                         </div>
-                        <div className={styles.commentText}>저도 그 부분이 헷갈리더라고요. 아시는 분 답변 부탁드립니다!</div>
-                        <div className={styles.commentActions}>
-                        <button className={styles.actionBtn} onClick={() => {toggleCommentLike('cnt-1')}}>
+                        <div className={styles.replyText}></div>
+                        <div className={styles.replyActions}>
+                        <button className={styles.actionBtn} onClick={() => {togglereplyLike('cnt-1')}}>
                             <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3zM7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"/></svg>
-                            좋아요 <span id="cnt-1">2</span>
+                            좋아요 <span id="cnt-1"></span>
                         </button>
                         <span className={styles.metaDivider}>|</span>
                         <button className={styles.actionBtn} onClick={() => {toggleReplyForm(1)}}>대댓글</button>
@@ -92,23 +167,23 @@ const  BoardFreeDetail = () =>{
                         <span className={styles.metaDivider}>|</span>
                         <button className={`${styles.actionBtn} ${styles.danger}`}>신고</button>
                         </div>
-                        <form action="/reply/insert" method="POST" className={`${styles.commentForm} ${styles.replyFormWrapper}`} id="reply-form-1">
+                        <form action="/reply/insert" method="POST" className={`${styles.replyForm} ${styles.replyFormWrapper}`} id="reply-form-1">
                             <div className={styles.replyIndicator}>↳</div>
                             <input type="hidden" name="ref_id" value="1"/>
                             <input type="hidden" name="code" value="R"/>
-                            <input type="text" className={styles.commentInput} name="reply_content" placeholder="대댓글을 입력해 주세요..." required/>
-                            <button type="submit" className={styles.btnCommentSubmit} style={{background:' #6C757D'}}>등록</button>
+                            <input type="text" className={styles.replyInput} name="reply_content" placeholder="대댓글을 입력해 주세요..." required/>
+                            <button type="submit" className={styles.btnreplySubmit} style={{background:' #6C757D'}}>등록</button>
                         </form>
                     </div>
 
-                    <div className={styles.commentItem} id="reply-2">
-                        <div className={styles.commentInfo}>
-                        <span className={styles.commentAuthor}>지식인청년</span>
-                        <span className={styles.commentDate}>2024.05.20 16:30</span>
+                    <div className={styles.replyItem} id="reply-2">
+                        <div className={styles.replyInfo}>
+                        <span className={styles.replyAuthor}></span>
+                        <span className={styles.replyDate}>2024.05.20 16:30</span>
                         </div>
-                        <div className={styles.commentText}>소득은 가구원 수에 따른 기준 중위소득(세전 기준)으로 산정합니다. 부모님과 주민등록상 세대가 분리되어 있으면 본인 소득만 봅니다!</div>
-                        <div className={styles.commentActions}>
-                        <button className={styles.actionBtn} onClick={() => {toggleCommentLike('cnt-2')}}>
+                        <div className={styles.replyText}></div>
+                        <div className={styles.replyActions}>
+                        <button className={styles.actionBtn} onClick={() => {togglereplyLike('cnt-2')}}>
                             <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3zM7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"/></svg>
                             좋아요 <span id="cnt-2">8</span>
                         </button>
@@ -117,12 +192,12 @@ const  BoardFreeDetail = () =>{
                         <span className={styles.metaDivider}>|</span>
                         <button className={`${styles.actionBtn} ${styles.danger}`}>신고</button>
                         </div>
-                        <form action="/reply/insert" method="POST" className={`${styles.commentForm} ${styles.replyFormWrapper}`} id="reply-form-2">
+                        <form action="/reply/insert" method="POST" className={`${styles.replyForm} ${styles.replyFormWrapper}`} id="reply-form-2">
                             <div className={styles.replyIndicator}>↳</div>
                             <input type="hidden" name="ref_id" value="2"/>
                             <input type="hidden" name="code" value="R"/>
-                            <input type="text" className={styles.commentInput} name="reply_content" placeholder="대댓글을 입력해 주세요..." required/>
-                            <button type="submit" className={styles.btnCommentSubmit} style={{background: '#6C757D'}}>등록</button>
+                            <input type="text" className={styles.replyInput} name="reply_content" placeholder="대댓글을 입력해 주세요..." required/>
+                            <button type="submit" className={styles.btnreplySubmit} style={{background: '#6C757D'}}>등록</button>
                         </form>
                     </div>
 
