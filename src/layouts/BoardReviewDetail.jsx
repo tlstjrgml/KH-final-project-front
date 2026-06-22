@@ -9,8 +9,30 @@ const BoardReviewDetail = () => {
     const [post, setPost] = useState(null);
     const [isPostLiked, setIsPostLiked] = useState(false);
     const [postLikes, setPostLikes] = useState(0);
-    const [activeReplyForm, setActiveReplyForm] = useState(null);
     const [welfareInfo, setWelfareInfo] = useState(null);
+
+    // 댓글 관련 state
+    const [replies, setReplies] = useState([]);
+    const [replyCount, setReplyCount] = useState(0);
+    const [replyPage, setReplyPage] = useState(1);
+    const [replyEndPage, setReplyEndPage] = useState(1);
+    const [newComment, setNewComment] = useState('');
+
+    const [activeReplyForm, setActiveReplyForm] = useState(null);
+    const [replyInputs, setReplyInputs] = useState({});
+
+    const [editingReplyId, setEditingReplyId] = useState(null);
+    const [editContent, setEditContent] = useState('');
+
+    const currentMemberId = (() => {
+        const token = localStorage.getItem('token');
+        if (!token) return null;
+        try {
+            return JSON.parse(atob(token.split('.')[1])).memberId;
+        } catch {
+            return null;
+        }
+    })();
 
     useEffect(() => {
         const fetchDetail = async () => {
@@ -40,6 +62,27 @@ const BoardReviewDetail = () => {
         fetchDetail();
     }, [id]);
 
+    // 댓글 목록 조회
+    const fetchReplies = async () => {
+        try {
+            const res = await fetch(`/react/reply/list/${id}?page=${replyPage}&limit=10`);
+            if (!res.ok) throw new Error('댓글 조회 실패');
+            const data = await res.json();
+
+            setReplies(data.content || []);
+            setReplyEndPage(data.pagination?.endPage || 1);
+
+            const totalCount = data.pagination?.totalItems ?? data.content.filter(r => r.code === 'B').length;
+            setReplyCount(totalCount);
+        } catch (err) {
+            console.error(err);
+        }
+    };
+
+    useEffect(() => {
+        fetchReplies();
+    }, [id, replyPage]);
+
     const togglePostLike = async () => {
         const token = localStorage.getItem('token');
         if (!token) {
@@ -59,9 +102,7 @@ const BoardReviewDetail = () => {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
 
-            if (!res.ok) {
-                throw new Error('좋아요 처리 실패');
-            }
+            if (!res.ok) throw new Error('좋아요 처리 실패');
         } catch (err) {
             console.error(err);
             setIsPostLiked(prevLiked);
@@ -70,11 +111,176 @@ const BoardReviewDetail = () => {
         }
     };
 
+    // 원댓글 등록
+    const handleCommentSubmit = async (e) => {
+        e.preventDefault();
+
+        if (!newComment.trim()) {
+            alert('댓글 내용을 입력해주세요.');
+            return;
+        }
+
+        const token = localStorage.getItem('token');
+        if (!token) {
+            alert('로그인이 필요합니다.');
+            return;
+        }
+
+        try {
+            const res = await fetch('/react/reply/write', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify({
+                    replyContent: newComment,
+                    refId: id,
+                    code: 'B'
+                })
+            });
+
+            if (!res.ok) {
+                const errMsg = await res.text();
+                throw new Error(errMsg || '댓글 등록 실패');
+            }
+
+            setNewComment('');
+            fetchReplies();
+        } catch (err) {
+            console.error(err);
+            alert(`댓글 등록 중 오류가 발생했습니다: ${err.message}`);
+        }
+    };
+
+    // 대댓글 입력창 토글
     const toggleReplyForm = (replyId) => {
         setActiveReplyForm(activeReplyForm === replyId ? null : replyId);
     };
 
+    // 대댓글 입력값 변경
+    const handleReplyInputChange = (replyId, value) => {
+        setReplyInputs(prev => ({ ...prev, [replyId]: value }));
+    };
+
+    // 대댓글 등록
+    const handleReplySubmit = async (e, parentReplyId) => {
+        e.preventDefault();
+
+        const content = replyInputs[parentReplyId];
+        if (!content || !content.trim()) {
+            alert('대댓글 내용을 입력해주세요.');
+            return;
+        }
+
+        const token = localStorage.getItem('token');
+        if (!token) {
+            alert('로그인이 필요합니다.');
+            return;
+        }
+
+        try {
+            const res = await fetch('/react/reply/write', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify({
+                    replyContent: content,
+                    refId: parentReplyId,
+                    code: 'R'
+                })
+            });
+
+            if (!res.ok) {
+                const errMsg = await res.text();
+                throw new Error(errMsg || '대댓글 등록 실패');
+            }
+
+            setReplyInputs(prev => ({ ...prev, [parentReplyId]: '' }));
+            setActiveReplyForm(null);
+            fetchReplies();
+        } catch (err) {
+            console.error(err);
+            alert(`대댓글 등록 중 오류가 발생했습니다: ${err.message}`);
+        }
+    };
+
+    // 댓글 수정 모드 진입
+    const startEdit = (reply) => {
+        setEditingReplyId(reply.replyId);
+        setEditContent(reply.replyContent);
+    };
+
+    const cancelEdit = () => {
+        setEditingReplyId(null);
+        setEditContent('');
+    };
+
+    // 댓글 수정 등록
+    const submitEdit = async (replyId) => {
+        if (!editContent.trim()) {
+            alert('댓글 내용을 입력해주세요.');
+            return;
+        }
+
+        const token = localStorage.getItem('token');
+        if (!token) {
+            alert('로그인이 필요합니다.');
+            return;
+        }
+
+        try {
+            const res = await fetch(`/react/reply/${replyId}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify({ replyContent: editContent })
+            });
+
+            if (!res.ok) {
+                const errMsg = await res.text();
+                throw new Error(errMsg || '댓글 수정 실패');
+            }
+
+            setEditingReplyId(null);
+            setEditContent('');
+            fetchReplies();
+        } catch (err) {
+            console.error(err);
+            alert(`댓글 수정 중 오류가 발생했습니다: ${err.message}`);
+        }
+    };
+
+    // 댓글 삭제
+    const handleDeleteReply = async (replyId) => {
+        if (!window.confirm('댓글을 삭제하시겠습니까?')) return;
+
+        const token = localStorage.getItem('token');
+        try {
+            const res = await fetch(`/react/reply/${replyId}`, {
+                method: 'DELETE',
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+
+            if (!res.ok) throw new Error('삭제 실패');
+            fetchReplies();
+        } catch (err) {
+            console.error(err);
+            alert('삭제 중 오류가 발생했습니다.');
+        }
+    };
+
+    
+
     if (!post) return <div>로딩 중...</div>;
+
+    // 원댓글과 그에 딸린 대댓글을 그룹으로 묶기
+    const parentReplies = replies.filter(r => r.code === 'B');
+    const getChildReplies = (parentId) => replies.filter(r => r.code === 'R' && r.refId === parentId);
 
     return (
         <main className={styles.page}>
@@ -111,7 +317,7 @@ const BoardReviewDetail = () => {
                                     <>
                                         <button
                                             className={styles.actionBtn}
-                                            onClick={() => navigate(`/boardreview/edit`)}>
+                                            onClick={() => navigate(`/boardreview/edit/${id}`)}>
                                             수정
                                         </button>
                                         <span className={styles.metaDivider}>|</span>
@@ -136,18 +342,134 @@ const BoardReviewDetail = () => {
                     </div>
 
                     <div className={styles.commentSection}>
-                        <h3 className={styles.commentHeader}>댓글 <span>0</span></h3>
-                        <form className={styles.commentForm}>
-                            <input type="text" className={styles.commentInput} placeholder="댓글을 입력해 주세요..." />
+                        <h3 className={styles.commentHeader}>댓글 <span>{replyCount}</span></h3>
+
+                        <form className={styles.commentForm} onSubmit={handleCommentSubmit}>
+                            <input
+                                type="text"
+                                className={styles.commentInput}
+                                placeholder="댓글을 입력해 주세요..."
+                                value={newComment}
+                                onChange={(e) => setNewComment(e.target.value)}
+                            />
                             <button type="submit" className={styles.btnCommentSubmit}>댓글 등록</button>
                         </form>
 
                         <div className={styles.commentList}>
+                            {parentReplies.length === 0 ? (
+                                <p style={{ textAlign: 'center', color: '#999' }}>등록된 댓글이 없습니다.</p>
+                            ) : (
+                                parentReplies.map((reply) => (
+                                    <div className={styles.commentItem} key={reply.replyId}>
+                                        <div className={styles.commentInfo}>
+                                            <span className={styles.commentAuthor}>{reply.writerNickname}</span>
+                                            <span className={styles.commentDate}>{reply.createDate.split('T')[0]}</span>
+                                        </div>
+
+                                        {editingReplyId === reply.replyId ? (
+                                            <div className={styles.commentForm}>
+                                                <input
+                                                    type="text"
+                                                    className={styles.commentInput}
+                                                    value={editContent}
+                                                    onChange={(e) => setEditContent(e.target.value)}
+                                                />
+                                                <button type="button" className={styles.btnCommentSubmit} onClick={() => submitEdit(reply.replyId)}>저장</button>
+                                                <button type="button" className={styles.actionBtn} onClick={cancelEdit}>취소</button>
+                                            </div>
+                                        ) : (
+                                            <div className={styles.commentText}>{reply.replyContent}</div>
+                                        )}
+
+                                        <div className={styles.commentActions}>
+                                            <button className={styles.actionBtn} onClick={() => toggleReplyForm(reply.replyId)}>대댓글</button>
+                                            {currentMemberId === reply.memberId && editingReplyId !== reply.replyId && (
+                                                <>
+                                                    <span className={styles.metaDivider}>|</span>
+                                                    <button className={styles.actionBtn} onClick={() => startEdit(reply)}>수정</button>
+                                                    <span className={styles.metaDivider}>|</span>
+                                                    <button className={`${styles.actionBtn} ${styles.danger}`} onClick={() => handleDeleteReply(reply.replyId)}>삭제</button>
+                                                </>
+                                            )}
+                                        </div>
+
+                                        {activeReplyForm === reply.replyId && (
+                                            <form
+                                                className={`${styles.commentForm} ${styles.replyFormWrapper}`}
+                                                onSubmit={(e) => handleReplySubmit(e, reply.replyId)}
+                                            >
+                                                <div className={styles.replyIndicator}>↳</div>
+                                                <input
+                                                    type="text"
+                                                    className={styles.commentInput}
+                                                    placeholder="대댓글을 입력해 주세요..."
+                                                    value={replyInputs[reply.replyId] || ''}
+                                                    onChange={(e) => handleReplyInputChange(reply.replyId, e.target.value)}
+                                                />
+                                                <button type="submit" className={styles.btnCommentSubmit} style={{ background: '#6C757D' }}>등록</button>
+                                            </form>
+                                        )}
+
+                                        {getChildReplies(reply.replyId).map((child) => (
+                                            <div className={styles.commentItem} key={child.replyId} style={{ marginLeft: '24px' }}>
+                                                <div className={styles.commentInfo}>
+                                                    <span className={styles.commentAuthor}>{child.writerNickname}</span>
+                                                    <span className={styles.commentDate}>{child.createDate.split('T')[0]}</span>
+                                                </div>
+
+                                                {editingReplyId === child.replyId ? (
+                                                    <div className={styles.commentForm}>
+                                                        <input
+                                                            type="text"
+                                                            className={styles.commentInput}
+                                                            value={editContent}
+                                                            onChange={(e) => setEditContent(e.target.value)}
+                                                        />
+                                                        <button type="button" className={styles.btnCommentSubmit} onClick={() => submitEdit(child.replyId)}>저장</button>
+                                                        <button type="button" className={styles.actionBtn} onClick={cancelEdit}>취소</button>
+                                                    </div>
+                                                ) : (
+                                                    <div className={styles.commentText}>{child.replyContent}</div>
+                                                )}
+
+                                                {currentMemberId === child.memberId && editingReplyId !== child.replyId && (
+                                                    <div className={styles.commentActions}>
+                                                        <button className={styles.actionBtn} onClick={() => startEdit(child)}>수정</button>
+                                                        <span className={styles.metaDivider}>|</span>
+                                                        <button className={`${styles.actionBtn} ${styles.danger}`} onClick={() => handleDeleteReply(child.replyId)}>삭제</button>
+                                                    </div>
+                                                )}
+                                            </div>
+                                        ))}
+                                    </div>
+                                ))
+                            )}
                         </div>
 
                         <div className={styles.pagination}>
-                            <button className={styles.pageItem}>&lt;</button>
-                            <button className={`${styles.pageItem} ${styles.active}`}>1</button>
+                            <button
+                                className={styles.pageItem}
+                                onClick={() => replyPage > 1 && setReplyPage(replyPage - 1)}
+                                disabled={replyPage <= 1}
+                            >
+                                &lt;
+                            </button>
+                            {Array.from({ length: replyEndPage }, (_, i) => i + 1).map((p) => (
+                                <button
+                                    key={p}
+                                    className={`${styles.pageItem} ${p === replyPage ? styles.active : ''}`}
+                                    onClick={() => setReplyPage(p)}
+                                >
+                                    {p}
+                                </button>
+                            ))}
+                            <button
+                                className={styles.pageItem}
+                                onClick={() => replyPage < replyEndPage && setReplyPage(replyPage + 1)}
+                                disabled={replyPage >= replyEndPage}
+                            >
+                                &gt;
+                            </button>
                         </div>
                     </div>
                 </div>

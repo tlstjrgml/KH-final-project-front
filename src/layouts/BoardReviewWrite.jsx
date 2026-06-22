@@ -4,7 +4,6 @@ import styles from './BoardReviewWrite.module.css';
 
 const BoardReviewWrite = () => {
     const navigate = useNavigate();
-    const [rating, setRating] = useState(0);
     const [boardTitle, setBoardTitle] = useState('');
     const [boardContent, setBoardContent] = useState('');
     const [selectedWelfare, setSelectedWelfare] = useState(null);
@@ -66,8 +65,7 @@ const BoardReviewWrite = () => {
                     boardTitle: boardTitle,
                     boardContent: boardContent,
                     boardType: 'REV',
-                    welfareId: selectedWelfare ? selectedWelfare.welfareId : null,
-                    rating: rating
+                    welfareId: selectedWelfare ? selectedWelfare.welfareId : null
                 })
             });
 
@@ -75,7 +73,6 @@ const BoardReviewWrite = () => {
                 throw new Error('등록 실패');
             }
 
-            const data = await res.json();
             alert('등록되었습니다.');
             navigate('/boardreview');
         } catch (err) {
