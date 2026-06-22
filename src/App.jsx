@@ -50,7 +50,7 @@ const AppInner = () => {
 
   return (
     <>
-      <Navbar isLoggedIn={isLoggedIn} isAdmin={isAdmin} nickname="석희" />
+      <Navbar isLoggedIn={isLoggedIn} isAdmin={isAdmin} nickname={nickname} />
       <Routes>
          <Route path="/" element={<Main />} />
         <Route path="/login" element={<Login />} />
