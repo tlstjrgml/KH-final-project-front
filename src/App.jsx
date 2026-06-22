@@ -70,7 +70,7 @@ const AppInner = () => {
         <Route path="/welfaredetail/:id" element={<WelfareDetail />} />
         <Route path="/persona" element={<PrivateRoute element={<Persona />} />} />
         
-        {/* 자유 게시판 영역 - 💡 동적 id 라우팅 파라미터 적용 */}
+        {/* 자유 게시판 영역  */}
         <Route path="/boardfree" element={<BoardFree />} />
         <Route path="/boardfree/write" element={<PrivateRoute element={<BoardFreeWrite />} />} />
         <Route path="/boardfree/edit" element={<PrivateRoute element={<BoardFreeEdit />} />} />
