@@ -47,6 +47,8 @@ const AppInner = () => {
     }
   }, [token]);
 
+  const nickname = isLoggedIn ? JSON.parse(atob(localStorage.getItem('token').split('.')[1])).nickname : "";
+
 
   return (
     <>
