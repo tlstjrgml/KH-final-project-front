@@ -3,7 +3,7 @@ import NoticeModal from './NoticeModal';
 import styles from './AdminNotice.module.css';
 
 function AdminNotice() {
-    const [notices, setNotices] = useState([]); 
+    const [notices, setNotices] = useState([]);
     const [currentNoticePage, setCurrentNoticePage] = useState(1);
     const [searchNoticeKeyword, setSearchNoticeKeyword] = useState('');
     const [noticeSort, setNoticeSort] = useState('latest');
@@ -16,7 +16,7 @@ function AdminNotice() {
         hasNext: false,
         totalPages: 1
     });
-    
+
     const [isNoticeModalOpen, setIsNoticeModalOpen] = useState(false);
     const [editingNotice, setEditingNotice] = useState(null);
     const [viewingNotice, setViewingNotice] = useState(null);
@@ -25,7 +25,10 @@ function AdminNotice() {
     const fetchNotices = async () => {
         try {
             const token = localStorage.getItem('token');
-            const response = await fetch(`http://localhost:8080/board/list?page=${currentNoticePage}&keyword=${searchNoticeKeyword}&sort=${noticeSort}`, {
+
+            const url = `http://localhost:8080/board/list?boardType=NOT&page=${currentNoticePage}&keyword=${searchNoticeKeyword}&sort=${noticeSort}`;
+
+            const response = await fetch(url, {
                 method: 'GET',
                 headers: {
                     'Content-Type': 'application/json',
@@ -36,13 +39,13 @@ function AdminNotice() {
             if (!response.ok) throw new Error('목록을 불러오는데 실패했습니다.');
 
             const data = await response.json();
-            
+
             // 백엔드가 PageResponse 객체에 담아준 데이터 세팅
-            setNotices(data.content || []); 
+            setNotices(data.content || []);
             if (data.pagination) {
                 setPageInfo(data.pagination);
             }
-            
+
         } catch (error) {
             console.error('API 호출 에러:', error);
         }
@@ -78,9 +81,9 @@ function AdminNotice() {
                     method: 'DELETE',
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
-                
+
                 if (!response.ok) throw new Error('삭제 실패');
-                
+
                 alert('삭제되었습니다.');
                 setCurrentNoticePage(1); // 삭제 후 1페이지로 이동
                 fetchNotices();
@@ -94,20 +97,30 @@ function AdminNotice() {
         setIsNoticeModalOpen(false);
         setEditingNotice(null);
         setCurrentNoticePage(1); // 저장 후 최신 글을 보기 위해 1페이지로 이동
-        fetchNotices(); 
+        fetchNotices();
     };
 
     const openCreateModal = () => { setEditingNotice(null); setIsNoticeModalOpen(true); };
-    const openEditModal = async (notice) => { 
+    const openEditModal = async (notice) => {
         const detailData = await fetchNoticeDetail(notice.boardId);
         if (detailData) { setEditingNotice(detailData); setIsNoticeModalOpen(true); }
     };
-    const openViewModal = async (notice) => { 
+    
+    const openViewModal = async (notice) => {
         const detailData = await fetchNoticeDetail(notice.boardId);
-        if (detailData) setViewingNotice(detailData); 
+
+        if (detailData) {
+            setViewingNotice(detailData);
+            setNotices(prevNotices =>
+                prevNotices.map(item =>
+                    item.boardId === notice.boardId
+                        ? { ...item, views: item.views + 1 }
+                        : item
+                )
+            );
+        }
     };
 
-    // 검색 실행 (Enter 키 눌렀을 때만 작동하여 API 과호출 방지)
     const executeSearch = () => {
         setCurrentNoticePage(1);
         fetchNotices();
@@ -115,29 +128,40 @@ function AdminNotice() {
 
     return (
         <section className={`${styles['tab-content']} ${styles['active-tab']}`}>
+            
             <div className={styles['header-controls']}>
                 <h2>공지사항관리</h2>
-                <div style={{ display: 'flex', gap: '10px' }}>
-                    <select
-                        value={noticeSort}
-                        onChange={(e) => { setNoticeSort(e.target.value); setCurrentNoticePage(1); }}
-                        style={{ padding: '10px', borderRadius: '6px', border: '1px solid #CED4DA', outline: 'none', backgroundColor: '#fff', cursor: 'pointer' }}
-                    >
-                        <option value="latest">최신순</option>
-                        <option value="oldest">오래된순</option>
-                        <option value="views">조회수순</option>
-                    </select>
-                    <input
-                        type="text"
-                        placeholder="제목 검색 (Enter)"
-                        className={styles['search-input']}
-                        value={searchNoticeKeyword}
-                        onChange={(e) => setSearchNoticeKeyword(e.target.value)}
-                        onKeyDown={(e) => { if (e.key === 'Enter') executeSearch(); }}
-                    />
+                
+                {/* 우측 컨트롤 영역 (위: 버튼, 아래: 검색) */}
+                <div className={styles['right-controls']}>
                     <button className={styles['primary-btn']} onClick={openCreateModal}>
                         + 새 공지 작성
                     </button>
+
+                    <div className={styles['search-group']}>
+                        <select
+                            className={styles['sort-select']}
+                            value={noticeSort}
+                            onChange={(e) => { setNoticeSort(e.target.value); setCurrentNoticePage(1); }}
+                        >
+                            <option value="latest">최신순</option>
+                            <option value="oldest">오래된순</option>
+                            <option value="views">조회수순</option>
+                        </select>
+                        
+                        <input
+                            type="text"
+                            placeholder="제목 검색"
+                            className={styles['search-input']}
+                            value={searchNoticeKeyword}
+                            onChange={(e) => setSearchNoticeKeyword(e.target.value)}
+                            onKeyDown={(e) => { if (e.key === 'Enter') executeSearch(); }}
+                        />
+                        
+                        <button className={styles['search-btn']} onClick={executeSearch}>
+                            검색
+                        </button>
+                    </div>
                 </div>
             </div>
 
@@ -157,7 +181,7 @@ function AdminNotice() {
                                     <td>{notice.createDate ? notice.createDate.substring(0, 10) : '-'}</td>
                                     <td>{notice.views}</td>
                                     <td>
-                                        <div style={{ display: 'flex', gap: '5px' }}>
+                                        <div className={styles['action-buttons']}>
                                             <button className={styles['detail-btn']} onClick={() => openEditModal(notice)}>수정</button>
                                             <button className={styles['danger-btn']} onClick={() => handleDeleteNotice(notice.boardId)}>삭제</button>
                                         </div>
@@ -167,29 +191,25 @@ function AdminNotice() {
                         )}
                     </tbody>
                 </table>
-                
-                {/* 4. 백엔드의 Pagination 객체에 전적으로 의존하는 하단 버튼 */}
+
                 {pageInfo.totalPages > 0 && (
                     <div className={styles.pagination}>
-                        {/* 이전 블록 */}
                         {pageInfo.hasPrev && (
                             <button className={styles['page-btn']} onClick={() => setCurrentNoticePage(pageInfo.startPage - 1)}>
                                 &lt;
                             </button>
                         )}
 
-                        {/* 숫자 버튼 반복 */}
                         {Array.from({ length: pageInfo.endPage - pageInfo.startPage + 1 }, (_, i) => pageInfo.startPage + i).map(page => (
-                            <button 
-                                key={page} 
-                                className={`${styles['page-btn']} ${currentNoticePage === page ? styles['active-page'] : ''}`} 
+                            <button
+                                key={page}
+                                className={`${styles['page-btn']} ${currentNoticePage === page ? styles['active-page'] : ''}`}
                                 onClick={() => setCurrentNoticePage(page)}
                             >
                                 {page}
                             </button>
                         ))}
 
-                        {/* 다음 블록 */}
                         {pageInfo.hasNext && (
                             <button className={styles['page-btn']} onClick={() => setCurrentNoticePage(pageInfo.endPage + 1)}>
                                 &gt;
@@ -199,12 +219,11 @@ function AdminNotice() {
                 )}
             </div>
 
-            {/* 모달 연동 */}
             {isNoticeModalOpen && (
                 <NoticeModal
-                    notice={editingNotice} 
+                    notice={editingNotice}
                     onClose={() => { setIsNoticeModalOpen(false); setEditingNotice(null); }}
-                    onSave={handleSaveNotice} 
+                    onSave={handleSaveNotice}
                 />
             )}
 
