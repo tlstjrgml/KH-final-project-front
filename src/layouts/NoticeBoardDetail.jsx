@@ -129,46 +129,6 @@ const NoticeBoardDetail = () => {
                         </button>
                     </div>
 
-                    {/* 댓글 영역 */}
-                    <div className={` ${styles.replySection}`} style={{ marginTop: '30px' }}>
-                        
-                        {/* 댓글 헤더를 attachmentTitle 스타일로 맞춤 */}
-                        <div className={styles.attachmentTitle} style={{ borderBottom: '1px solid #E9ECEF', paddingBottom: '15px', marginBottom: '15px' }}>
-                            {/* 말풍선 모양 SVG */}
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ width: '18px', height: '18px', marginRight: '6px', verticalAlign: 'middle' }}>
-                                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
-                            </svg>
-                            댓글 <span style={{ color: '#378ADD', marginLeft: '5px' }}>0</span>
-                        </div>
-
-                        {/* 댓글 입력 폼 */}
-                        <form onSubmit={(e) => e.preventDefault()} className={styles.replyForm}>
-                            <input 
-                                type="text" 
-                                className={styles.replyInput} 
-                                value={replyContent}
-                                onChange={(e) => setReplyContent(e.target.value)}
-                                placeholder="댓글을 입력해 주세요..." 
-                                required 
-                            />
-                            <button type="submit" className={styles.btnreplySubmit}>댓글 등록</button>
-                        </form>
-
-                        {/* 댓글 목록 */}
-                        <div className={styles.replyList}>
-                            <div className={styles.replyItem} style={{ textAlign: 'center', padding: '30px 0', color: '#adb5bd' }}>
-                                등록된 댓글이 없습니다.
-                            </div>
-                        </div>
-
-                        {/* 댓글 페이지네이션 */}
-                        <div className={styles.pagination}>
-                            <button className={styles.pageItem}>&lt;</button>
-                            <button className={`${styles.pageItem} ${styles.active}`}>1</button>
-                            <button className={styles.pageItem}>&gt;</button>
-                        </div>
-
-                    </div>
 
                 </div> {/* detail-card */}
 
