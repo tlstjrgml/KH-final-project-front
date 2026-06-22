@@ -1,4 +1,4 @@
- import React, { useState, useRef } from 'react';
+import React, { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styles from './BoardFreeWrite.module.css';
 
@@ -7,20 +7,21 @@ const BoardFreeWrite = () => {
     const formRef = useRef(null);
     
     // 상태 관리
+    const [title, setTitle] = useState('');
+    const [content, setContent] = useState('');
     const [isModalOpen, setIsModalOpen] = useState(false);
+    
+    // 파일 첨부 UI 유지를 위한 상태 (백엔드 고정 전제로 인해 실제 전송은 되지 않습니다)
     const [fileRows, setFileRows] = useState([{ id: Date.now(), files: [] }]);
 
-    // 첨부파일 행 추가
     const handleAddFileRow = () => {
         setFileRows([...fileRows, { id: Date.now(), files: [] }]);
     };
 
-    // 첨부파일 행 삭제
     const handleRemoveFileRow = (rowId) => {
         setFileRows(fileRows.filter((row) => row.id !== rowId));
     };
 
-    // 첨부파일 변경 처리 및 용량 제한 검사
     const handleFileChange = (rowId, event) => {
         const selectedFiles = Array.from(event.target.files);
         const maxFileSize = 5 * 1024 * 1024; // 5MB
@@ -40,33 +41,62 @@ const BoardFreeWrite = () => {
         );
     };
 
-    // 폼 제출 이벤트 핸들러
+    // 💡 백엔드 컨트롤러(@RequestBody) 규격에 맞춘 JSON 전송 전용 함수
+    const executeSubmit = async () => {
+        try {
+            // 백엔드가 요구하는 JSON 객체 구성 (파일 제외, Board VO 필드명 일치)
+            const payload = {
+                boardTitle: title,
+                boardContent: content,
+                boardType: "FRE"
+            };
+
+            const response = await fetch('http://localhost:8080/board/write', { 
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json', // JSON 통신 명시
+                    'Authorization': `Bearer ${localStorage.getItem('token')}` 
+                },
+                body: JSON.stringify(payload)
+            });
+
+            if (response.ok) {
+                alert('게시글이 성공적으로 등록되었습니다.');
+                navigate('/boardfree'); // 성공 시 목록으로 이동
+            } else {
+                alert('게시글 등록에 실패했습니다. 서버 상태나 권한을 확인해주세요.');
+            }
+        } catch (error) {
+            console.error('글 등록 중 서버 통신 에러:', error);
+            alert('서버와의 통신에 실패했습니다.');
+        }
+    };
+
     const handleSubmit = (e) => {
         e.preventDefault();
-        const form = formRef.current;
         
-        if (!form.board_title.value.trim()) { 
+        if (!title.trim()) { 
             alert('제목을 입력해주세요.'); 
             return; 
         }
-        if (!form.board_content.value.trim()) { 
+        if (!content.trim()) { 
             alert('내용을 입력해주세요.'); 
             return; 
         }
 
         const hasFiles = fileRows.some(row => row.files.length > 0);
 
+        // UI 상 파일 첨부 여부를 확인하지만, 실제 서버 통신은 텍스트(JSON)로만 이루어집니다.
         if (!hasFiles) {
             setIsModalOpen(true);
         } else {
-            form.submit();
+            executeSubmit(); 
         }
     };
 
-    // 첨부파일 없이 등록 승인
     const confirmSubmit = () => {
         setIsModalOpen(false);
-        formRef.current.submit();
+        executeSubmit();
     };
 
     return (
@@ -76,16 +106,7 @@ const BoardFreeWrite = () => {
                     <h2 className={styles.writeTitle}>자유게시판 글 작성</h2>
                 </div>
 
-                <form 
-                    id="attmForm" 
-                    ref={formRef}
-                    action="/board/write" 
-                    method="POST" 
-                    encType="multipart/form-data"
-                    onSubmit={handleSubmit}
-                >
-                    <input type="hidden" name="board_type" value="FRE" />
-
+                <form ref={formRef} onSubmit={handleSubmit}>
                     <div className={styles.field}>
                         <label htmlFor="board_title">
                             제목<span className={styles.req}>*</span>
@@ -93,9 +114,9 @@ const BoardFreeWrite = () => {
                         <input 
                             type="text" 
                             id="board_title" 
-                            name="board_title" 
+                            value={title}
+                            onChange={(e) => setTitle(e.target.value)}
                             placeholder="게시글 제목을 입력해주세요" 
-                            required 
                         />
                     </div>
 
@@ -105,9 +126,9 @@ const BoardFreeWrite = () => {
                         </label>
                         <textarea 
                             id="board_content" 
-                            name="board_content" 
+                            value={content}
+                            onChange={(e) => setContent(e.target.value)}
                             placeholder="청년복지 관련 자유로운 이야기를 나누어보세요. (욕설, 비방 등은 삭제될 수 있습니다.)" 
-                            required
                         />
                     </div>
 
@@ -116,12 +137,11 @@ const BoardFreeWrite = () => {
                             <label>
                                 파일 첨부 
                                 <span style={{ fontSize: '12px', fontWeight: 'normal', color: '#ADB5BD', marginLeft: '6px' }}>
-                                    (최대 5MB)
+                                    (최대 5MB, 현재 백엔드 버전에서는 첨부파일이 서버에 저장되지 않습니다.)
                                 </span>
                             </label>
                             <button 
                                 type="button" 
-                                id="addFile" 
                                 className={styles.btnAddFile} 
                                 onClick={handleAddFileRow}
                             >
@@ -134,19 +154,11 @@ const BoardFreeWrite = () => {
                                 <div key={row.id} className={styles.fileRow}>
                                     <input 
                                         type="file" 
-                                        name="file" 
                                         id={`file_input_${row.id}`}
                                         className={styles.fileInputHidden} 
                                         multiple 
                                         onChange={(e) => handleFileChange(row.id, e)}
                                     />
-                                    
-                                    <input type="hidden" name="attm_id" value="" />
-                                    <input type="hidden" name="original_name" value={row.files.map(f => f.name).join(',')} />
-                                    <input type="hidden" name="rename_name" value="" />
-                                    <input type="hidden" name="attm_path" value="" />
-                                    <input type="hidden" name="attm_status" value="Y" />
-                                    <input type="hidden" name="board_id" value="" />
                                     
                                     <div 
                                         className={styles.fileCustomBox} 
@@ -180,7 +192,7 @@ const BoardFreeWrite = () => {
                         <button type="button" className={styles.btnCancel} onClick={() => navigate(-1)}>
                             취소
                         </button>
-                        <button type="submit" id="submitAttm" className={styles.btnSubmit}>
+                        <button type="submit" className={styles.btnSubmit}>
                             <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#fff" strokeWidth={2}>
                                 <path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z" />
                             </svg>
@@ -216,6 +228,6 @@ const BoardFreeWrite = () => {
             )}
         </div>
     );
-};
+}; 
 
-export default BoardFreeWrite; 
+export default BoardFreeWrite;

@@ -1,5 +1,7 @@
 import styles from './BoardFreeDetail.module.css'
 
+
+
 const  BoardFreeDetail = () =>{
      return(
         <main className={styles.page}>
@@ -21,7 +23,7 @@ const  BoardFreeDetail = () =>{
                             <span>2024.05.20 14:30</span>
                         </div>
                         <div className={styles.postMetaRight}>
-                            <button className={styles.actionBtn} onClick={() => {location.href=''}}>수정</button>
+                            <button className={styles.actionBtn} onClick={() => {location.href='/boardfree/edit'}}>수정</button>
                             <span className={styles.metaDivider}>|</span>
                             <button className={`${styles.actionBtn} ${styles.danger}`}>삭제</button>
                             <span className={styles.metaDivider}>|</span>
@@ -139,10 +141,10 @@ const  BoardFreeDetail = () =>{
                 </div> {/* detail-card */}
 
                 <div className={styles.bottomActions}>
-                <a href="board_list.html" className={styles.btnList}>
-                    <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
-                    목록으로
-                </a>
+                    <a href="/boardfree" className={styles.btnList}>
+                        <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
+                        목록으로
+                    </a>
                 </div>
 
             </div>

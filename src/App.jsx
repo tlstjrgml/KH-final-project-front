@@ -24,9 +24,6 @@ import NoticeBoardEdit from './layouts/NoticeBoardEdit';
 import NoticeBoardDetail from './layouts/NoticeBoardDetail';
 import BoardFreeEdit from './layouts/BoardFreeEdit';
 
-
-
-
 const PrivateRoute = ({element}) => {
   const token = localStorage.getItem('token');
   if(!token){
@@ -41,12 +38,13 @@ const AppInner = () => {
   const token = searchParams.get('token');
   const isLoggedIn = localStorage.getItem('token') ? true : false;
   const isAdmin = isLoggedIn ? JSON.parse(atob(localStorage.getItem('token').split('.')[1])).isAdmin === 'Y' : false;
+  
   useEffect(() => {
     if (token) {
       localStorage.setItem('token', token);
       window.location.replace('/');
     }
-  }, []);
+  }, [token]);
 
   return (
     <>
@@ -58,29 +56,29 @@ const AppInner = () => {
         <Route path="/edit-profile" element={<PrivateRoute element={<EditProfile />} />} />
         <Route path="/mypage" element={<PrivateRoute element={<MyPage />} />} />
         <Route path="/admin" element={<AdminPage />} />
+        
+        {/* 후기 게시판 영역 */}
         <Route path="/boardreview" element={<BoardReview />} />
-     
         <Route path="/boardreview/write" element={<PrivateRoute element={<BoardReviewWrite />} />} />
         <Route path="/boardreview/edit" element={<PrivateRoute element={<BoardReviewEdit />} />} />
         <Route path="/boardreview/detail/:id" element={<PrivateRoute element={<BoardReviewDetail />} />} />
+        
+        {/* 복지 및 페르소나 영역 */}
         <Route path="/welfarelist" element={<WelfareList />} />
         <Route path="/welfaredetail/:id" element={<WelfareDetail />} />
         <Route path="/persona" element={<PrivateRoute element={<Persona />} />} />
+        
+        {/* 자유 게시판 영역 - 💡 동적 id 라우팅 파라미터 적용 */}
         <Route path="/boardfree" element={<BoardFree />} />
-
-        <Route path="/boardfree/detail" element={<BoardFreeDetail />} />
         <Route path="/boardfree/write" element={<PrivateRoute element={<BoardFreeWrite />} />} />
-        <Route path="/noticeboard" element={<NoticeBoard />} />
-        <Route path="/notice/write" element={<PrivateRoute element={<NoticeBoardWrite />} />} />
-        <Route path="/notice/detail" element={<NoticeBoardDetail />} />
-        <Route path="/notice/eidt" element={<PrivateRoute element={<NoticeBoardEdit />} />} />
-
         <Route path="/boardfree/edit" element={<PrivateRoute element={<BoardFreeEdit />} />} />
-        <Route path="/notice/write" element={<PrivateRoute element={<NoticeBoardWrite />} />} />
-        <Route path="/notice/detail" element={<NoticeBoardDetail />} />
-        <Route path="/notice/edit" element={<PrivateRoute element={<NoticeBoardEdit />} />} />
+        <Route path="/boardfree/detail/:id" element={<PrivateRoute element={<BoardFreeDetail />} />} />
+        
+        {/* 공지사항 게시판 영역 */}
         <Route path="/noticeboard" element={<NoticeBoard />} />
- 
+        <Route path="/notice/write" element={<PrivateRoute element={<NoticeBoardWrite />} />} />
+        <Route path="/notice/detail/:id" element={<NoticeBoardDetail />} />
+        <Route path="/notice/edit" element={<PrivateRoute element={<NoticeBoardEdit />} />} />
       </Routes>
     </>
   );
