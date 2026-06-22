@@ -55,8 +55,10 @@ const BoardFreeDetail = () => {
     }, [id]);
 
     const togglePostLike = () => {
-        setIsLiked(!isLiked);
-        setLikes(prev => isLiked ? prev - 1 : prev + 1);
+       setIsLiked(prev => {
+        setLikes(l => prev ? l - 1 : l + 1);
+        return !prev;
+});
     };
 
     const toggleReplyForm = (replyId) => {
