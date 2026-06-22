@@ -10,6 +10,7 @@ const BoardReviewDetail = () => {
     const [isPostLiked, setIsPostLiked] = useState(false);
     const [postLikes, setPostLikes] = useState(0);
     const [activeReplyForm, setActiveReplyForm] = useState(null);
+    const [welfareInfo, setWelfareInfo] = useState(null);
 
     useEffect(() => {
         const fetchDetail = async () => {
@@ -20,9 +21,18 @@ const BoardReviewDetail = () => {
                 });
                 if (!res.ok) throw new Error('상세조회 실패');
                 const data = await res.json();
+
                 setPost(data);
                 setIsPostLiked(data.isLiked);
                 setPostLikes(data.likeCount);
+
+                if (data.welfareId) {
+                    const wRes = await fetch(`/api/welfare/detail/${data.welfareId}`);
+                    if (wRes.ok) {
+                        const wData = await wRes.json();
+                        setWelfareInfo(wData);
+                    }
+                }
             } catch (err) {
                 console.error(err);
             }
@@ -30,9 +40,34 @@ const BoardReviewDetail = () => {
         fetchDetail();
     }, [id]);
 
-    const togglePostLike = () => {
-        setIsPostLiked(!isPostLiked);
-        setPostLikes(prev => isPostLiked ? prev - 1 : prev + 1);
+    const togglePostLike = async () => {
+        const token = localStorage.getItem('token');
+        if (!token) {
+            alert('로그인이 필요합니다.');
+            return;
+        }
+
+        const prevLiked = isPostLiked;
+        const prevCount = postLikes;
+
+        setIsPostLiked(!prevLiked);
+        setPostLikes(prevLiked ? prevCount - 1 : prevCount + 1);
+
+        try {
+            const res = await fetch(`/react/board/${id}/likes`, {
+                method: prevLiked ? 'DELETE' : 'POST',
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+
+            if (!res.ok) {
+                throw new Error('좋아요 처리 실패');
+            }
+        } catch (err) {
+            console.error(err);
+            setIsPostLiked(prevLiked);
+            setPostLikes(prevCount);
+            alert('좋아요 처리 중 오류가 발생했습니다.');
+        }
     };
 
     const toggleReplyForm = (replyId) => {
@@ -49,13 +84,16 @@ const BoardReviewDetail = () => {
 
                     <div className={styles.welfareServiceBox}>
                         <div className={styles.welfareInfo}>
-                            <strong>대상 복지 서비스:</strong> 테스트용
+                            <strong>대상 복지 서비스:</strong> {welfareInfo ? welfareInfo.plcyNm : '연결된 복지 없음'}
                         </div>
-                        <button
-                            className={styles.btnShortcut}
-                            onClick={() => navigate('/welfaredetail/1')}>
-                            복지 서비스 글 바로가기
-                        </button>
+
+                        {post.welfareId && (
+                            <button
+                                className={styles.btnShortcut}
+                                onClick={() => navigate(`/welfaredetail/${post.welfareId}`)}>
+                                복지 서비스 글 바로가기
+                            </button>
+                        )}
                     </div>
 
                     <div className={styles.postHeader}>
@@ -105,7 +143,6 @@ const BoardReviewDetail = () => {
                         </form>
 
                         <div className={styles.commentList}>
-                            {/* 댓글 기능은 추후 연동 */}
                         </div>
 
                         <div className={styles.pagination}>
