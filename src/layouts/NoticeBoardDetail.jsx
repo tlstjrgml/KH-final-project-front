@@ -10,10 +10,6 @@ const NoticeBoardDetail = () => {
     const [isLiked, setIsLiked] = useState(false);
     const [likes, setLikes] = useState(0);
 
-    const [reply, setReply] = useState(null);
-    const [replyContent, setReplyContent] = useState("");
-    const [activeReplyForm, setActiveReplyForm] = useState(null);
-
     // 현재 로그인한 사용자 정보 (JWT 토큰 디코딩)
     const [currentUser, setCurrentUser] = useState(null);
 
