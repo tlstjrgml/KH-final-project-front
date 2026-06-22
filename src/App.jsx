@@ -24,6 +24,7 @@ import NoticeBoardEdit from './layouts/NoticeBoardEdit';
 import NoticeBoardDetail from './layouts/NoticeBoardDetail';
 import BoardFreeEdit from './layouts/BoardFreeEdit';
 
+
 const PrivateRoute = ({element}) => {
   const token = localStorage.getItem('token');
   if(!token){
@@ -46,13 +47,15 @@ const AppInner = () => {
     }
   }, [token]);
 
+
   return (
     <>
       <Navbar isLoggedIn={isLoggedIn} isAdmin={isAdmin} nickname="석희" />
       <Routes>
-        <Route path="/" element={<Main />} />
+        {/* <Route path="/" element={<Main />} />
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
+<<<<<<< Updated upstream
         <Route path="/edit-profile" element={<PrivateRoute element={<EditProfile />} />} />
         <Route path="/mypage" element={<PrivateRoute element={<MyPage />} />} />
         <Route path="/admin" element={<AdminPage />} />
@@ -79,6 +82,7 @@ const AppInner = () => {
         <Route path="/notice/write" element={<PrivateRoute element={<NoticeBoardWrite />} />} />
         <Route path="/notice/detail/:id" element={<NoticeBoardDetail />} />
         <Route path="/notice/edit" element={<PrivateRoute element={<NoticeBoardEdit />} />} />
+
       </Routes>
     </>
   );
@@ -89,6 +93,7 @@ function App() {
     <BrowserRouter>
       <AppInner />
     </BrowserRouter>
+    
   );
 }
 

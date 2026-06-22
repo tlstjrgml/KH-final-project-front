@@ -1,4 +1,5 @@
 import React, { useState, useRef } from 'react';
+
 import { useNavigate } from 'react-router-dom';
 import styles from './BoardFreeWrite.module.css';
 
@@ -14,13 +15,17 @@ const BoardFreeWrite = () => {
     // 파일 첨부 UI 유지를 위한 상태 (백엔드 고정 전제로 인해 실제 전송은 되지 않습니다)
     const [fileRows, setFileRows] = useState([{ id: Date.now(), files: [] }]);
 
+
     const handleAddFileRow = () => {
         setFileRows([...fileRows, { id: Date.now(), files: [] }]);
     };
 
+
+    
     const handleRemoveFileRow = (rowId) => {
         setFileRows(fileRows.filter((row) => row.id !== rowId));
     };
+
 
     const handleFileChange = (rowId, event) => {
         const selectedFiles = Array.from(event.target.files);
@@ -41,7 +46,6 @@ const BoardFreeWrite = () => {
         );
     };
 
-    // 💡 백엔드 컨트롤러(@RequestBody) 규격에 맞춘 JSON 전송 전용 함수
     const executeSubmit = async () => {
         try {
             // 백엔드가 요구하는 JSON 객체 구성 (파일 제외, Board VO 필드명 일치)
@@ -80,6 +84,7 @@ const BoardFreeWrite = () => {
             return; 
         }
         if (!content.trim()) { 
+
             alert('내용을 입력해주세요.'); 
             return; 
         }
@@ -97,6 +102,7 @@ const BoardFreeWrite = () => {
     const confirmSubmit = () => {
         setIsModalOpen(false);
         executeSubmit();
+
     };
 
     return (
@@ -107,6 +113,7 @@ const BoardFreeWrite = () => {
                 </div>
 
                 <form ref={formRef} onSubmit={handleSubmit}>
+
                     <div className={styles.field}>
                         <label htmlFor="board_title">
                             제목<span className={styles.req}>*</span>
@@ -117,6 +124,7 @@ const BoardFreeWrite = () => {
                             value={title}
                             onChange={(e) => setTitle(e.target.value)}
                             placeholder="게시글 제목을 입력해주세요" 
+
                         />
                     </div>
 
@@ -129,6 +137,8 @@ const BoardFreeWrite = () => {
                             value={content}
                             onChange={(e) => setContent(e.target.value)}
                             placeholder="청년복지 관련 자유로운 이야기를 나누어보세요. (욕설, 비방 등은 삭제될 수 있습니다.)" 
+
+
                         />
                     </div>
 
@@ -138,10 +148,12 @@ const BoardFreeWrite = () => {
                                 파일 첨부 
                                 <span style={{ fontSize: '12px', fontWeight: 'normal', color: '#ADB5BD', marginLeft: '6px' }}>
                                     (최대 5MB, 현재 백엔드 버전에서는 첨부파일이 서버에 저장되지 않습니다.)
+
                                 </span>
                             </label>
                             <button 
                                 type="button" 
+                                id="addFile" 
                                 className={styles.btnAddFile} 
                                 onClick={handleAddFileRow}
                             >
@@ -154,11 +166,20 @@ const BoardFreeWrite = () => {
                                 <div key={row.id} className={styles.fileRow}>
                                     <input 
                                         type="file" 
+                                        name="file" 
                                         id={`file_input_${row.id}`}
                                         className={styles.fileInputHidden} 
                                         multiple 
                                         onChange={(e) => handleFileChange(row.id, e)}
                                     />
+                                    
+
+                                    <input type="hidden" name="attm_id" value="" />
+                                    <input type="hidden" name="original_name" value={row.files.map(f => f.name).join(',')} />
+                                    <input type="hidden" name="rename_name" value="" />
+                                    <input type="hidden" name="attm_path" value="" />
+                                    <input type="hidden" name="attm_status" value="Y" />
+                                    <input type="hidden" name="board_id" value="" />
                                     
                                     <div 
                                         className={styles.fileCustomBox} 
@@ -193,6 +214,7 @@ const BoardFreeWrite = () => {
                             취소
                         </button>
                         <button type="submit" className={styles.btnSubmit}>
+
                             <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#fff" strokeWidth={2}>
                                 <path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z" />
                             </svg>
@@ -228,6 +250,7 @@ const BoardFreeWrite = () => {
             )}
         </div>
     );
-}; 
+
+};
 
 export default BoardFreeWrite;
