@@ -41,6 +41,7 @@ const AppInner = () => {
   const token = searchParams.get('token');
   const isLoggedIn = localStorage.getItem('token') ? true : false;
   const isAdmin = isLoggedIn ? JSON.parse(atob(localStorage.getItem('token').split('.')[1])).isAdmin === 'Y' : false;
+  const nickname = isLoggedIn ? JSON.parse(decodeURIComponent(escape(atob(localStorage.getItem('token').split('.')[1])))).nickname : '';
   useEffect(() => {
     if (token) {
       localStorage.setItem('token', token);
@@ -50,7 +51,7 @@ const AppInner = () => {
 
   return (
     <>
-      <Navbar isLoggedIn={isLoggedIn} isAdmin={isAdmin} nickname="석희" />
+      <Navbar isLoggedIn={isLoggedIn} isAdmin={isAdmin} nickname={nickname} />
       <Routes>
         <Route path="/" element={<Main />} />
         <Route path="/login" element={<Login />} />
