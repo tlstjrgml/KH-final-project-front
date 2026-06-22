@@ -1,10 +1,23 @@
-  import { useState } from 'react'
+  import { useState,useEffect } from 'react'
   import styles from './MyPage.module.css'
   import { Link, useNavigate} from 'react-router-dom'
 
 const MyPage = () => {
   const [isOpen, setIsOpen] = useState(false)
   const navigate = useNavigate();
+  const [profile, setProfile] = useState(null);
+
+  useEffect(() => {
+    const token = localStorage.getItem('token')
+    fetch('http://localhost:8080/member/me', {
+      headers: {
+        'Authorization': `Bearer ${token}`
+      }
+    })
+    .then(res => res.json())
+    .then(data => setProfile(data))
+  }, [])
+  
   return (
     <main className={styles.page}>
       <div className={styles.pageGrid}>
@@ -19,21 +32,21 @@ const MyPage = () => {
             </button>
           </div>
 
-          <p className={styles.profileName}>석희</p>
-          <p className={styles.profileId}>@seokHee123</p>
-          <p className={styles.profileEmail}>seok@gmail.com</p>
+          <p className={styles.profileName}>{profile?.nickname}</p>
+          
+          <p className={styles.profileEmail}>{profile?.email}</p>
 
           <div className={styles.statsRow}>
             <div className={styles.statItem}>
-              <p className={styles.statNum}>12</p>
+              <p className={styles.statNum}>{profile?.boardCount}</p>
               <p className={styles.statLabel}>게시글</p>
             </div>
             <div className={styles.statItem}>
-              <p className={styles.statNum}>34</p>
+              <p className={styles.statNum}>{profile?.replyCount}</p>
               <p className={styles.statLabel}>댓글</p>
             </div>
             <div className={styles.statItem}>
-              <p className={styles.statNum}>8</p>
+              <p className={styles.statNum}>{profile?.wishCount}</p>
               <p className={styles.statLabel}>찜</p>
             </div>
           </div>
