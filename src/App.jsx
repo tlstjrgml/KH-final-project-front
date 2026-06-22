@@ -25,8 +25,6 @@ import NoticeBoardDetail from './layouts/NoticeBoardDetail';
 import BoardFreeEdit from './layouts/BoardFreeEdit';
 
 
-
-
 const PrivateRoute = ({element}) => {
   const token = localStorage.getItem('token');
   if(!token){
@@ -41,47 +39,51 @@ const AppInner = () => {
   const token = searchParams.get('token');
   const isLoggedIn = localStorage.getItem('token') ? true : false;
   const isAdmin = isLoggedIn ? JSON.parse(atob(localStorage.getItem('token').split('.')[1])).isAdmin === 'Y' : false;
-  const nickname = isLoggedIn ? JSON.parse(decodeURIComponent(escape(atob(localStorage.getItem('token').split('.')[1])))).nickname : '';
+  
   useEffect(() => {
     if (token) {
       localStorage.setItem('token', token);
       window.location.replace('/');
     }
-  }, []);
+  }, [token]);
+
+  const nickname = isLoggedIn ? JSON.parse(atob(localStorage.getItem('token').split('.')[1])).nickname : "";
+
 
   return (
     <>
       <Navbar isLoggedIn={isLoggedIn} isAdmin={isAdmin} nickname={nickname} />
       <Routes>
-        <Route path="/" element={<Main />} />
+         <Route path="/" element={<Main />} />
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
         <Route path="/edit-profile" element={<PrivateRoute element={<EditProfile />} />} />
         <Route path="/mypage" element={<PrivateRoute element={<MyPage />} />} />
         <Route path="/admin" element={<AdminPage />} />
+        
+        {/* 후기 게시판 영역 */}
         <Route path="/boardreview" element={<BoardReview />} />
-     
         <Route path="/boardreview/write" element={<PrivateRoute element={<BoardReviewWrite />} />} />
         <Route path="/boardreview/edit" element={<PrivateRoute element={<BoardReviewEdit />} />} />
         <Route path="/boardreview/detail/:id" element={<PrivateRoute element={<BoardReviewDetail />} />} />
+        
+        {/* 복지 및 페르소나 영역 */}
         <Route path="/welfarelist" element={<WelfareList />} />
         <Route path="/welfaredetail/:id" element={<WelfareDetail />} />
         <Route path="/persona" element={<PrivateRoute element={<Persona />} />} />
+        
+        {/* 자유 게시판 영역  */}
         <Route path="/boardfree" element={<BoardFree />} />
-
-        <Route path="/boardfree/detail" element={<BoardFreeDetail />} />
         <Route path="/boardfree/write" element={<PrivateRoute element={<BoardFreeWrite />} />} />
-        <Route path="/noticeboard" element={<NoticeBoard />} />
-        <Route path="/notice/write" element={<PrivateRoute element={<NoticeBoardWrite />} />} />
-        <Route path="/notice/detail" element={<NoticeBoardDetail />} />
-        <Route path="/notice/eidt" element={<PrivateRoute element={<NoticeBoardEdit />} />} />
-
         <Route path="/boardfree/edit" element={<PrivateRoute element={<BoardFreeEdit />} />} />
-        <Route path="/notice/write" element={<PrivateRoute element={<NoticeBoardWrite />} />} />
-        <Route path="/notice/detail" element={<NoticeBoardDetail />} />
-        <Route path="/notice/edit" element={<PrivateRoute element={<NoticeBoardEdit />} />} />
+        <Route path="/boardfree/detail/:id" element={<PrivateRoute element={<BoardFreeDetail />} />} />
+        
+        {/* 공지사항 게시판 영역 */}
         <Route path="/noticeboard" element={<NoticeBoard />} />
- 
+        <Route path="/notice/write" element={<PrivateRoute element={<NoticeBoardWrite />} />} />
+        <Route path="/notice/detail/:id" element={<NoticeBoardDetail />} />
+        <Route path="/notice/edit" element={<PrivateRoute element={<NoticeBoardEdit />} />} />
+
       </Routes>
     </>
   );
@@ -92,6 +94,7 @@ function App() {
     <BrowserRouter>
       <AppInner />
     </BrowserRouter>
+    
   );
 }
 

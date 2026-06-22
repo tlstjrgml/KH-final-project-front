@@ -214,24 +214,24 @@ body {
 }
 
 /* 댓글 */
-.commentSection {
+.replySection {
   border-top: 1px solid #DEE2E6;
   padding-top: 1.75rem;
 }
 
-.commentHeader {
+.replyHeader {
   font-size: 15px;
   font-weight: 600;
   margin-bottom: 1.25rem;
 }
 
-.commentForm {
+.replyForm {
   display: flex;
   gap: 8px;
   margin-bottom: 1.75rem;
 }
 
-.commentInput {
+.replyInput {
   flex: 1;
   height: 48px;
   border: none;
@@ -240,12 +240,12 @@ body {
   box-shadow: 0 0 0 1px #E9ECEF;
 }
 
-.commentInput:focus {
+.replyInput:focus {
   outline: none;
   box-shadow: 0 0 0 2px #378ADD;
 }
 
-.btnCommentSubmit {
+.btnreplySubmit {
   height: 48px;
   padding: 0 20px;
   background: #378ADD;
@@ -255,37 +255,37 @@ body {
   cursor: pointer;
 }
 
-.commentList {
+.replyList {
   display: flex;
   flex-direction: column;
 }
 
-.commentItem {
+.replyItem {
   padding: 1.25rem 0;
   border-bottom: 1px solid #F1F3F5;
 }
 
-.commentInfo {
+.replyInfo {
   display: flex;
   gap: 8px;
   margin-bottom: 6px;
 }
 
-.commentAuthor {
+.replyAuthor {
   font-size: 13px;
   font-weight: 600;
 }
 
-.commentDate {
+.replyDate {
   font-size: 11px;
   color: #ADB5BD;
 }
 
-.commentText {
+.replyText {
   margin-bottom: 10px;
 }
 
-.commentActions {
+.replyActions {
   display: flex;
   align-items: center;
   gap: 4px;
