@@ -61,20 +61,7 @@
     min-height: 200px;
 }
 
-.starContainer {
-    display: flex;
-    gap: 5px;
-    font-size: 28px;
-    cursor: pointer;
-}
 
-.starEmpty {
-    color: #dee2e6;
-}
-
-.starFilled {
-    color: #ffc107;
-}
 
 .btnLoad {
     width: 150px;

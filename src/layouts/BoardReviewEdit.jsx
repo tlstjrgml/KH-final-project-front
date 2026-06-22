@@ -60,14 +60,7 @@ const BoardReviewEdit = () => {
                         </div>
                     </div>
 
-                    <div className={styles.field}>
-                        <label>만족도</label>
-                        <div className={styles.starContainer}>
-                            {[1, 2, 3, 4, 5].map((star) => (
-                                <span key={star} className={star <= rating ? styles.starFilled : styles.starEmpty} onClick={() => setRating(star)}>★</span>
-                            ))}
-                        </div>
-                    </div>
+                   
 
                     <div className={styles.field}>
                         <label>제목</label>
