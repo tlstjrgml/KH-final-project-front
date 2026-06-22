@@ -10,6 +10,10 @@ const Main = () => {
   const [recommend, setRecommend] = useState([])
   const [memberInfo, setMemberInfo] = useState(null)
   const [showModal, setShowModal] = useState(false)
+  const [boardType, setBoardType] = useState('FRE')
+  const [boardTop5, setBoardTop5] = useState([])
+  const [noticeTop5, setNoticeTop5] = useState([])
+  const [searchInput, setSearchInput] = useState('')
   const token = localStorage.getItem('token')
 
   useEffect(() => {
@@ -48,6 +52,25 @@ const Main = () => {
         })
     }
   }, [])
+
+      useEffect(() => {
+      fetch(`http://localhost:8080/board/top5?boardType=${boardType}`)
+        .then(res => res.json())
+        .then(data => setBoardTop5(data))
+    }, [boardType])
+
+    useEffect(() => {
+      fetch('http://localhost:8080/board/notice/recent')
+        .then(res => res.json())
+        .then(data => setNoticeTop5(data))
+    }, [])
+
+    const handleSearch = (e) => {
+      e.preventDefault()
+      if (searchInput.trim()) {
+        navigate(`/welfarelist?keyword=${encodeURIComponent(searchInput)}`)
+      }
+    }
 
   const renderRecBox = () => {
     if (!token) return null
@@ -119,12 +142,19 @@ const Main = () => {
             정부 공식 복지 데이터 연동
           </div>
           <h1 className={styles.heroTitle}>
-            내게 맞는 복지 서비스를,<br/>
+            내게 맞는 복지 서비스를<br/>
             <em>한 곳에서 찾아보세요</em>
           </h1>
           <p className={styles.heroSub}>주거, 일자리, 교육, 금융까지 — 청년을 위한 모든 복지 정보</p>
-          <form className={styles.heroSearch} action="#" method="get">
-            <input type="text" name="q" placeholder="복지 서비스를 검색해보세요" autoComplete="off"/>
+          <form className={styles.heroSearch} onSubmit={handleSearch}>
+            <input
+              type="text"
+              name="q"
+              placeholder="복지 서비스를 검색해보세요"
+              autoComplete="off"
+              value={searchInput}
+              onChange={(e) => setSearchInput(e.target.value)}
+            />
             <button type="submit">
               <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
               검색
@@ -183,52 +213,48 @@ const Main = () => {
             </div>
           </section>
 
-          <section className={styles.sectionBox}>
-            <div className={styles.sectionHeader}>
-              <h2 className={styles.sectionTitle}>인기 게시글</h2>
-              <Link to="#" className={styles.sectionMore}>
-                더 보러가기
-                <svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
-              </Link>
-            </div>
-            <div className={styles.boardTabs}>
-              <button className={`${styles.boardTab} ${styles.active}`}>자유게시판</button>
-              <button className={styles.boardTab}>복지</button>
-              <button className={styles.boardTab}>후기</button>
-            </div>
-            <div className={styles.boardList}>
-              <Link to="#" className={styles.boardItem}>
-                <div className={styles.boardItemLeft}>
-                  <span className={styles.boardNum}>1</span>
-                  <span className={styles.boardItemTitle}>청년 월세 지원 신청 후기 공유합니다</span>
-                </div>
-                <div className={styles.boardItemMeta}>
-                  <span><svg viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>1.2k</span>
-                  <span><svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>48</span>
-                </div>
-              </Link>
-              <Link to="#" className={styles.boardItem}>
-                <div className={styles.boardItemLeft}>
-                  <span className={styles.boardNum}>2</span>
-                  <span className={styles.boardItemTitle}>청년도약계좌 가입 조건 정리해봤어요</span>
-                </div>
-                <div className={styles.boardItemMeta}>
-                  <span><svg viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>980</span>
-                  <span><svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>32</span>
-                </div>
-              </Link>
-              <Link to="#" className={styles.boardItem}>
-                <div className={styles.boardItemLeft}>
-                  <span className={styles.boardNum}>3</span>
-                  <span className={styles.boardItemTitle}>취준생인데 받을 수 있는 복지 뭐가 있나요?</span>
-                </div>
-                <div className={styles.boardItemMeta}>
-                  <span><svg viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>756</span>
-                  <span><svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>21</span>
-                </div>
-              </Link>
-            </div>
-          </section>
+                <section className={styles.sectionBox}>
+        <div className={styles.sectionHeader}>
+          <h2 className={styles.sectionTitle}>인기 게시글</h2>
+          <Link to={boardType === 'FRE' ? '/boardfree' : '/boardreview'} className={styles.sectionMore}>
+            더 보러가기
+            <svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
+          </Link>
+        </div>
+        <div className={styles.boardTabs}>
+          <button
+            className={`${styles.boardTab} ${boardType === 'FRE' ? styles.active : ''}`}
+            onClick={() => setBoardType('FRE')}
+          >
+            자유게시판
+          </button>
+          <button
+            className={`${styles.boardTab} ${boardType === 'REV' ? styles.active : ''}`}
+            onClick={() => setBoardType('REV')}
+          >
+            후기게시판
+          </button>
+        </div>
+
+        <div className={styles.boardList}>
+      {boardTop5.map((b, idx) => (
+        <Link
+          to={boardType === 'FRE' ? `/boardfree/detail/${b.boardId}` : `/boardreview/detail/${b.boardId}`}
+          key={b.boardId}
+          className={styles.boardItem}
+        >
+          <div className={styles.boardItemLeft}>
+            <span className={styles.boardNum}>{idx + 1}</span>
+            <span className={styles.boardItemTitle}>{b.boardTitle}</span>
+          </div>
+          <div className={styles.boardItemMeta}>
+            <span><svg viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>{b.views}</span>
+            <span><svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>{b.likeCount}</span>
+          </div>
+        </Link>
+      ))}
+    </div>
+      </section>
         </div>
 
         <div className={styles.rightCol}>
@@ -253,11 +279,12 @@ const Main = () => {
               공지사항
             </h2>
             <div className={styles.noticeList}>
-              <Link to="#" className={styles.noticeItem}><div className={styles.noticeDot}></div><span className={styles.noticeTitle}>2025년 복지 서비스 데이터 업데이트 안내</span></Link>
-              <Link to="#" className={styles.noticeItem}><div className={styles.noticeDot}></div><span className={styles.noticeTitle}>청년복지MOA 서비스 오픈 안내</span></Link>
-              <Link to="#" className={styles.noticeItem}><div className={styles.noticeDot}></div><span className={styles.noticeTitle}>개인정보 처리방침 개정 안내</span></Link>
-              <Link to="#" className={styles.noticeItem}><div className={styles.noticeDot}></div><span className={styles.noticeTitle}>복지 서비스 신청 기간 안내</span></Link>
-              <Link to="#" className={styles.noticeItem}><div className={styles.noticeDot}></div><span className={styles.noticeTitle}>시스템 점검 안내 (3/15 02:00~04:00)</span></Link>
+              {noticeTop5.map(n => (
+                <Link to={`/notice/detail/${n.boardId}`} key={n.boardId} className={styles.noticeItem}>
+                  <div className={styles.noticeDot}></div>
+                  <span className={styles.noticeTitle}>{n.boardTitle}</span>
+                </Link>
+              ))}
             </div>
           </section>
         </div>

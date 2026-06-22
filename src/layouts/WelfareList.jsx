@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import styles from './WelfareList.module.css'
+import Pagination from '../components/common/Pagination'
 
 const CATEGORIES = ['주거', '일자리', '교육', '참여･기반', '금융･복지･문화']
 const REGIONS = ['전국', '서울', '부산', '대구', '인천', '광주', '대전', '울산', '세종', '경기', '강원', '충북', '충남', '전북', '전남', '경북', '경남', '제주']
@@ -75,16 +76,16 @@ const WelfareList = () => {
       .filter(([_, code]) => codes.includes(code))
       .map(([name]) => name)
   })
-  const [sort, setSort] = useState('최신순')
+  const [sort, setSort] = useState(searchParams.get('sort') || '최신순')
   const [wished, setWished] = useState({})
   const [currentPage, setCurrentPage] = useState(1)
-  const [keyword, setKeyword] = useState('')
-  const [searchInput, setSearchInput] = useState('')
+  const [keyword, setKeyword] = useState(searchParams.get('keyword') || '')
+  const [searchInput, setSearchInput] = useState(searchParams.get('keyword') || '')
   const [welfareList, setWelfareList] = useState([])
-  const [total, setTotal] = useState(0)
-  const [totalPages, setTotalPages] = useState(1)
+  const [pageInfo, setPageInfo] = useState(null)
 
   const displayLclsf = (lclsfNm) => {
+    if (!lclsfNm) return ''
     const parts = lclsfNm.split(',')
     const unique = [...new Set(parts.map(p => p.trim()))]
     return unique.join(',')
@@ -116,17 +117,17 @@ const WelfareList = () => {
       params.append('ageMin', AGE_RANGE[selectedAge].min)
       params.append('ageMax', AGE_RANGE[selectedAge].max)
     }
+    if (sort && sort !== '최신순') params.append('sort', sort)
 
     window.history.replaceState(null, '', `/welfarelist?${params.toString()}`)
 
     fetch(`http://localhost:8080/api/welfare/list?${params.toString()}`)
       .then(res => res.json())
       .then(data => {
-        setWelfareList(data.list)
-        setTotal(data.total)
-        setTotalPages(data.totalPages)
+        setWelfareList(data.content)
+        setPageInfo(data.pagination)
       })
-  }, [keyword, selectedCats, selectedRegions, selectedAge, selectedIncomes, selectedJobs, currentPage])
+  }, [keyword, selectedCats, selectedRegions, selectedAge, selectedIncomes, selectedJobs, sort, currentPage])
 
   const toggleCheck = (val, setList) => {
     setList(prev => prev.includes(val) ? prev.filter(v => v !== val) : [...prev, val])
@@ -178,14 +179,6 @@ const WelfareList = () => {
   const handleSearch = () => {
     setKeyword(searchInput)
     setCurrentPage(1)
-  }
-
-  const renderPageButtons = () => {
-    const pages = []
-    const start = Math.max(1, currentPage - 2)
-    const end = Math.min(totalPages, start + 4)
-    for (let i = start; i <= end; i++) pages.push(i)
-    return pages
   }
 
   return (
@@ -263,10 +256,9 @@ const WelfareList = () => {
 
           <div className={styles.listMain}>
             <div className={styles.listHd}>
-              <span className={styles.cnt}>총 <b>{total}</b>개 복지 서비스</span>
-              <select className={styles.sortSel} value={sort} onChange={e => setSort(e.target.value)}>
+              <span className={styles.cnt}>총 <b>{pageInfo?.totalItems || 0}</b>개 복지 서비스</span>
+              <select className={styles.sortSel} value={sort} onChange={e => { setSort(e.target.value);       setCurrentPage(1) }}>
                 <option>최신순</option>
-                <option>조회수순</option>
                 <option>찜 많은순</option>
               </select>
             </div>
@@ -303,14 +295,7 @@ const WelfareList = () => {
                 )
               })}
             </div>
-
-            <div className={styles.paging}>
-              <button className={styles.pgbtn} onClick={() => setCurrentPage(p => Math.max(1, p - 1))}>‹</button>
-              {renderPageButtons().map(p => (
-                <button key={p} className={`${styles.pgbtn} ${currentPage === p ? styles.on : ''}`} onClick={() => setCurrentPage(p)}>{p}</button>
-              ))}
-              <button className={styles.pgbtn} onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}>›</button>
-            </div>
+            <Pagination pageInfo={pageInfo} currentPage={currentPage} changePage={setCurrentPage} />
           </div>
 
         </div>
