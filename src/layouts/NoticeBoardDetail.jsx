@@ -2,7 +2,8 @@ import { useNavigate, useParams } from 'react-router-dom';
 import styles from './NoticeBoardDetail.module.css';
 import { useEffect, useState } from 'react';
 
-const NoticeBoardDetail = () => {
+
+const NotieBoardDetail = () => {
     const { id } = useParams();
     const navigate = useNavigate();
 
@@ -10,11 +11,12 @@ const NoticeBoardDetail = () => {
     const [isLiked, setIsLiked] = useState(false);
     const [likes, setLikes] = useState(0);
 
+    const [replyContent, setReplyContent] = useState("");
+
     // 현재 로그인한 사용자 정보 (JWT 토큰 디코딩)
     const [currentUser, setCurrentUser] = useState(null);
 
     useEffect(() => {
-        // JWT 토큰에서 로그인 유저 정보 추출
         const token = localStorage.getItem("token");
 
         if (token) {
@@ -31,7 +33,10 @@ const NoticeBoardDetail = () => {
 
         const fetchBoardDetail = async () => {
             try {
-                const response = await fetch(`/react/board/${id}`);
+
+                const response = await fetch(`/react/board/${id}`, {
+                    headers: token ? { 'Authorization': `Bearer ${token}` } : {}
+                });
 
                 if (!response.ok) {
                     throw new Error("게시글 조회 실패");
@@ -51,14 +56,9 @@ const NoticeBoardDetail = () => {
     }, [id]);
 
     const togglePostLike = () => {
-       setIsLiked(prev => {
-        setLikes(l => prev ? l - 1 : l + 1);
-        return !prev;
-});
-    };
 
-    const toggleReplyForm = (replyId) => {
-        setActiveReplyForm(activeReplyForm === replyId ? null : replyId);
+        setIsLiked(!isLiked);
+        setLikes(prev => isLiked ? prev - 1 : prev + 1);
     };
 
     if (!post) return <div style={{ textAlign: 'center', padding: '50px' }}>로딩 중...</div>
@@ -83,16 +83,22 @@ const NoticeBoardDetail = () => {
                                 <span>{post.createDate ? post.createDate.split('T')[0] : ''}</span>
                             </div>
                             <div className={styles.postMetaRight}>
-                                <button className={styles.actionBtn} onClick={() => { navigate(`/notice/edit/${id}`) }}>수정</button>
-                                <span className={styles.metaDivider}>|</span>
-                                <button className={`${styles.actionBtn} ${styles.danger}`}>삭제</button>
-                                <span className={styles.metaDivider}>|</span>
+
+                                {post.isOwner && (
+                                    <>
+                                        <button className={styles.actionBtn} onClick={() => { navigate(`/notice/edit/${id}`) }}>수정</button>
+                                        <span className={styles.metaDivider}>|</span>
+                                        <button className={`${styles.actionBtn} ${styles.danger}`}>삭제</button>
+                                        <span className={styles.metaDivider}>|</span>
+                                    </>
+                                )}
                                 <button className={`${styles.actionBtn} ${styles.danger}`}>신고</button>
                             </div>
                         </div>
                     </div>
 
-                    {/*게시글 본문 */}
+
+                    {/* 게시글 본문 */}
                     <div className={styles.postContent}>
                         {post.boardContent}
                     </div>
@@ -128,7 +134,7 @@ const NoticeBoardDetail = () => {
 
                 </div> {/* detail-card */}
 
-               <div className={styles.bottomActions}>
+                <div className={styles.bottomActions}>
                     <button className={styles.btnList} onClick={() => navigate('/noticeboard')}>목록으로</button>
                 </div>
 
@@ -137,4 +143,5 @@ const NoticeBoardDetail = () => {
     );
 }
 
-export default NoticeBoardDetail;
+
+export default NotieBoardDetail;

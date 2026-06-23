@@ -1,6 +1,13 @@
-<<<<<<< Updated upstream
-/* BoardWrite.module.css */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
+html, body {
+  height: 100%;
+  font-family: 'Pretendard', -apple-system, sans-serif;
+  background: #F4F7FB;
+  color: #1A1D23;
+}
+
+/* ── 페이지 본문 ── */
 .page {
   min-height: 100vh;
   padding: 80px 2rem 4rem;
@@ -8,18 +15,17 @@
   margin: 0 auto;
   display: flex;
   justify-content: center;
-  background: #F4F7FB;
-  font-family: 'Pretendard', -apple-system, sans-serif;
 }
 
+/* ── 글쓰기 카드 ── */
 .writeCard {
   width: 100%;
-  max-width: 100%; /* 넓게 펼쳐지는 디자인 적용 */
+  max-width: 100%; /* 좌우로 넓게 펼쳐지도록 100%로 설정 */
   background: #FFFFFF;
   border-radius: 16px;
   box-shadow: 0 1px 8px rgba(0,0,0,0.06);
   border: 1px solid #DEE2E6;
-  padding: 2.5rem 3rem;
+  padding: 2.5rem 3rem; /* 여백 확대 */
   height: fit-content;
 }
 
@@ -40,9 +46,8 @@
   margin: 0;
 }
 
-.field {
-  margin-bottom: 24px;
-}
+/* ── 입력 필드 ── */
+.field { margin-bottom: 24px; }
 
 .field label {
   display: block;
@@ -52,7 +57,7 @@
   margin-bottom: 8px;
 }
 
-.req {
+.field label .req {
   color: #378ADD;
   margin-left: 4px;
 }
@@ -73,25 +78,14 @@
   line-height: 1.6;
 }
 
-.field input[type="text"] {
-  height: 52px;
-}
-
-.field textarea {
-  min-height: 400px;
-  resize: vertical;
-} 
-
+.field input[type="text"] { height: 52px; }
+.field textarea { min-height: 400px; resize: vertical; } 
 .field input[type="text"]::placeholder,
-.field textarea::placeholder {
-  color: #ADB5BD;
-}
-
+.field textarea::placeholder { color: #ADB5BD; }
 .field input[type="text"]:focus,
-.field textarea:focus {
-  box-shadow: 0 0 0 2px #378ADD;
-}
+.field textarea:focus { box-shadow: 0 0 0 2px #378ADD; }
 
+/* ── 파일 첨부 ── */
 .fileHeader {
   display: flex;
   justify-content: space-between;
@@ -99,10 +93,7 @@
   margin-bottom: 10px;
 }
 
-.fileHeader label {
-  margin-bottom: 0;
-  font-weight: 600;
-}
+.fileHeader label { margin-bottom: 0; font-weight: 600; }
 
 .btnAddFile {
   font-size: 13px;
@@ -116,9 +107,7 @@
   transition: all 0.15s;
 }
 
-.btnAddFile:hover {
-  background: #B5D4F4;
-}
+.btnAddFile:hover { background: #B5D4F4; }
 
 .fileRow {
   display: flex;
@@ -198,6 +187,7 @@
   color: #E24B4A;
 }
 
+/* ── 액션 버튼 ── */
 .formActions {
   display: flex;
   justify-content: flex-end;
@@ -252,6 +242,7 @@
   stroke-width: 2;
 }
 
+/* ── 모달 ── */
 .modalOverlay {
   position: fixed;
   top: 0;
@@ -260,7 +251,7 @@
   bottom: 0;
   background: rgba(15,23,42,0.45);
   z-index: 999;
-  display: flex;
+  display: none;
   align-items: center;
   justify-content: center;
 }
@@ -308,22 +299,17 @@
   transition: all 0.15s;
 }
 
-.cancel {
+.modalBtn.cancel {
   background: #F1F3F5;
   color: #343A40;
   border: 1px solid #DEE2E6;
 }
 
-.cancel:hover {
-  background: #E9ECEF;
-}
+.modalBtn.cancel:hover { background: #E9ECEF; }
 
-.confirm {
+.modalBtn.confirm {
   background: #378ADD;
   color: #fff;
 }
 
-.confirm:hover {
-  background: #185FA5;
-}
-
+.modalBtn.confirm:hover { background: #185FA5; }
