@@ -6,19 +6,15 @@ const BoardFreeEdit = () => {
     const { id } = useParams();
     const navigate = useNavigate();
 
-    // 1. 기본 폼 상태 관리
     const [title, setTitle] = useState("");
     const [content, setContent] = useState("");
     const [isLoading, setIsLoading] = useState(true);
 
-   // 2. 첨부파일 상태 관리 (요청하신 기능 반영)
     const [existingFiles, setExistingFiles] = useState([]);
-    const [deletedExistingFiles, setDeletedExistingFiles] = useState([]); // 삭제할 기존 파일 ID 배열
-    
-    const [fileRows, setFileRows] = useState([{ id: 0, files: [] }]); // 새 첨부파일 배열
+    const [deletedExistingFiles, setDeletedExistingFiles] = useState([]); 
+    const [fileRows, setFileRows] = useState([{ id: 0, files: [] }]); 
     const nextRowId = useRef(1);
 
-    // [데이터 불러오기]
     useEffect(() => {
         const fetchBoardDetail = async () => {
             const token = localStorage.getItem("token");
@@ -45,7 +41,6 @@ const BoardFreeEdit = () => {
         fetchBoardDetail();
     }, [id, navigate]);
 
-    // [첨부파일 핸들러]
     const handleDeleteExisting = (fileId) => {
         if (window.confirm("기존 첨부파일을 삭제하시겠습니까? (수정 완료 시 최종 반영됩니다)")) {
             setDeletedExistingFiles([...deletedExistingFiles, fileId]);
@@ -70,7 +65,6 @@ const BoardFreeEdit = () => {
         }
     };
 
-    // [수정 완료 폼 제출]
     const handleFormSubmit = async (e) => {
         e.preventDefault();
 
@@ -91,7 +85,6 @@ const BoardFreeEdit = () => {
                 body: JSON.stringify({
                     boardTitle: title,
                     boardContent: content,
-                    // 삭제된 기존 파일 ID 목록 전송 (백엔드 설계에 맞게 키값 변경 필요)
                     deletedFileIds: deletedExistingFiles 
                 })
             });
@@ -164,7 +157,6 @@ const BoardFreeEdit = () => {
                             </label>
                             
                             {existingFiles.map((file) => (
-                                // 삭제 목록에 포함되지 않은 파일만 렌더링
                                 !deletedExistingFiles.includes(file.id) && (
                                     <div key={`existing-${file.id}`} className={styles.existingFileItem}>
                                         <div className={styles.existingFileName}>
@@ -189,7 +181,6 @@ const BoardFreeEdit = () => {
                             ))}
                         </div>
 
-                        {/* 폼 전송 시 백엔드로 삭제할 파일 ID 전달용 hidden input */}
                         {deletedExistingFiles.map((delId) => (
                             <input key={`del-${delId}`} type="hidden" name="deleteFileIds" value={delId} />
                         ))}
@@ -217,7 +208,7 @@ const BoardFreeEdit = () => {
                                         name="file" 
                                         id={`file_input_${row.id}`}
                                         className={styles.fileInputHidden} 
-                                        style={{ display: 'none' }} // UI를 위해 숨김 처리
+                                        style={{ display: 'none' }} 
                                         multiple 
                                         onChange={(e) => handleFileChange(row.id, e)}
                                     />
@@ -238,7 +229,7 @@ const BoardFreeEdit = () => {
                                             className={styles.btnRemoveFile} 
                                             title="삭제" 
                                             onClick={(e) => {
-                                                e.stopPropagation(); // 부모 요소의 onClick(파일 선택)이 발동하지 않도록 방지
+                                                e.stopPropagation(); 
                                                 handleRemoveFileRow(row.id);
                                             }}
                                         >
