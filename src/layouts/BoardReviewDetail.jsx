@@ -111,6 +111,30 @@ const BoardReviewDetail = () => {
         }
     };
 
+    // 게시글 삭제
+    const handleDeletePost = async () => {
+        if (!window.confirm('게시글을 삭제하시겠습니까?')) return;
+
+        const token = localStorage.getItem('token');
+        try {
+            const res = await fetch(`/react/board/${id}`, {
+                method: 'DELETE',
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+
+            if (!res.ok) {
+                const errMsg = await res.text();
+                throw new Error(errMsg || '삭제 실패');
+            }
+
+            alert('게시글이 삭제되었습니다.');
+            navigate('/boardreview');
+        } catch (err) {
+            console.error(err);
+            alert(`삭제 중 오류가 발생했습니다: ${err.message}`);
+        }
+    };
+
     // 원댓글 등록
     const handleCommentSubmit = async (e) => {
         e.preventDefault();
@@ -274,11 +298,8 @@ const BoardReviewDetail = () => {
         }
     };
 
-    
-
     if (!post) return <div>로딩 중...</div>;
 
-    // 원댓글과 그에 딸린 대댓글을 그룹으로 묶기
     const parentReplies = replies.filter(r => r.code === 'B');
     const getChildReplies = (parentId) => replies.filter(r => r.code === 'R' && r.refId === parentId);
 
@@ -317,11 +338,16 @@ const BoardReviewDetail = () => {
                                     <>
                                         <button
                                             className={styles.actionBtn}
-                                            onClick={() => navigate(`/boardreview/edit/${id}`)}>
+                                            onClick={() => navigate(`/boardreview/edit/${post.boardId || id}`)}>
                                             수정
                                         </button>
                                         <span className={styles.metaDivider}>|</span>
-                                        <button className={`${styles.actionBtn} ${styles.danger}`}>삭제</button>
+                                        <button
+                                            className={`${styles.actionBtn} ${styles.danger}`}
+                                            onClick={handleDeletePost}
+                                        >
+                                            삭제
+                                        </button>
                                         <span className={styles.metaDivider}>|</span>
                                     </>
                                 )}
@@ -333,6 +359,31 @@ const BoardReviewDetail = () => {
                     <div className={styles.postContent}>
                         {post.boardContent}
                     </div>
+
+                    {post && post.attachments && post.attachments.length > 0 && (
+                        <div className={styles.attachmentSection}>
+                            <h4 className={styles.attachmentHeader}>첨부파일 ({post.attachments.length})</h4>
+                            <ul className={styles.attachmentList}>
+                                {post.attachments.map((file, index) => {
+                                    const fileId = file.attmId || file.fileId || index;
+                                    const fileName = file.originalName || file.originName || '첨부파일';
+
+                                    return (
+                                        <li key={fileId} className={styles.attachmentItem}>
+                                            <span className={styles.fileIcon}>📁</span>
+                                            <a
+                                                href={`/react/board/download/${fileId}`}
+                                                download={fileName}
+                                                className={styles.fileLink}
+                                            >
+                                                {fileName}
+                                            </a>
+                                        </li>
+                                    );
+                                })}
+                            </ul>
+                        </div>
+                    )}
 
                     <div className={styles.likeActionArea}>
                         <button className={`${styles.btnLike} ${isPostLiked ? styles.liked : ''}`} onClick={togglePostLike}>
@@ -382,7 +433,18 @@ const BoardReviewDetail = () => {
                                         )}
 
                                         <div className={styles.commentActions}>
-                                            <button className={styles.actionBtn} onClick={() => toggleReplyForm(reply.replyId)}>대댓글</button>
+                                            <button
+                                                type="button"
+                                                className={styles.actionBtn}
+                                                onClick={(e) => {
+                                                    console.log('onClick 실행됨!');
+                                                    const newState = activeReplyForm === reply.replyId ? null : reply.replyId;
+                                                    console.log('activeReplyForm을 이렇게 변경:', newState);
+                                                    setActiveReplyForm(newState);
+                                                }}
+                                            >
+                                                대댓글
+                                            </button>
                                             {currentMemberId === reply.memberId && editingReplyId !== reply.replyId && (
                                                 <>
                                                     <span className={styles.metaDivider}>|</span>
@@ -395,7 +457,7 @@ const BoardReviewDetail = () => {
 
                                         {activeReplyForm === reply.replyId && (
                                             <form
-                                                className={`${styles.commentForm} ${styles.replyFormWrapper}`}
+                                                className={`${styles.commentForm} ${styles.replyFormWrapper} ${styles.active}`}
                                                 onSubmit={(e) => handleReplySubmit(e, reply.replyId)}
                                             >
                                                 <div className={styles.replyIndicator}>↳</div>

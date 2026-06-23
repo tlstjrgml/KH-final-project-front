@@ -277,3 +277,82 @@
     border-color: #378ADD;
     color: #fff;
 }
+
+.commentActions {
+    display: flex;
+    gap: 8px;
+    margin-top: 10px;
+    font-size: 13px;
+}
+
+.actionBtn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: #6C757D;
+    font-size: 13px;
+    padding: 4px 8px;
+    transition: color 0.15s;
+}
+
+.actionBtn:hover {
+    color: #378ADD;
+}
+
+.actionBtn.danger:hover {
+    color: #E24B4A;
+}
+
+
+/* 첨부파일 전체 섹션 */
+.attachmentSection {
+    margin-top: 24px;
+    padding: 16px 20px;
+    background-color: #f8f9fa;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+}
+
+/* 첨부파일 헤더 타이틀 */
+.attachmentHeader {
+    margin: 0 0 12px 0;
+    font-size: 15px;
+    font-weight: 600;
+    color: #4a5568;
+}
+
+/* 파일 목록 wrap 리스트 */
+.attachmentList {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+/* 개별 파일 요소 */
+.attachmentItem {
+    display: flex;
+    align-items: center;
+    font-size: 14px;
+}
+
+/* 파일 아이콘 */
+.fileIcon {
+    margin-right: 8px;
+    font-size: 16px;
+    user-select: none;
+}
+
+/* 다운로드 링크 가독성 처리 */
+.fileLink {
+    color: #2d3748;
+    text-decoration: none;
+    transition: color 0.15s, text-decoration 0.15s;
+}
+
+.fileLink:hover {
+    color: #3182ce;
+    text-decoration: underline;
+}
