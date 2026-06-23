@@ -10,15 +10,12 @@ const BoardFreeDetail = () => {
     const [isLiked, setIsLiked] = useState(false);
     const [likes, setLikes] = useState(0);
 
-    const [reply, setReply] = useState(null);
     const [replyContent, setReplyContent] = useState("");
-    const [activeReplyForm, setActiveReplyForm] = useState(null);
 
     // 현재 로그인한 사용자 정보 (JWT 토큰 디코딩)
     const [currentUser, setCurrentUser] = useState(null);
 
     useEffect(() => {
-        // JWT 토큰에서 로그인 유저 정보 추출
         const token = localStorage.getItem("token");
 
         if (token) {
@@ -35,7 +32,9 @@ const BoardFreeDetail = () => {
 
         const fetchBoardDetail = async () => {
             try {
-                const response = await fetch(`/react/board/${id}`);
+                const response = await fetch(`/react/board/${id}`, {
+                    headers: token ? { 'Authorization': `Bearer ${token}` } : {}
+                });
 
                 if (!response.ok) {
                     throw new Error("게시글 조회 실패");
@@ -43,9 +42,7 @@ const BoardFreeDetail = () => {
 
                 const data = await response.json();
                 setPost(data);
-                // 초기 좋아요 수 세팅 로직 추가 가능
-                // setLikes(data.views || 0);
-
+                
             } catch (err) {
                 console.error(err);
             }
@@ -59,10 +56,6 @@ const BoardFreeDetail = () => {
         setLikes(l => prev ? l - 1 : l + 1);
         return !prev;
 });
-    };
-
-    const toggleReplyForm = (replyId) => {
-        setActiveReplyForm(activeReplyForm === replyId ? null : replyId);
     };
 
     if (!post) return <div style={{ textAlign: 'center', padding: '50px' }}>로딩 중...</div>
@@ -87,16 +80,20 @@ const BoardFreeDetail = () => {
                                 <span>{post.createDate ? post.createDate.split('T')[0] : ''}</span>
                             </div>
                             <div className={styles.postMetaRight}>
-                                <button className={styles.actionBtn} onClick={() => { navigate(`/boardfree/edit/${id}`) }}>수정</button>
-                                <span className={styles.metaDivider}>|</span>
-                                <button className={`${styles.actionBtn} ${styles.danger}`}>삭제</button>
-                                <span className={styles.metaDivider}>|</span>
+                                {post.isOwner && (
+                                    <>
+                                        <button className={styles.actionBtn} onClick={() => { navigate(`/boardfree/edit/${id}`) }}>수정</button>
+                                        <span className={styles.metaDivider}>|</span>
+                                        <button className={`${styles.actionBtn} ${styles.danger}`}>삭제</button>
+                                        <span className={styles.metaDivider}>|</span>
+                                    </>
+                                )}
                                 <button className={`${styles.actionBtn} ${styles.danger}`}>신고</button>
                             </div>
                         </div>
                     </div>
 
-                    {/*게시글 본문 */}
+                    {/* 게시글 본문 */}
                     <div className={styles.postContent}>
                         {post.boardContent}
                     </div>
@@ -132,16 +129,13 @@ const BoardFreeDetail = () => {
                     {/* 댓글 영역 */}
                     <div className={` ${styles.replySection}`} style={{ marginTop: '30px' }}>
                         
-                        {/* 댓글 헤더를 attachmentTitle 스타일로 맞춤 */}
                         <div className={styles.attachmentTitle} style={{ borderBottom: '1px solid #E9ECEF', paddingBottom: '15px', marginBottom: '15px' }}>
-                            {/* 말풍선 모양 SVG */}
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ width: '18px', height: '18px', marginRight: '6px', verticalAlign: 'middle' }}>
                                 <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
                             </svg>
                             댓글 <span style={{ color: '#378ADD', marginLeft: '5px' }}>0</span>
                         </div>
 
-                        {/* 댓글 입력 폼 */}
                         <form onSubmit={(e) => e.preventDefault()} className={styles.replyForm}>
                             <input 
                                 type="text" 
@@ -154,14 +148,12 @@ const BoardFreeDetail = () => {
                             <button type="submit" className={styles.btnreplySubmit}>댓글 등록</button>
                         </form>
 
-                        {/* 댓글 목록 */}
                         <div className={styles.replyList}>
                             <div className={styles.replyItem} style={{ textAlign: 'center', padding: '30px 0', color: '#adb5bd' }}>
                                 등록된 댓글이 없습니다.
                             </div>
                         </div>
 
-                        {/* 댓글 페이지네이션 */}
                         <div className={styles.pagination}>
                             <button className={styles.pageItem}>&lt;</button>
                             <button className={`${styles.pageItem} ${styles.active}`}>1</button>
@@ -172,7 +164,7 @@ const BoardFreeDetail = () => {
 
                 </div> {/* detail-card */}
 
-               <div className={styles.bottomActions}>
+                <div className={styles.bottomActions}>
                     <button className={styles.btnList} onClick={() => navigate('/boardfree')}>목록으로</button>
                 </div>
 
