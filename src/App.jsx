@@ -1,10 +1,6 @@
-import React from 'react';
-import { BrowserRouter, Routes, Route, useSearchParams, Navigate } from 'react-router-dom';
-import { useEffect } from 'react';
-import { jwtDecode } from 'jwt-decode'; 
-
 import React, { useEffect } from 'react';
 import { BrowserRouter, Routes, Route, useSearchParams, Navigate, useNavigate } from 'react-router-dom';
+import { jwtDecode } from 'jwt-decode';
 import Navbar from './components/common/Navbar';
 import Login from './layouts/Login';
 import Signup from './layouts/Signup';
@@ -28,7 +24,6 @@ import NoticeBoardEdit from './layouts/NoticeBoardEdit';
 import NoticeBoardDetail from './layouts/NoticeBoardDetail';
 import BoardFreeEdit from './layouts/BoardFreeEdit';
 
-const PrivateRoute = ({element}) => {
 const PrivateRoute = ({ element }) => {
   const token = localStorage.getItem('token');
   if (!token) {
@@ -40,25 +35,17 @@ const PrivateRoute = ({ element }) => {
 
 const AppInner = () => {
   const [searchParams] = useSearchParams();
-  const urlToken = searchParams.get('token'); 
-  
-  useEffect(() => {
-    if (urlToken) {
-      localStorage.setItem('token', urlToken);
-      window.location.replace('/');
-    }
-  }, [urlToken]);
-
+  const urlToken = searchParams.get('token');
+  const navigate = useNavigate();
 
   const storedToken = localStorage.getItem('token');
-  const isLoggedIn = !!storedToken; // token이 존재하면 true, 아니면 false
-  
+  const isLoggedIn = !!storedToken;
+
   let isAdmin = false;
   let nickname = "";
 
   if (isLoggedIn) {
     try {
-
       const decodedToken = jwtDecode(storedToken);
       isAdmin = decodedToken.isAdmin === 'Y';
       nickname = decodedToken.nickname || "";
@@ -66,29 +53,10 @@ const AppInner = () => {
       console.error("토큰 파싱 에러:", error);
     }
   }
-  const urlToken = searchParams.get('token');
-  const navigate = useNavigate();
-  
-  const token = localStorage.getItem('token');
-  const isLoggedIn = !!token;
 
-  let isAdmin = false;
-  let nickname = "";
-
-  if (isLoggedIn) {
-    try {
-      const payload = JSON.parse(atob(token.split('.')[1]));
-      isAdmin = payload.isAdmin === 'Y';
-      nickname = payload.nickname || "";
-    } catch (error) {
-      console.error("토큰 검증 중 오류가 발생했습니다:", error);
-    }
-  }
-  
   useEffect(() => {
     if (urlToken) {
       localStorage.setItem('token', urlToken);
-      // SPA의 부드러운 전환을 위해 navigate 사용
       navigate('/', { replace: true });
     }
   }, [urlToken, navigate]);
@@ -103,28 +71,28 @@ const AppInner = () => {
         <Route path="/edit-profile" element={<PrivateRoute element={<EditProfile />} />} />
         <Route path="/mypage" element={<PrivateRoute element={<MyPage />} />} />
         <Route path="/admin" element={<AdminPage />} />
-        
+
         {/* 후기 게시판 영역 */}
         <Route path="/boardreview" element={<BoardReview />} />
         <Route path="/boardreview/write" element={<PrivateRoute element={<BoardReviewWrite />} />} />
-        <Route path="/boardreview/edit/:id" element={<PrivateRoute element={<BoardReviewEdit />} />} /> 
+        <Route path="/boardreview/edit/:id" element={<PrivateRoute element={<BoardReviewEdit />} />} />
         <Route path="/boardreview/detail/:id" element={<PrivateRoute element={<BoardReviewDetail />} />} />
-        
+
         {/* 복지 및 페르소나 영역 */}
         <Route path="/welfarelist" element={<WelfareList />} />
         <Route path="/welfaredetail/:id" element={<WelfareDetail />} />
         <Route path="/persona" element={<PrivateRoute element={<Persona />} />} />
-        
+
         {/* 자유 게시판 영역 */}
         <Route path="/boardfree" element={<BoardFree />} />
         <Route path="/boardfree/write" element={<PrivateRoute element={<BoardFreeWrite />} />} />
         <Route path="/boardfree/edit/:id" element={<PrivateRoute element={<BoardFreeEdit />} />} />
         <Route path="/boardfree/detail/:id" element={<PrivateRoute element={<BoardFreeDetail />} />} />
-        
+
         {/* 공지사항 게시판 영역 */}
         <Route path="/noticeboard" element={<NoticeBoard />} />
         <Route path="/notice/write" element={<PrivateRoute element={<NoticeBoardWrite />} />} />
-        <Route path="/notice/edit/:id" element={<PrivateRoute element={<NoticeBoardEdit />} />} /> 
+        <Route path="/notice/edit/:id" element={<PrivateRoute element={<NoticeBoardEdit />} />} />
         <Route path="/notice/detail/:id" element={<NoticeBoardDetail />} />
       </Routes>
     </>
