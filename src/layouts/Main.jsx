@@ -47,7 +47,11 @@ const Main = () => {
               headers: { 'Authorization': `Bearer ${token}` }
             })
               .then(res => res.json())
-              .then(data => setRecommend(data))
+              .then(data => {
+                console.log('recommend 응답:', data)
+                setRecommend(data)
+          })
+                
           }
         })
     }

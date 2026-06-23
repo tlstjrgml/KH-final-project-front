@@ -240,21 +240,14 @@ const EditProfile = () => {
                 </div>
 
                 <div className={styles.field}>
-                    <label htmlFor="incomeLevel">소득분위</label>
+                    <label htmlFor="incomeLevel">소득기준</label>
                     <select className={styles.incomeSelect} id="incomeLevel" name="incomeLevel" value={profile.incomeLevel} onChange={handleChange}>
-                        <option value="">소득분위 선택</option>
-                        <option value="1">1분위 (최저 소득)</option>
-                        <option value="2">2분위</option>
-                        <option value="3">3분위</option>
-                        <option value="4">4분위</option>
-                        <option value="5">5분위 (중위 소득)</option>
-                        <option value="6">6분위</option>
-                        <option value="7">7분위</option>
-                        <option value="8">8분위</option>
-                        <option value="9">9분위</option>
-                        <option value="10">10분위 (최고 소득)</option>
+                        <option value="">소득기준 선택</option>
+                        <option value="0">무관</option>
+                        <option value="1">연소득</option>
+                        <option value="2">기타</option>
                     </select>
-                    <p className={styles.fieldHint}>1분위(최저) ~ 10분위(최고) · 건강보험료 기준 중위소득 구간</p>
+                    <p className={styles.fieldHint}>복지 서비스의 소득 조건 기준에 따라 추천돼요</p>
                 </div>
             </section>
 
