@@ -30,16 +30,34 @@ function AdminDashboard() {
 
     return (
         <section className={`${styles['tab-content']} ${styles['active-tab']}`}>
-            <h2>관리자 대시보드</h2>
+            
+            <div style={{ display: 'flex', alignItems: 'center', marginBottom: '30px', gap: '15px' }}>
+                <h2 style={{ margin: 0, color: '#2c3e50', fontWeight: '800' }}>관리자 대시보드</h2>
+                <div style={{
+                    background: 'linear-gradient(135deg, #f0f4ff 0%, #e0eafc 100%)', // 은은한 파란색 그라데이션
+                    color: '#0d6efd',
+                    padding: '8px 20px',
+                    borderRadius: '30px', // 알약 모양의 둥근 테두리
+                    fontSize: '1rem',
+                    fontWeight: 'bold',
+                    boxShadow: '0 4px 6px rgba(13, 110, 253, 0.1)', // 부드러운 그림자로 입체감 부여
+                    border: '1px solid rgba(13, 110, 253, 0.15)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '6px'
+                }}>
+                    👥 총 누적 가입자 
+                    <span style={{ fontSize: '1.25rem', color: '#004a9f', marginLeft: '4px' }}>{totalUsers}</span> 명
+                </div>
+            </div>
+
+            {/* 2. 하단 차트 영역 */}
             <div className={styles['dashboard-grid']}>
                 
-                {/* 가입자 현황 */}
+                {/* 최근 7일 가입자 추이 */}
                 <div className={`${styles.card} ${styles['chart-card']}`}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                        <h3>최근 7일 가입자 추이</h3>
-                        <h2 style={{ margin: 0, color: '#0d6efd' }}>총 {totalUsers}명</h2>
-                    </div>
-                    <div style={{ width: '100%', height: 350, marginTop: '20px' }}>
+                    <h3 style={{ marginBottom: '20px' }}>최근 7일 가입자 추이</h3>
+                    <div style={{ width: '100%', height: 350 }}>
                         <ResponsiveContainer width="100%" height="100%">
                             <LineChart data={signupData}>
                                 <CartesianGrid strokeDasharray="3 3" vertical={false} />
@@ -53,9 +71,9 @@ function AdminDashboard() {
                     </div>
                 </div>
 
-                {/* 인기 복지 TOP 10 */}
+                {/* 인기 복지 카테고리 */}
                 <div className={`${styles.card} ${styles['chart-card']}`}>
-                    <h3>인기 복지 TOP 10 (조회수 + 찜)</h3>
+                    <h3>인기 복지 카테고리</h3>
                     <div style={{ width: '100%', height: 400, marginTop: '20px' }}>
                         <ResponsiveContainer width="100%" height="100%">
                             <BarChart 
@@ -74,8 +92,6 @@ function AdminDashboard() {
                                 <YAxis tick={{ fontSize: 12 }} />
                                 <Tooltip cursor={{ fill: '#f8f9fa' }} />
                                 <Legend verticalAlign="bottom" wrapperStyle={{ paddingTop: '40px' }} />
-                                
-                                {/* 조회수(왼쪽/녹색), 찜 횟수(오른쪽/빨간색) */}
                                 <Bar dataKey="views" name="조회수" fill="#198754" radius={[4, 4, 0, 0]} />
                                 <Bar dataKey="wishes" name="찜 횟수" fill="#ff4d4f" radius={[4, 4, 0, 0]} />
                             </BarChart>

@@ -1,21 +1,91 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import styles from './NoticeModal.module.css'; 
 
 function NoticeModal({ notice, onClose, onSave, isReadOnly = false }) {
     const [boardTitle, setBoardTitle] = useState('');
     const [boardContent, setBoardContent] = useState('');
+    const [files, setFiles] = useState([]); 
+    const [existingFiles, setExistingFiles] = useState([]); 
+    const [deleteFileIds, setDeleteFileIds] = useState([]); 
+
+    const fileInputRef = useRef(null);
 
     useEffect(() => {
         if (notice) {
-            // 수정 또는 상세보기 모드일 때 기존 데이터 세팅
             setBoardTitle(notice.boardTitle);
             setBoardContent(notice.boardContent || '');
+            setFiles([]);
+            setDeleteFileIds([]); 
+            setExistingFiles(notice.attachments || []);
         } else {
-            // 새 글 작성 모드일 때 입력창 초기화
             setBoardTitle('');
             setBoardContent('');
+            setFiles([]);
+            setExistingFiles([]);
+            setDeleteFileIds([]);
         }
     }, [notice]);
+
+    const handleFileChange = (e) => {
+        if (e.target.files) {
+            const newFiles = Array.from(e.target.files);
+            setFiles((prevFiles) => [...prevFiles, ...newFiles]);
+
+            if (fileInputRef.current) {
+                fileInputRef.current.value = '';
+            }
+        }
+    };
+
+    const handleRemoveFile = (indexToRemove) => {
+        setFiles((prevFiles) => prevFiles.filter((_, idx) => idx !== indexToRemove));
+    };
+
+    const handleRemoveExistingFile = (attmIdToRemove) => {
+        setExistingFiles((prevFiles) => 
+            prevFiles.filter(file => file.attmId !== attmIdToRemove)
+        );
+        setDeleteFileIds((prevIds) => [...prevIds, attmIdToRemove]);
+    };
+
+    // 💡 상세 HTTP 상태 코드와 에러 원인을 화면에 띄워주는 다운로드 로직
+    const handleFileDownload = async (attmId, fileName) => {
+        const token = localStorage.getItem('token');
+        if (!token) {
+            alert("로그인이 필요합니다.");
+            return;
+        }
+
+        const downloadUrl = `http://localhost:8080/board/download/${attmId}`;
+        console.log("다운로드 시도 URL:", downloadUrl);
+
+        try {
+            const response = await fetch(downloadUrl, {
+                method: 'GET',
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+
+            if (!response.ok) {
+                const errorText = await response.text();
+                throw new Error(`[HTTP ${response.status}] 서버 응답 실패\n사유: ${errorText || '원인 불명'}`);
+            }
+
+            const blob = await response.blob();
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = fileName;
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+            window.URL.revokeObjectURL(url);
+        } catch (error) {
+            console.error("Detailed Download Error:", error);
+            alert(`파일 다운로드 에러 발생:\n${error.message}`);
+        }
+    };
 
     const handleSubmit = async () => {
         if (!boardTitle.trim() || !boardContent.trim()) { 
@@ -29,22 +99,33 @@ function NoticeModal({ notice, onClose, onSave, isReadOnly = false }) {
             return; 
         }
 
-        // 💡 1. 모드 판별을 가장 먼저 실행합니다. (에러 해결 핵심 포인트)
         const isEditMode = notice && notice.boardId;
+        const formData = new FormData();
 
-        // 💡 2. 이제 에러 없이 isEditMode와 notice.boardId를 사용할 수 있습니다.
-        // 백엔드로 보낼 JSON 데이터 (memberId: 999 삭제, boardId 추가)
-        const requestBody = {
-            boardId: isEditMode ? notice.boardId : null,
-            boardTitle: boardTitle,
-            boardContent: boardContent,
-            boardType: "NOT" 
-        };
+        if (isEditMode) {
+            formData.append("boardId", notice.boardId);
+        }
+
+        formData.append("boardTitle", boardTitle);
+        formData.append("boardContent", boardContent);
+        formData.append("boardType", "NOT"); 
+
+        if (files.length > 0) {
+            const fileKey = isEditMode ? 'newFiles' : 'files';
+            files.forEach(file => {
+                formData.append(fileKey, file);
+            });
+        }
+
+        if (deleteFileIds.length > 0) {
+            deleteFileIds.forEach(id => {
+                formData.append("deleteFileIds", id);
+            });
+        }
         
-        // 3. 모드에 따라 URL과 HTTP 메서드를 다르게 설정합니다.
         const url = isEditMode 
-            ? `http://localhost:8080/board/${notice.boardId}` // 수정 (PUT)
-            : `http://localhost:8080/board/write`;            // 작성 (POST)
+            ? `http://localhost:8080/board/${notice.boardId}` 
+            : `http://localhost:8080/board/write`; 
             
         const method = isEditMode ? 'PUT' : 'POST';
 
@@ -52,19 +133,16 @@ function NoticeModal({ notice, onClose, onSave, isReadOnly = false }) {
             const response = await fetch(url, {
                 method: method, 
                 headers: {
-                    'Content-Type': 'application/json',
                     'Authorization': `Bearer ${token}` 
                 },
-                body: JSON.stringify(requestBody)
+                body: formData
             });
 
             if (!response.ok) {
-                // 추가 팁: 백엔드에서 보낸 에러 메시지(400 에러 사유 등)를 읽어서 띄워주면 디버깅이 더 편합니다.
                 const errorText = await response.text();
                 throw new Error(errorText || (isEditMode ? "서버 수정 실패" : "서버 등록 실패"));
             }
 
-            // 부모 컴포넌트(AdminNotice)의 handleSaveNotice를 호출하여 모달 닫기 및 목록 새로고침
             alert(isEditMode ? "수정이 완료되었습니다." : "새 공지사항이 등록되었습니다.");
             onSave(); 
 
@@ -82,7 +160,7 @@ function NoticeModal({ notice, onClose, onSave, isReadOnly = false }) {
                     <button className={styles['close-btn']} onClick={onClose}>✕</button>
                 </div>
 
-                <div className={styles['modal-body']}>
+                <div className={styles['modal-body']} style={{ maxHeight: '55vh', overflowY: 'auto', paddingRight: '8px' }}>
                     <div style={{ marginBottom: '15px' }}>
                         <label style={{ display: 'block', fontWeight: 'bold', marginBottom: '8px', color: '#343A40' }}>제목</label>
                         <input
@@ -113,6 +191,66 @@ function NoticeModal({ notice, onClose, onSave, isReadOnly = false }) {
                             }}
                             disabled={isReadOnly}
                         />
+                    </div>
+
+                    <div style={{ marginBottom: '15px' }}>
+                        <label style={{ display: 'block', fontWeight: 'bold', marginBottom: '8px', color: '#343A40' }}>
+                            첨부파일
+                        </label>
+                        
+                        {!isReadOnly && (
+                            <input
+                                type="file"
+                                multiple
+                                ref={fileInputRef}
+                                onChange={handleFileChange}
+                                style={{ marginBottom: '12px', display: 'block' }}
+                            />
+                        )}
+                        
+                        {!isReadOnly && files.length > 0 && (
+                            <div style={{ border: '1px solid #E9ECEF', borderRadius: '6px', padding: '10px', backgroundColor: '#F8F9FA', marginBottom: '12px' }}>
+                                <p style={{ margin: '0 0 8px 0', fontSize: '13px', fontWeight: 'bold', color: '#495057' }}>새로 추가된 파일 ({files.length}개):</p>
+                                {files.map((file, idx) => (
+                                    <div key={idx} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px', fontSize: '14px' }}>
+                                        <span style={{ color: '#495057', wordBreak: 'break-all' }}>{file.name}</span>
+                                        <button type="button" onClick={() => handleRemoveFile(idx)} style={{ border: 'none', background: 'none', color: '#DC3545', cursor: 'pointer', fontWeight: 'bold', marginLeft: '10px' }}>삭제</button>
+                                    </div>
+                                ))}
+                            </div>
+                        )}
+
+                        {existingFiles.length > 0 ? (
+                            <div style={{ border: '1px solid #CED4DA', borderRadius: '6px', padding: '10px', backgroundColor: '#FFF' }}>
+                                <p style={{ margin: '0 0 8px 0', fontSize: '13px', fontWeight: 'bold', color: '#495057' }}>등록된 첨부파일 ({existingFiles.length}개):</p>
+                                {existingFiles.map((file, idx) => {
+                                    const fileId = file.attmId;
+                                    const fileName = file.originalName || "첨부파일";
+
+                                    return (
+                                        <div key={idx} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px', fontSize: '14px' }}>
+                                            <span 
+                                                onClick={() => handleFileDownload(fileId, fileName)}
+                                                style={{ color: '#007BFF', textDecoration: 'underline', cursor: 'pointer', fontWeight: '500', wordBreak: 'break-all', marginRight: '10px' }}
+                                            >
+                                                📎 {fileName}
+                                            </span>
+                                            {!isReadOnly && (
+                                                <button 
+                                                    type="button" 
+                                                    onClick={() => handleRemoveExistingFile(fileId)} 
+                                                    style={{ border: 'none', background: 'none', color: '#DC3545', cursor: 'pointer', fontWeight: 'bold' }}
+                                                >
+                                                    삭제
+                                                </button>
+                                            )}
+                                        </div>
+                                    );
+                                })}
+                            </div>
+                        ) : (
+                            isReadOnly && <div style={{ color: '#868E96', fontSize: '14px' }}>첨부된 파일이 없습니다.</div>
+                        )}
                     </div>
                 </div>
 
