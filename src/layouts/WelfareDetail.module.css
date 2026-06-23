@@ -305,3 +305,27 @@
   color: #D4537E;
   font-weight: 500;
 }
+
+.btnRowRight {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 10px;
+}
+
+.wishCountInline {
+  font-size: 12px;
+  color: #ADB5BD;
+}
+
+.wishCountInline span {
+  color: #D4537E;
+  font-weight: 500;
+}
+
+.heartOnlyBox {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 6px;
+}
