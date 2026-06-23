@@ -33,6 +33,20 @@ const PrivateRoute = ({ element }) => {
   return element;
 };
 
+const AdminRoute = ({element}) => {
+  const token = localStorage.getItem('token');
+  if(!token) {
+    alert('로그인이 필요한 페이지입니다. 로그인을 해주세요');
+    return <Navigate to="/login"/>;
+  }
+  const isAdmin = JSON.parse(atob(token.split('.')[1])).isAdmin === 'Y';
+  if(!isAdmin){
+    alert('관리자만 접근할 수 있는 페이지입니다.');
+    return <Navigate to="/"/>;
+  }
+  return element;
+}
+
 const AppInner = () => {
   const [searchParams] = useSearchParams();
   const urlToken = searchParams.get('token');
@@ -70,8 +84,8 @@ const AppInner = () => {
         <Route path="/signup" element={<Signup />} />
         <Route path="/edit-profile" element={<PrivateRoute element={<EditProfile />} />} />
         <Route path="/mypage" element={<PrivateRoute element={<MyPage />} />} />
-        <Route path="/admin" element={<AdminPage />} />
-
+        <Route path="/admin" element={<AdminRoute element={<AdminPage />} />} />
+        
         {/* 후기 게시판 영역 */}
         <Route path="/boardreview" element={<BoardReview />} />
         <Route path="/boardreview/write" element={<PrivateRoute element={<BoardReviewWrite />} />} />
