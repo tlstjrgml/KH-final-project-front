@@ -1,0 +1,26 @@
+.paging {
+  display: flex;
+  justify-content: center;
+  gap: 4px;
+  margin-top: 16px;
+}
+
+.pgbtn {
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid #DEE2E6;
+  border-radius: 10px;
+  font-size: 12px;
+  cursor: pointer;
+  background: #fff;
+  color: #6C757D;
+  font-family: inherit;
+  transition: all 0.15s;
+}
+
+.pgbtn:hover:not(:disabled) { border-color: #85B7EB; color: #185FA5; }
+.pgbtn.on { background: #378ADD; color: #fff; border-color: #378ADD; }
+.pgbtn:disabled { opacity: 0.4; cursor: default; }

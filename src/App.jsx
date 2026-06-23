@@ -1,6 +1,6 @@
-import React from 'react';
-import { BrowserRouter, Routes, Route, useSearchParams, Navigate } from 'react-router-dom';
-import { useEffect } from 'react';
+import React, { useEffect } from 'react';
+import { BrowserRouter, Routes, Route, useSearchParams, Navigate, useNavigate } from 'react-router-dom';
+import { jwtDecode } from 'jwt-decode';
 import Navbar from './components/common/Navbar';
 import Login from './layouts/Login';
 import Signup from './layouts/Signup';
@@ -24,30 +24,42 @@ import NoticeBoardEdit from './layouts/NoticeBoardEdit';
 import NoticeBoardDetail from './layouts/NoticeBoardDetail';
 import BoardFreeEdit from './layouts/BoardFreeEdit';
 
-
-
-
-const PrivateRoute = ({element}) => {
+const PrivateRoute = ({ element }) => {
   const token = localStorage.getItem('token');
-  if(!token){
+  if (!token) {
     alert('로그인이 필요한 페이지입니다. 로그인을 해주세요');
-    return <Navigate to="/login"/>;
+    return <Navigate to="/login" />;
   }
   return element;
-}
+};
 
 const AppInner = () => {
   const [searchParams] = useSearchParams();
-  const token = searchParams.get('token');
-  const isLoggedIn = localStorage.getItem('token') ? true : false;
-  const isAdmin = isLoggedIn ? JSON.parse(atob(localStorage.getItem('token').split('.')[1])).isAdmin === 'Y' : false;
-  const nickname = isLoggedIn ? JSON.parse(decodeURIComponent(escape(atob(localStorage.getItem('token').split('.')[1])))).nickname : '';
-  useEffect(() => {
-    if (token) {
-      localStorage.setItem('token', token);
-      window.location.replace('/');
+  const urlToken = searchParams.get('token');
+  const navigate = useNavigate();
+
+  const storedToken = localStorage.getItem('token');
+  const isLoggedIn = !!storedToken;
+
+  let isAdmin = false;
+  let nickname = "";
+
+  if (isLoggedIn) {
+    try {
+      const decodedToken = jwtDecode(storedToken);
+      isAdmin = decodedToken.isAdmin === 'Y';
+      nickname = decodedToken.nickname || "";
+    } catch (error) {
+      console.error("토큰 파싱 에러:", error);
     }
-  }, []);
+  }
+
+  useEffect(() => {
+    if (urlToken) {
+      localStorage.setItem('token', urlToken);
+      navigate('/', { replace: true });
+    }
+  }, [urlToken, navigate]);
 
   return (
     <>
@@ -59,33 +71,33 @@ const AppInner = () => {
         <Route path="/edit-profile" element={<PrivateRoute element={<EditProfile />} />} />
         <Route path="/mypage" element={<PrivateRoute element={<MyPage />} />} />
         <Route path="/admin" element={<AdminPage />} />
+
+        {/* 후기 게시판 영역 */}
         <Route path="/boardreview" element={<BoardReview />} />
-     
         <Route path="/boardreview/write" element={<PrivateRoute element={<BoardReviewWrite />} />} />
         <Route path="/boardreview/edit/:id" element={<PrivateRoute element={<BoardReviewEdit />} />} />
         <Route path="/boardreview/detail/:id" element={<PrivateRoute element={<BoardReviewDetail />} />} />
+
+        {/* 복지 및 페르소나 영역 */}
         <Route path="/welfarelist" element={<WelfareList />} />
         <Route path="/welfaredetail/:id" element={<WelfareDetail />} />
         <Route path="/persona" element={<PrivateRoute element={<Persona />} />} />
+
+        {/* 자유 게시판 영역 */}
         <Route path="/boardfree" element={<BoardFree />} />
-
-        <Route path="/boardfree/detail" element={<BoardFreeDetail />} />
         <Route path="/boardfree/write" element={<PrivateRoute element={<BoardFreeWrite />} />} />
-        <Route path="/noticeboard" element={<NoticeBoard />} />
-        <Route path="/notice/write" element={<PrivateRoute element={<NoticeBoardWrite />} />} />
-        <Route path="/notice/detail" element={<NoticeBoardDetail />} />
-        <Route path="/notice/eidt" element={<PrivateRoute element={<NoticeBoardEdit />} />} />
+        <Route path="/boardfree/edit/:id" element={<PrivateRoute element={<BoardFreeEdit />} />} />
+        <Route path="/boardfree/detail/:id" element={<PrivateRoute element={<BoardFreeDetail />} />} />
 
-        <Route path="/boardfree/edit" element={<PrivateRoute element={<BoardFreeEdit />} />} />
-        <Route path="/notice/write" element={<PrivateRoute element={<NoticeBoardWrite />} />} />
-        <Route path="/notice/detail" element={<NoticeBoardDetail />} />
-        <Route path="/notice/edit" element={<PrivateRoute element={<NoticeBoardEdit />} />} />
+        {/* 공지사항 게시판 영역 */}
         <Route path="/noticeboard" element={<NoticeBoard />} />
- 
+        <Route path="/notice/write" element={<PrivateRoute element={<NoticeBoardWrite />} />} />
+        <Route path="/notice/edit/:id" element={<PrivateRoute element={<NoticeBoardEdit />} />} />
+        <Route path="/notice/detail/:id" element={<NoticeBoardDetail />} />
       </Routes>
     </>
   );
-}
+};
 
 function App() {
   return (

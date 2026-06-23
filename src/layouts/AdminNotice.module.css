@@ -9,15 +9,42 @@
     to { opacity: 1; transform: translateY(0); }
 }
 
+/* --- 헤더 레이아웃 (좌우 분리) --- */
 .header-controls {
     display: flex;
     justify-content: space-between;
-    align-items: center;
+    align-items: flex-start;
     margin-bottom: 20px;
     padding: 10px 0;
 }
 
-.header-controls h2 { margin: 0; }
+.header-controls h2 { 
+    margin: 0; 
+    padding-top: 5px; /* 우측 버튼과 시각적 높이 맞춤 */
+}
+
+/* --- 우측 컨트롤 영역 (위: 작성버튼, 아래: 검색) --- */
+.right-controls {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end; /* 우측 정렬 */
+    gap: 10px;
+}
+
+.search-group {
+    display: flex;
+    gap: 10px;
+}
+
+/* --- 검색/정렬 요소 스타일 --- */
+.sort-select {
+    padding: 10px;
+    border-radius: 6px;
+    border: 1px solid #CED4DA;
+    outline: none;
+    background-color: #fff;
+    cursor: pointer;
+}
 
 .search-input {
     padding: 10px 15px;
@@ -33,6 +60,22 @@
     border-color: #0d6efd;
 }
 
+.search-btn {
+    padding: 10px 20px;
+    border-radius: 6px;
+    border: 1px solid #007bff;
+    background-color: #007bff;
+    color: #fff;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.search-btn:hover { 
+    background-color: #0b5ed7; 
+}
+
+/* --- 메인 콘텐츠 및 테이블 스타일 --- */
 .card {
     background: white;
     border-radius: 10px;
@@ -72,6 +115,7 @@
     text-decoration: underline;
 }
 
+/* --- 상태 배지 스타일 --- */
 .badge-on {
     background-color: #198754;
     color: white;
@@ -100,6 +144,7 @@
 
 .badge-off:hover { opacity: 0.8; }
 
+/* --- 일반 버튼 스타일 --- */
 .primary-btn {
     padding: 12px 24px;
     background-color: #0d6efd;
@@ -113,6 +158,11 @@
 }
 
 .primary-btn:hover { background-color: #0b5ed7; }
+
+.action-buttons {
+    display: flex;
+    gap: 5px;
+}
 
 .detail-btn {
     padding: 6px 14px;
@@ -139,6 +189,7 @@
 
 .danger-btn:hover { background-color: #C82333; }
 
+/* --- 페이징 스타일 --- */
 .pagination {
     display: flex;
     justify-content: center;

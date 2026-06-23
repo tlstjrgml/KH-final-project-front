@@ -1,22 +1,47 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styles from './BoardFree.module.css';
 
 const BoardFree = () => {
     const navigate = useNavigate();
-    const pages = [1, 2, 3, 4, 5];
+    const [boardList, setBoardList] = useState([]);
+    const [pages, setPages] = useState([1]);
+    const [currentPage, setCurrentPage] = useState(1);
+    const [endPage, setEndPage] = useState(1);
 
-    const handleRowClick = () => {
-        navigate('/boardfree/detail');
-    };
+    useEffect(() => {
+        const fetchBoardList = async () => {
+            try {
+                const res = await fetch(`http://localhost:8080/board/list?boardType=FRE&page=${currentPage}`);
+                const data = await res.json();
+                //console.log('자유게시판 SQL 수신 데이터:', data);
+
+                setBoardList(data.content || []);
+
+                const maxPage = data.pagination?.endPage || 1;
+                setEndPage(maxPage);
+                setPages(Array.from({ length: maxPage }, (_, i) => i + 1));
+            
+            } catch (err) {
+                console.error('목록 조회 실패:', err);
+            }
+        };
+        
+        fetchBoardList(); 
+    }, [currentPage]); 
 
     return (
-        <main className="page">
+        <main className={styles.page}>
             <div className={styles.boardCard}>
+
                 <div className={styles.boardHeader}>
-                    <h2 className={styles.boardTitle}>자유게시판</h2>
-                    <button type="button" className={styles.btnWrite} onClick={() => navigate('/boardfree/write')}>
-                        <svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
+                    <h2 className={styles.boardTitle}>자유 게시판</h2>
+                    <button
+                        type="button"
+                        className={styles.btnWrite}
+                        onClick={() => navigate('/boardfree/write')}
+                    >
+                        <svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14" /></svg>
                         글쓰기
                     </button>
                 </div>
@@ -32,24 +57,78 @@ const BoardFree = () => {
                         </tr>
                     </thead>
                     <tbody>
-                        {[...Array(10)].map((_, index) => (
-                            <tr key={index} className={styles.dataRow} onClick={handleRowClick} style={{ cursor: 'pointer' }}>
-                                <td>{10 - index}</td>
-                                <td>{index === 0 ? '청년 주거지원 정책 관련해서 질문 있습니다!' : '안녕하세요'}</td>
-                                <td>{index === 0 ? '김청년' : '건강최고'}</td>
-                                <td>{index === 0 ? '2026-06-15' : '2026-06-08'}</td>
-                                <td>{index === 0 ? '152' : '10'}</td>
+                        {boardList.length === 0 ? (
+                            <tr>
+                                <td colSpan="5" style={{ textAlign: 'center' }}>등록된 게시글이 없습니다.</td>
                             </tr>
-                        ))}
+                        ) : (
+                            boardList.map((board) => (
+                                <tr
+                                    key={board.boardId}
+                                    className={styles.dataRow}
+                                    onClick={() => navigate(`/boardfree/detail/${board.boardId}`)}
+                                    style={{ cursor: 'pointer' }}
+                                >
+                                    {/* 글 번호 */}
+                                    <td className={`${styles.colId} ${styles.boardId}`}>{board.boardId}</td>
+                                    
+                                    {/* 글 제목 */}
+                                    <td className={styles.colTitle}>{board.boardTitle ?? board.title ?? '제목 없음'}</td>
+                                    
+                                    {/* 작성자 닉네임 */}
+                                    <td className={styles.colAuthor}>{board.writerNickname ?? '작성자 없음'}</td>
+                                    
+                                    {/* 작성일자  */}
+                                    <td className={styles.colDate}>
+                                        {board.createDate && typeof board.createDate === 'string'
+                                            ? board.createDate.split('T')[0]
+                                            : '-'}
+                                    </td>
+                                    
+                                    {/* 조회수 */}
+                                    <td className={styles.colViews}>{board.views ?? 0}</td>
+                                </tr>
+                            ))
+                        )}
                     </tbody>
                 </table>
 
-                <div className={styles.pagination}>
-                    <a className={styles.pageItem}>&lt;</a>
+                {/* 페이지네이션 인터페이스 */}
+                <div className={styles.pagination} id="pagination-container">
+                    <a className={styles.pageItem}
+                        aria-label="Previous"
+                        onClick={() => currentPage > 1 && setCurrentPage(currentPage - 1)}
+                        style={{
+                            pointerEvents: currentPage <= 1 ? 'none' : 'auto',
+                            opacity: currentPage <= 1 ? 0.4 : 1,
+                            cursor: currentPage <= 1 ? 'default' : 'pointer'
+                        }}
+                    >
+                        &lt;
+                    </a>
+
                     {pages.map((p) => (
-                        <a key={p} className={`${styles.pageItem} ${p === 1 ? styles.active : ''}`}>{p}</a>
+                        <a
+                            key={p}
+                            className={`${styles.pageItem} ${p === currentPage ? styles.active : ''}`}
+                            onClick={() => setCurrentPage(p)}
+                            style={{ cursor: 'pointer' }}
+                        >
+                            {p}
+                        </a>
                     ))}
-                    <a className={styles.pageItem}>&gt;</a>
+
+                    <a className={styles.pageItem}
+                        aria-label="Next"
+                        onClick={() => currentPage < endPage && setCurrentPage(currentPage + 1)}
+                        style={{
+                            pointerEvents: currentPage >= endPage ? 'none' : 'auto',
+                            opacity: currentPage >= endPage ? 0.4 : 1,
+                            cursor: currentPage >= endPage ? 'default' : 'pointer'
+                        }}
+                    >
+                        &gt;
+                    </a>
                 </div>
 
                 <div className={styles.searchBar}>
@@ -61,6 +140,7 @@ const BoardFree = () => {
                     <input type="text" className={styles.searchInput} placeholder="검색어를 입력해주세요" />
                     <button type="button" className={styles.btnSearch}>검색</button>
                 </div>
+
             </div>
         </main>
     );

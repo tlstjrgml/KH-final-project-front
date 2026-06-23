@@ -1,131 +1,150 @@
-import React, { useState, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useState, useEffect, useRef } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
 import styles from './BoardFreeEdit.module.css';
 
-const BoardFReeEdit = () => {
+const BoardFreeEdit = () => {
+    const { id } = useParams();
     const navigate = useNavigate();
-    const formRef = useRef(null);
-    
-    // 상태 관리 (삭제할 기존 파일 아이디, 새로운 파일 목록, 모달 열림 여부)
-    const [deletedExistingFiles, setDeletedExistingFiles] = useState([]);
-    const [fileRows, setFileRows] = useState([{ id: Date.now(), files: [] }]);
-    const [isModalOpen, setIsModalOpen] = useState(false);
 
-    // 이벤트 핸들러: 기존 첨부파일 삭제
+    // 1. 기본 폼 상태 관리
+    const [title, setTitle] = useState("");
+    const [content, setContent] = useState("");
+    const [isLoading, setIsLoading] = useState(true);
+
+   // 2. 첨부파일 상태 관리 (요청하신 기능 반영)
+    const [existingFiles, setExistingFiles] = useState([]);
+    const [deletedExistingFiles, setDeletedExistingFiles] = useState([]); // 삭제할 기존 파일 ID 배열
+    
+    const [fileRows, setFileRows] = useState([{ id: 0, files: [] }]); // 새 첨부파일 배열
+    const nextRowId = useRef(1);
+
+    // [데이터 불러오기]
+    useEffect(() => {
+        const fetchBoardDetail = async () => {
+            const token = localStorage.getItem("token");
+            try {
+                const response = await fetch(`/react/board/${id}`, {
+                    headers: token ? { 'Authorization': `Bearer ${token}` } : {}
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    setTitle(data.boardTitle || "");
+                    setContent(data.boardContent || "");
+                } else {
+                    alert("게시글 정보를 불러올 수 없거나 권한이 없습니다.");
+                    navigate(-1);
+                }
+            } catch (err) {
+                console.error("게시글 로딩 오류:", err);
+            } finally {
+                setIsLoading(false);
+            }
+        };
+
+        fetchBoardDetail();
+    }, [id, navigate]);
+
+    // [첨부파일 핸들러]
     const handleDeleteExisting = (fileId) => {
-        if (window.confirm("기존 첨부파일을 삭제하시겠습니까?")) {
+        if (window.confirm("기존 첨부파일을 삭제하시겠습니까? (수정 완료 시 최종 반영됩니다)")) {
             setDeletedExistingFiles([...deletedExistingFiles, fileId]);
         }
     };
 
-    // 이벤트 핸들러: 새 첨부파일 행 추가
     const handleAddFileRow = () => {
-        setFileRows([...fileRows, { id: Date.now(), files: [] }]);
+        setFileRows([...fileRows, { id: nextRowId.current, files: [] }]);
+        nextRowId.current += 1;
     };
 
-    // 이벤트 핸들러: 새 첨부파일 행 삭제
     const handleRemoveFileRow = (rowId) => {
-        setFileRows(fileRows.filter((row) => row.id !== rowId));
+        setFileRows(fileRows.filter(row => row.id !== rowId));
     };
 
-    // 이벤트 핸들러: 첨부파일 변경 처리 및 용량 제한 검사
-    const handleFileChange = (rowId, event) => {
-        const selectedFiles = Array.from(event.target.files);
-        const maxFileSize = 5 * 1024 * 1024; // 5MB
-
-        for (let file of selectedFiles) {
-            if (file.size > maxFileSize) {
-                alert('첨부파일 최대 용량을 넘었습니다. 다시 첨부해주세요.');
-                event.target.value = '';
-                return;
-            }
-        }
-
-        setFileRows(
-            fileRows.map((row) =>
+    const handleFileChange = (rowId, e) => {
+        const selectedFiles = Array.from(e.target.files);
+        if (selectedFiles.length > 0) {
+            setFileRows(fileRows.map(row => 
                 row.id === rowId ? { ...row, files: selectedFiles } : row
-            )
-        );
+            ));
+        }
     };
 
-    // 이벤트 핸들러: 폼 제출 (유효성 검사 및 모달 토글)
-    const handleSubmit = (e) => {
+    // [수정 완료 폼 제출]
+    const handleFormSubmit = async (e) => {
         e.preventDefault();
-        const form = formRef.current;
-        
-        if (!form.board_title.value.trim()) { 
-            alert('제목을 입력해주세요.'); 
-            return; 
-        }
-        if (!form.board_content.value.trim()) { 
-            alert('내용을 입력해주세요.'); 
-            return; 
+
+        if (!title.trim() || !content.trim()) {
+            alert('제목과 내용을 모두 입력해주세요.');
+            return;
         }
 
-        // 새 첨부파일 여부 확인
-        const hasNewFiles = fileRows.some(row => row.files.length > 0);
-        // 기존 첨부파일 존재 여부 확인 (샘플 데이터 1번 기준)
-        const hasExistingFiles = !deletedExistingFiles.includes(1);
+        const token = localStorage.getItem("token");
 
-        // 둘 다 없을 경우 모달 출력
-        if (!hasNewFiles && !hasExistingFiles) {
-            setIsModalOpen(true);
-        } else {
-            form.submit();
+        try {
+            const response = await fetch(`/react/board/${id}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify({
+                    boardTitle: title,
+                    boardContent: content,
+                    // 삭제된 기존 파일 ID 목록 전송 (백엔드 설계에 맞게 키값 변경 필요)
+                    deletedFileIds: deletedExistingFiles 
+                })
+            });
+
+            if (response.ok) {
+                alert('수정이 성공적으로 완료되었습니다!');
+                navigate(`/boardfree/detail/${id}`);
+            } else {
+                alert('게시글 수정에 실패했습니다.');
+            }
+        } catch (error) {
+            console.error('수정 통신 오류:', error);
         }
     };
 
-    // 첨부파일 없이 수정 승인
-    const confirmSubmit = () => {
-        setIsModalOpen(false);
-        formRef.current.submit();
-    };
+    if (isLoading) {
+        return <div style={{ textAlign: 'center', padding: '100px' }}>데이터를 불러오는 중입니다...</div>;
+    }
 
     return (
-        <div className={styles.page}>
+        <main className={styles.page}>
             <div className={styles.writeCard}>
                 <div className={styles.writeHeader}>
                     <h2 className={styles.writeTitle}>자유게시판 글 수정</h2>
                 </div>
 
-                <form 
-                    id="attmForm" 
-                    ref={formRef}
-                    action="/board/update" 
-                    method="POST" 
-                    encType="multipart/form-data"
-                    onSubmit={handleSubmit}
-                >
-                    <input type="hidden" name="board_type" value="FRE" />
-                    <input type="hidden" name="board_id" value="123" />
-
+                <form onSubmit={handleFormSubmit}>
+                    
+                    {/* 제목 입력 필드 */}
                     <div className={styles.field}>
-                        <label htmlFor="board_title">
-                            제목<span className={styles.req}>*</span>
-                        </label>
+                        <label>제목</label>
                         <input 
                             type="text" 
-                            id="board_title" 
-                            name="board_title" 
-                            defaultValue="청년 주거지원 정책 관련해서 질문 있습니다!" 
-                            placeholder="게시글 제목을 입력해주세요" 
-                            required 
-                        />
-                    </div>
-
-                    <div className={styles.field}>
-                        <label htmlFor="board_content">
-                            내용<span className={styles.req}>*</span>
-                        </label>
-                        <textarea 
-                            id="board_content" 
-                            name="board_content" 
-                            defaultValue="안녕하세요, 이번에 주거지원 정책을 알아보려고 하는데 여러 가지 헷갈리는 부분이 있어서 질문 남깁니다.&#10;&#10;소득 분위 산정 기준이 세전인지 세후인지, 그리고 부모님과 떨어져 살아도 부모님 소득이 합산되는지 궁금합니다.&#10;혹시 최근에 신청해보신 분 계시면 답변 부탁드리겠습니다! 감사합니다."
-                            placeholder="청년복지 관련 자유로운 이야기를 나누어보세요. (욕설, 비방 등은 삭제될 수 있습니다.)" 
+                            value={title} 
+                            onChange={(e) => setTitle(e.target.value)} 
+                            placeholder="제목을 입력하세요"
                             required
                         />
                     </div>
 
+                    {/* 내용 입력 필드 */}
+                    <div className={styles.field}>
+                        <label>내용</label>
+                        <textarea 
+                            value={content} 
+                            onChange={(e) => setContent(e.target.value)} 
+                            rows="12"
+                            placeholder="내용을 입력하세요"
+                            required
+                        />
+                    </div>
+
+                    {/*  파일 첨부 전체 영역 시작 */}
                     <div className={styles.field}>
                         <div className={styles.fileHeader}>
                             <label>
@@ -136,41 +155,46 @@ const BoardFReeEdit = () => {
                             </label>
                         </div>
 
-                        {/* ── 기존 첨부파일 영역 ── */}
+                        {/* 기존 첨부파일 영역 */}
                         <div className={styles.existingFiles} id="existingFilesArea">
                             <label style={{ fontSize: '12px', color: '#6C757D', fontWeight: 500, marginBottom: '6px', display: 'block' }}>
-                                기존에 첨부된 파일
+                                <div className={styles.replyItem} style={{ textAlign: 'center', padding: '30px 0', color: '#adb5bd' }}>
+                                        등록된 첨부파일이 없습니다.
+                                </div>
                             </label>
                             
-                            {!deletedExistingFiles.includes(1) && (
-                                <div className={styles.existingFileItem}>
-                                    <div className={styles.existingFileName}>
-                                        <svg viewBox="0 0 24 24" style={{ width: '14px', height: '14px', stroke: 'currentColor', strokeWidth: 2, fill: 'none' }}>
-                                            <path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48" />
-                                        </svg>
-                                        주거지원_정책안내_가이드.pdf <span style={{ color: '#ADB5BD', fontSize: '11px' }}>(1.2MB)</span>
+                            {existingFiles.map((file) => (
+                                // 삭제 목록에 포함되지 않은 파일만 렌더링
+                                !deletedExistingFiles.includes(file.id) && (
+                                    <div key={`existing-${file.id}`} className={styles.existingFileItem}>
+                                        <div className={styles.existingFileName}>
+                                            <svg viewBox="0 0 24 24" style={{ width: '14px', height: '14px', stroke: 'currentColor', strokeWidth: 2, fill: 'none' }}>
+                                                <path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48" />
+                                            </svg>
+                                            {file.name} <span style={{ color: '#ADB5BD', fontSize: '11px' }}>({file.size})</span>
+                                        </div>
+                                        <button
+                                            type="button"
+                                            className={styles.btnRemoveExisting}
+                                            onClick={() => handleDeleteExisting(file.id)}
+                                            title="삭제"
+                                        >
+                                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
+                                                <line x1="18" y1="6" x2="6" y2="18" />
+                                                <line x1="6" y1="6" x2="18" y2="18" />
+                                            </svg>
+                                        </button>
                                     </div>
-                                    <button
-                                        type="button"
-                                        className={styles.btnRemoveExisting}
-                                        onClick={() => handleDeleteExisting(1)}
-                                        title="삭제"
-                                    >
-                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
-                                            <line x1="18" y1="6" x2="6" y2="18" />
-                                            <line x1="6" y1="6" x2="18" y2="18" />
-                                        </svg>
-                                    </button>
-                                </div>
-                            )}
+                                )
+                            ))}
                         </div>
 
-                        {/* 삭제할 기존 파일 ID 전송용 */}
-                        {deletedExistingFiles.map((id) => (
-                            <input key={`del-${id}`} type="hidden" name="deleteFileIds" value={id} />
+                        {/* 폼 전송 시 백엔드로 삭제할 파일 ID 전달용 hidden input */}
+                        {deletedExistingFiles.map((delId) => (
+                            <input key={`del-${delId}`} type="hidden" name="deleteFileIds" value={delId} />
                         ))}
 
-                        {/* ── 새로운 파일 첨부 영역 ── */}
+                        {/* 새로운 파일 첨부 영역 */}
                         <div className={styles.fileHeader} style={{ marginTop: '16px' }}>
                             <label style={{ fontSize: '12px', color: '#6C757D', fontWeight: 500 }}>
                                 새 파일 추가하기
@@ -193,16 +217,10 @@ const BoardFReeEdit = () => {
                                         name="file" 
                                         id={`file_input_${row.id}`}
                                         className={styles.fileInputHidden} 
+                                        style={{ display: 'none' }} // UI를 위해 숨김 처리
                                         multiple 
                                         onChange={(e) => handleFileChange(row.id, e)}
                                     />
-                                    
-                                    <input type="hidden" name="attm_id" value="" />
-                                    <input type="hidden" name="original_name" value={row.files.map(f => f.name).join(',')} />
-                                    <input type="hidden" name="rename_name" value="" />
-                                    <input type="hidden" name="attm_path" value="" />
-                                    <input type="hidden" name="attm_status" value="Y" />
-                                    <input type="hidden" name="board_id" value="" />
                                     
                                     <div 
                                         className={styles.fileCustomBox} 
@@ -219,7 +237,10 @@ const BoardFReeEdit = () => {
                                             type="button" 
                                             className={styles.btnRemoveFile} 
                                             title="삭제" 
-                                            onClick={() => handleRemoveFileRow(row.id)}
+                                            onClick={(e) => {
+                                                e.stopPropagation(); // 부모 요소의 onClick(파일 선택)이 발동하지 않도록 방지
+                                                handleRemoveFileRow(row.id);
+                                            }}
                                         >
                                             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
                                                 <line x1="18" y1="6" x2="6" y2="18" />
@@ -233,45 +254,13 @@ const BoardFReeEdit = () => {
                     </div>
 
                     <div className={styles.formActions}>
-                        <button type="button" className={styles.btnCancel} onClick={() => navigate(-1)}>
-                            취소
-                        </button>
-                        <button type="submit" id="submitAttm" className={styles.btnSubmit}>
-                            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#fff" strokeWidth={2}>
-                                <path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z" />
-                            </svg>
-                            수정 완료
-                        </button>
+                        <button type="button" className={styles.btnCancel} onClick={() => navigate(-1)}>취소</button>
+                        <button type="submit" className={styles.btnSubmit}>수정 완료</button>
                     </div>
                 </form>
             </div>
-
-            {/* 첨부파일 확인 모달 */}
-            {isModalOpen && (
-                <div id="modalChoice" className={styles.modalOverlay}>
-                    <div className={styles.modalContent}>
-                        <p>첨부된 파일이 하나도 없습니다.<br />이대로 게시글을 수정하시겠습니까?</p>
-                        <div className={styles.modalActions}>
-                            <button 
-                                type="button" 
-                                className={`${styles.modalBtn} ${styles.cancel}`} 
-                                onClick={() => setIsModalOpen(false)}
-                            >
-                                취소
-                            </button>
-                            <button 
-                                type="button" 
-                                className={`${styles.modalBtn} ${styles.confirm}`} 
-                                onClick={confirmSubmit}
-                            >
-                                확인
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            )}
-        </div>
+        </main>
     );
 };
 
-export default BoardFReeEdit;
+export default BoardFreeEdit;
