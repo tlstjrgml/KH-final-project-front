@@ -168,7 +168,7 @@ function AdminNotice() {
             <div className={styles.card}>
                 <table className={styles['report-table']}>
                     <thead>
-                        <tr><th>번호</th><th>제목</th><th>등록일</th><th>조회수</th><th>관리</th></tr>
+                        <tr><th>번호</th><th>제목</th><th>작성자</th><th>작성일자</th><th>조회수</th><th>관리</th></tr>
                     </thead>
                     <tbody>
                         {notices.length === 0 ? (
@@ -178,6 +178,7 @@ function AdminNotice() {
                                 <tr key={notice.boardId}>
                                     <td>{notice.boardId}</td>
                                     <td className={styles['clickable-title']} onClick={() => openViewModal(notice)}>{notice.boardTitle}</td>
+                                    <td>{notice.writerNickname}</td>
                                     <td>{notice.createDate ? notice.createDate.substring(0, 10) : '-'}</td>
                                     <td>{notice.views}</td>
                                     <td>
