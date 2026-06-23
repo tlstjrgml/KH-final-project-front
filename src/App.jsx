@@ -3,6 +3,8 @@ import { BrowserRouter, Routes, Route, useSearchParams, Navigate } from 'react-r
 import { useEffect } from 'react';
 import { jwtDecode } from 'jwt-decode'; 
 
+import React, { useEffect } from 'react';
+import { BrowserRouter, Routes, Route, useSearchParams, Navigate, useNavigate } from 'react-router-dom';
 import Navbar from './components/common/Navbar';
 import Login from './layouts/Login';
 import Signup from './layouts/Signup';
@@ -27,13 +29,14 @@ import NoticeBoardDetail from './layouts/NoticeBoardDetail';
 import BoardFreeEdit from './layouts/BoardFreeEdit';
 
 const PrivateRoute = ({element}) => {
+const PrivateRoute = ({ element }) => {
   const token = localStorage.getItem('token');
-  if(!token){
+  if (!token) {
     alert('로그인이 필요한 페이지입니다. 로그인을 해주세요');
-    return <Navigate to="/login"/>;
+    return <Navigate to="/login" />;
   }
   return element;
-}
+};
 
 const AppInner = () => {
   const [searchParams] = useSearchParams();
@@ -63,6 +66,32 @@ const AppInner = () => {
       console.error("토큰 파싱 에러:", error);
     }
   }
+  const urlToken = searchParams.get('token');
+  const navigate = useNavigate();
+  
+  const token = localStorage.getItem('token');
+  const isLoggedIn = !!token;
+
+  let isAdmin = false;
+  let nickname = "";
+
+  if (isLoggedIn) {
+    try {
+      const payload = JSON.parse(atob(token.split('.')[1]));
+      isAdmin = payload.isAdmin === 'Y';
+      nickname = payload.nickname || "";
+    } catch (error) {
+      console.error("토큰 검증 중 오류가 발생했습니다:", error);
+    }
+  }
+  
+  useEffect(() => {
+    if (urlToken) {
+      localStorage.setItem('token', urlToken);
+      // SPA의 부드러운 전환을 위해 navigate 사용
+      navigate('/', { replace: true });
+    }
+  }, [urlToken, navigate]);
 
   return (
     <>
@@ -78,7 +107,7 @@ const AppInner = () => {
         {/* 후기 게시판 영역 */}
         <Route path="/boardreview" element={<BoardReview />} />
         <Route path="/boardreview/write" element={<PrivateRoute element={<BoardReviewWrite />} />} />
-        <Route path="/boardreview/edit" element={<PrivateRoute element={<BoardReviewEdit />} />} />
+        <Route path="/boardreview/edit/:id" element={<PrivateRoute element={<BoardReviewEdit />} />} /> 
         <Route path="/boardreview/detail/:id" element={<PrivateRoute element={<BoardReviewDetail />} />} />
         
         {/* 복지 및 페르소나 영역 */}
@@ -86,22 +115,21 @@ const AppInner = () => {
         <Route path="/welfaredetail/:id" element={<WelfareDetail />} />
         <Route path="/persona" element={<PrivateRoute element={<Persona />} />} />
         
-        {/* 자유 게시판 영역  */}
+        {/* 자유 게시판 영역 */}
         <Route path="/boardfree" element={<BoardFree />} />
         <Route path="/boardfree/write" element={<PrivateRoute element={<BoardFreeWrite />} />} />
-        <Route path="/boardfree/edit" element={<PrivateRoute element={<BoardFreeEdit />} />} />
+        <Route path="/boardfree/edit/:id" element={<PrivateRoute element={<BoardFreeEdit />} />} />
         <Route path="/boardfree/detail/:id" element={<PrivateRoute element={<BoardFreeDetail />} />} />
         
         {/* 공지사항 게시판 영역 */}
         <Route path="/noticeboard" element={<NoticeBoard />} />
         <Route path="/notice/write" element={<PrivateRoute element={<NoticeBoardWrite />} />} />
+        <Route path="/notice/edit/:id" element={<PrivateRoute element={<NoticeBoardEdit />} />} /> 
         <Route path="/notice/detail/:id" element={<NoticeBoardDetail />} />
-        <Route path="/notice/edit" element={<PrivateRoute element={<NoticeBoardEdit />} />} />
-
       </Routes>
     </>
   );
-}
+};
 
 function App() {
   return (
