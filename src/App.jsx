@@ -1,3 +1,8 @@
+import React from 'react';
+import { BrowserRouter, Routes, Route, useSearchParams, Navigate } from 'react-router-dom';
+import { useEffect } from 'react';
+import { jwtDecode } from 'jwt-decode'; 
+
 import React, { useEffect } from 'react';
 import { BrowserRouter, Routes, Route, useSearchParams, Navigate, useNavigate } from 'react-router-dom';
 import Navbar from './components/common/Navbar';
@@ -23,6 +28,7 @@ import NoticeBoardEdit from './layouts/NoticeBoardEdit';
 import NoticeBoardDetail from './layouts/NoticeBoardDetail';
 import BoardFreeEdit from './layouts/BoardFreeEdit';
 
+const PrivateRoute = ({element}) => {
 const PrivateRoute = ({ element }) => {
   const token = localStorage.getItem('token');
   if (!token) {
@@ -34,6 +40,32 @@ const PrivateRoute = ({ element }) => {
 
 const AppInner = () => {
   const [searchParams] = useSearchParams();
+  const urlToken = searchParams.get('token'); 
+  
+  useEffect(() => {
+    if (urlToken) {
+      localStorage.setItem('token', urlToken);
+      window.location.replace('/');
+    }
+  }, [urlToken]);
+
+
+  const storedToken = localStorage.getItem('token');
+  const isLoggedIn = !!storedToken; // token이 존재하면 true, 아니면 false
+  
+  let isAdmin = false;
+  let nickname = "";
+
+  if (isLoggedIn) {
+    try {
+
+      const decodedToken = jwtDecode(storedToken);
+      isAdmin = decodedToken.isAdmin === 'Y';
+      nickname = decodedToken.nickname || "";
+    } catch (error) {
+      console.error("토큰 파싱 에러:", error);
+    }
+  }
   const urlToken = searchParams.get('token');
   const navigate = useNavigate();
   

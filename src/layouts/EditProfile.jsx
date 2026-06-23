@@ -20,9 +20,6 @@ const EditProfile = () => {
     const navigate = useNavigate();
 
     useEffect(() => {
-        console.log('useEffect 실행');
-        console.log('token:', localStorage.getItem('token'));
-        const token = localStorage.getItem('token');
         fetch('http://localhost:8080/member/me', {
             headers: { 'Authorization': `Bearer ${token}` }
         })
@@ -31,7 +28,6 @@ const EditProfile = () => {
                 nickname: data.nickname || '',
                 email: data.email || '',
                 name: data.name || '',
-                // 해결 데이터 파싱: 서버에서 '2002-11-25T00:00:00' 형태로 와도 날짜 부분만 안전하게 추출합니다.
                 birthDate: data.birthDate ? data.birthDate.substring(0, 10) : '',
                 gender: data.gender || '',
                 phone: data.phone || '',
@@ -42,8 +38,6 @@ const EditProfile = () => {
                 passwordConfirm: ''
             }));
     }, []);
-
-    // 해결 날짜 바인딩 보완: 각 연, 월, 일이 select option의 value와 정확히 일치하도록 01, 02 형식으로 포맷팅합니다.
     const rawParts = profile.birthDate ? profile.birthDate.substring(0, 10).split('-') : ['', '', ''];
     const birthParts = [
         rawParts[0] || '',
