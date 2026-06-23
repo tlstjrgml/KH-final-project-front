@@ -39,6 +39,15 @@ const WelfareDetail = () => {
     }
   }, [id])
 
+  const decodeHtml = (text) => {
+    if (!text) return text
+    const txt = document.createElement('textarea')
+    txt.innerHTML = text
+    let result = txt.value
+    txt.innerHTML = result
+    return txt.value
+  }
+
   const toggleWish = async () => {
   if (!token) {
     alert('로그인이 필요합니다.')
@@ -69,36 +78,45 @@ const WelfareDetail = () => {
           <table className={styles.infoTable}>
             <tbody>
               <tr><td>지원대상</td><td>만 {w.sprtTrgtMinAge}세 ~ {w.sprtTrgtMaxAge}세</td></tr>
-              <tr><td>지원제한대상</td><td>{w.ptcpPrpTrgtCn || '-'}</td></tr>
-              <tr><td>소득기준</td><td>{w.earnEtcCn || '-'}</td></tr>
-              <tr><td>정책지원내용</td><td>{w.plcySprtCn || '-'}</td></tr>
-              <tr><td>신청기간</td><td>{w.aplyYmd || '상시'}</td></tr>
-              <tr><td>신청방법</td><td>{w.plcyAplyMthdCn || '-'}</td></tr>
+              <tr><td>지원제한대상</td><td>{decodeHtml(w.ptcpPrpTrgtCn) || '-'}</td></tr>
+              <tr><td>소득기준</td><td>{decodeHtml(w.earnEtcCn) || '-'}</td></tr>
+              <tr><td>정책지원내용</td><td>{decodeHtml(w.plcySprtCn) || '-'}</td></tr>
+              <tr><td>신청기간</td><td>{decodeHtml(w.aplyYmd) || '상시'}</td></tr>
+              <tr><td>신청방법</td><td>{decodeHtml(w.plcyAplyMthdCn) || '-'}</td></tr>
             </tbody>
           </table>
-          <div className={styles.btnRow}>
-            <button className={`${styles.btnHeart} ${wished ? styles.on : ''}`} onClick={toggleWish}>
-              {wished ? '♥ 찜 해제' : '♡ 찜하기'}
-            </button>
-            {w.aplyUrlAddr && (
-              <button className={styles.btnApply} onClick={() => window.open(w.aplyUrlAddr, '_blank')}>
-                신청하러 가기 →
-              </button>
+           {w.aplyUrlAddr ? (
+              <>
+                <div className={styles.btnRow}>
+                  <button className={`${styles.btnHeart} ${wished ? styles.on : ''}`} onClick={toggleWish}>
+                    {wished ? '♥ 찜 해제' : '♡ 찜하기'}
+                  </button>
+                  <button className={styles.btnApply} onClick={() => window.open(w.aplyUrlAddr, '_blank')}>
+                    신청하러 가기 →
+                  </button>
+                </div>
+                <div className={styles.wishCount}>총 <span>{w.wishCount}</span>명이 찜했어요</div>
+              </>
+            ) : (
+              <div className={styles.heartOnlyBox}>
+                <button className={`${styles.btnHeart} ${wished ? styles.on : ''}`} onClick={toggleWish}>
+                  {wished ? '♥ 찜 해제' : '♡ 찜하기'}
+                </button>
+                <div className={styles.wishCountInline}>총 <span>{w.wishCount}</span>명이 찜했어요</div>
+              </div>
             )}
-          </div>
-          <div className={styles.wishCount}>총 <span>{w.wishCount}</span>명이 찜했어요</div>
         </div>
 
         <div className={styles.dcard}>
           <div className={styles.detailSecTitle}>지원 내용</div>
-          <div className={styles.detailContent}>{w.plcyExplnCn || '-'}</div>
+          <div className={styles.detailContent}>{decodeHtml(w.plcyExplnCn) || '-'}</div>
         </div>
 
         <div className={styles.dcard}>
           <div className={styles.detailSecTitle}>심사 방법</div>
           <div className={styles.detailContent}>
             {w.srngMthdCn
-              ? w.srngMthdCn.split('\n').map((line, i) => <span key={i}>{line}<br /></span>)
+              ? decodeHtml(w.srngMthdCn).split('\n').map((line, i) => <span key={i}>{line}<br /></span>)
               : '-'
             }
           </div>

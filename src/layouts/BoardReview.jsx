@@ -15,7 +15,7 @@ const BoardReview = () => {
             try {
                 const res = await fetch(`/react/board/list?boardType=REV&page=${currentPage}`);
                 const data = await res.json();
-                console.log('받은 데이터:', data);
+                //console.log('받은 데이터:', data);
 
                 setBoardList(data.content || []);
 

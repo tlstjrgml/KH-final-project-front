@@ -14,7 +14,7 @@ const BoardFree = () => {
             try {
                 const res = await fetch(`http://localhost:8080/board/list?boardType=FRE&page=${currentPage}`);
                 const data = await res.json();
-                console.log('자유게시판 SQL 수신 데이터:', data);
+                //console.log('자유게시판 SQL 수신 데이터:', data);
 
                 setBoardList(data.content || []);
 
