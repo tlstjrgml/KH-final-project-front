@@ -1,6 +1,8 @@
 import React from 'react';
 import { BrowserRouter, Routes, Route, useSearchParams, Navigate } from 'react-router-dom';
 import { useEffect } from 'react';
+import { jwtDecode } from 'jwt-decode'; 
+
 import Navbar from './components/common/Navbar';
 import Login from './layouts/Login';
 import Signup from './layouts/Signup';
@@ -24,7 +26,6 @@ import NoticeBoardEdit from './layouts/NoticeBoardEdit';
 import NoticeBoardDetail from './layouts/NoticeBoardDetail';
 import BoardFreeEdit from './layouts/BoardFreeEdit';
 
-
 const PrivateRoute = ({element}) => {
   const token = localStorage.getItem('token');
   if(!token){
@@ -36,25 +37,38 @@ const PrivateRoute = ({element}) => {
 
 const AppInner = () => {
   const [searchParams] = useSearchParams();
-  const token = searchParams.get('token');
-  const isLoggedIn = localStorage.getItem('token') ? true : false;
-  const isAdmin = isLoggedIn ? JSON.parse(atob(localStorage.getItem('token').split('.')[1])).isAdmin === 'Y' : false;
+  const urlToken = searchParams.get('token'); 
   
   useEffect(() => {
-    if (token) {
-      localStorage.setItem('token', token);
+    if (urlToken) {
+      localStorage.setItem('token', urlToken);
       window.location.replace('/');
     }
-  }, [token]);
+  }, [urlToken]);
 
-  const nickname = isLoggedIn ? JSON.parse(atob(localStorage.getItem('token').split('.')[1])).nickname : "";
 
+  const storedToken = localStorage.getItem('token');
+  const isLoggedIn = !!storedToken; // token이 존재하면 true, 아니면 false
+  
+  let isAdmin = false;
+  let nickname = "";
+
+  if (isLoggedIn) {
+    try {
+
+      const decodedToken = jwtDecode(storedToken);
+      isAdmin = decodedToken.isAdmin === 'Y';
+      nickname = decodedToken.nickname || "";
+    } catch (error) {
+      console.error("토큰 파싱 에러:", error);
+    }
+  }
 
   return (
     <>
       <Navbar isLoggedIn={isLoggedIn} isAdmin={isAdmin} nickname={nickname} />
       <Routes>
-         <Route path="/" element={<Main />} />
+        <Route path="/" element={<Main />} />
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
         <Route path="/edit-profile" element={<PrivateRoute element={<EditProfile />} />} />
@@ -94,7 +108,6 @@ function App() {
     <BrowserRouter>
       <AppInner />
     </BrowserRouter>
-    
   );
 }
 
