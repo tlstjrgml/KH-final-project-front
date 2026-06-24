@@ -121,15 +121,31 @@ const BoardFreeDetail = () => {
                     {/* 첨부파일 */}
                     <div className={styles.attachmentBox}>
                         <div className={styles.attachmentTitle}>
-                            <svg viewBox="0 0 24 24"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48" /></svg>
+                            <svg viewBox="0 0 24 24">
+                                <path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48" />
+                            </svg>
                             첨부파일
                         </div>
                         <ul className={styles.attachmentList}>
-                            <li>
-                                <a href="#" className={styles.attachmentLink} onClick={(e) => e.preventDefault()}>
-                                    등록된 첨부파일이 없습니다.
-                                </a>
-                            </li>
+                            {post.attachments && post.attachments.length > 0 ? (
+                                post.attachments.map((file) => (
+                                    <li key={file.attmId}>
+                                        {/* 클릭 시 다운로드 로직 등을 연결할 수 있습니다 */}
+                                        <a 
+                                            href={`/download/${file.attmId}`} 
+                                            className={styles.attachmentLink}
+                                        >
+                                            {file.originalName}
+                                        </a>
+                                    </li>
+                                ))
+                            ) : (
+                                <li>
+                                    <span className={styles.attachmentLink} style={{ color: '#ADB5BD', cursor: 'default' }}>
+                                        등록된 첨부파일이 없습니다.
+                                    </span>
+                                </li>
+                            )}
                         </ul>
                     </div>
 
