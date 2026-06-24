@@ -12,7 +12,6 @@ const BoardFreeDetail = () => {
 
     const [replyContent, setReplyContent] = useState("");
 
-    // 현재 로그인한 사용자 정보 (JWT 토큰 디코딩)
     const [currentUser, setCurrentUser] = useState(null);
 
     useEffect(() => {
@@ -50,14 +49,35 @@ const BoardFreeDetail = () => {
 
         fetchBoardDetail();
     }, [id]);
+    const togglePostLike = async () => {
+        const token = localStorage.getItem('token');
+        if (!token) {
+            alert('로그인이 필요합니다.');
+            return;
+        }
 
-    const togglePostLike = () => {
-       setIsLiked(prev => {
-        setLikes(l => prev ? l - 1 : l + 1);
-        return !prev;
-});
+        const prevLiked = isLiked;
+        const prevCount = likes;
+
+        setIsLiked(!prevLiked);
+        setLikes(prevLiked ? prevCount - 1 : prevCount + 1);
+
+        try {
+            const res = await fetch(`/react/board/${id}/likes`, {
+                method: prevLiked ? 'DELETE' : 'POST',
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+
+            if (!res.ok) {
+                throw new Error('좋아요 처리 실패');
+            }
+        } catch (err) {
+            console.error(err);
+            setIsPostLiked(prevLiked);
+            setPostLikes(prevCount);
+            alert('좋아요 처리 중 오류가 발생했습니다.');
+        }
     };
-
     if (!post) return <div style={{ textAlign: 'center', padding: '50px' }}>로딩 중...</div>
 
     return (
@@ -114,7 +134,7 @@ const BoardFreeDetail = () => {
                     </div>
 
                     {/* 좋아요 */}
-                    <div className={styles.likeActionArea}>
+                   <div className={styles.likeActionArea}>
                         <button
                             id="btn-post-like"
                             className={styles.btnLike}
@@ -162,7 +182,7 @@ const BoardFreeDetail = () => {
 
                     </div>
 
-                </div> {/* detail-card */}
+                </div>
 
                 <div className={styles.bottomActions}>
                     <button className={styles.btnList} onClick={() => navigate('/boardfree')}>목록으로</button>

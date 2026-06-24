@@ -47,7 +47,10 @@ const Main = () => {
               headers: { 'Authorization': `Bearer ${token}` }
             })
               .then(res => res.json())
-              .then(data => setRecommend(data))
+              .then(data => {
+                setRecommend(data)
+          })
+                
           }
         })
     }
@@ -130,8 +133,8 @@ const Main = () => {
         isOpen={showModal}
         onClose={() => setShowModal(false)}
         onSave={() => {
-          setShowModal(false)
-          navigate('/edit-profile')
+        setShowModal(false)
+        navigate('/edit-profile')
         }}
       />
 

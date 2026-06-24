@@ -132,8 +132,7 @@ const NotieBoardDetail = () => {
                     </div>
 
 
-                </div> {/* detail-card */}
-
+                </div> 
                 <div className={styles.bottomActions}>
                     <button className={styles.btnList} onClick={() => navigate('/noticeboard')}>목록으로</button>
                 </div>
