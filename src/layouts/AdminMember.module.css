@@ -103,3 +103,61 @@
     color: white;
     border-color: #0d6efd;
 }
+
+/* 활성/탈퇴 회원 전환 토글 */
+.status-toggle {
+    display: inline-flex;
+    background-color: #F1F3F5;
+    border-radius: 8px;
+    padding: 4px;
+    gap: 4px;
+}
+
+.status-btn {
+    padding: 8px 18px;
+    border: none;
+    background-color: transparent;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 500;
+    color: #6C757D;
+    transition: all 0.2s ease;
+}
+
+.status-btn:hover {
+    color: #343A40;
+}
+
+.status-btn-active {
+    padding: 8px 18px;
+    border: none;
+    background-color: #ffffff;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 600;
+    color: #0d6efd;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    transition: all 0.2s ease;
+}
+
+/* 탈퇴 회원 보기일 때 복구 버튼은 강조색 다르게 */
+.restore-btn {
+    padding: 6px 14px;
+    background-color: #198754;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+}
+
+.restore-btn:hover {
+    background-color: #157347;
+}
+
+/* 탈퇴 회원 행은 살짝 톤다운 */
+.banned-row td {
+    color: #868E96;
+}

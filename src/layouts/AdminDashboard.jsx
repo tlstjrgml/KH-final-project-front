@@ -46,7 +46,7 @@ function AdminDashboard() {
                     alignItems: 'center',
                     gap: '6px'
                 }}>
-                    👥 총 누적 가입자 
+                    👥 총 가입자 
                     <span style={{ fontSize: '1.25rem', color: '#004a9f', marginLeft: '4px' }}>{totalUsers}</span> 명
                 </div>
             </div>
