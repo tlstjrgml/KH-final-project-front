@@ -118,7 +118,7 @@ const BoardFreeDetail = () => {
                         {post.boardContent}
                     </div>
 
-                    {/* 첨부파일 */}
+                   {/* 첨부파일 */}
                     <div className={styles.attachmentBox}>
                         <div className={styles.attachmentTitle}>
                             <svg viewBox="0 0 24 24">

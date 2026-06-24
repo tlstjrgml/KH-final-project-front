@@ -47,7 +47,6 @@ const BoardFreeWrite = () => {
     // 데이터 구조화 및 서버 전송 로직
     const executeSubmit = async () => {
         try {
-
             const formData = new FormData();
             
             // 1. BOARD 테이블 매핑 텍스트 데이터
@@ -67,10 +66,9 @@ const BoardFreeWrite = () => {
 
             const token = localStorage.getItem('token');
 
-            const response = await fetch('http://localhost:8080/boardfree/write', { 
+            const response = await fetch('http://localhost:8080/board/write', { 
                 method: 'POST',
                 headers: {
-                    'Content-Type': 'application/json', 
                     // 브라우저가 전송 경계선(boundary)을 포함한 Content-Type을 자동 설정하도록 위임
                     'Authorization': token ? `Bearer ${token}` : '' 
                 },
@@ -78,8 +76,7 @@ const BoardFreeWrite = () => {
             });
 
             if (response.ok) {
-
-                alert('게시글이 정상적으로 등록되었습니다.');
+                alert('게시글과 첨부파일이 정상적으로 등록되었습니다.');
                 navigate('/boardfree'); 
             } else if (response.status === 401) {
                 alert('인증이 유효하지 않습니다. 다시 로그인해 주십시오.');
