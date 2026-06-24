@@ -33,7 +33,7 @@ const EditProfile = () => {
                 phone: data.phone || '',
                 region: data.region || '',
                 jobStatus: data.jobStatus || '',
-                incomeLevel: data.incomeLevel || '',
+                incomeLevel: data.incomeLevel != null ? String(data.incomeLevel) : '',
                 password: '',
                 passwordConfirm: ''
             }));
