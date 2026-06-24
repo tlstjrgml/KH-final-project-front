@@ -1,36 +1,66 @@
-import React, { useState, useRef } from 'react';
-
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styles from './NoticeBoardWrite.module.css';
 
 const NoticeBoardWrite = () => {
     const navigate = useNavigate();
-    const formRef = useRef(null);
-    
-    // 상태 관리
+
     const [title, setTitle] = useState('');
     const [content, setContent] = useState('');
-    const [isModalOpen, setIsModalOpen] = useState(false);
-    
     const [fileRows, setFileRows] = useState([{ id: Date.now(), files: [] }]);
+    const [isChecking, setIsChecking] = useState(true);
 
+    useEffect(() => {
+        const token = localStorage.getItem('token');
 
+        // JWT 토큰 디코딩 후 관리자(Admin) 권한 및 로그인 상태 검증
+        if (token) {
+            try {
+                // 한글 등 특수문자 깨짐 방지를 위한 안전한 Base64 디코딩 방식 적용
+                const base64Url = token.split('.')[1];
+                const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+                const jsonPayload = decodeURIComponent(atob(base64).split('').map(function (c) {
+                    return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+                }).join(''));
+
+                const payload = JSON.parse(jsonPayload);
+
+                if (payload.isAdmin !== "Y") {
+                    alert('관리자만 접근할 수 있는 페이지입니다.');
+                    navigate('/noticeboard', { replace: true });
+                    return;
+                }
+
+                setIsChecking(false);
+            } catch (err) {
+                console.error("토큰 검증 오류:", err);
+                alert('인증 정보에 오류가 있습니다. 다시 로그인 해주세요.');
+                navigate('/noticeboard', { replace: true });
+            }
+        } else {
+            alert('로그인이 필요한 서비스입니다.');
+            navigate('/noticeboard', { replace: true });
+        }
+    }, [navigate]);
+
+    // 첨부파일 행(Row) 추가 처리
     const handleAddFileRow = () => {
         setFileRows([...fileRows, { id: Date.now(), files: [] }]);
     };
-    
+
+    // 추가된 첨부파일 행(Row) 삭제 처리
     const handleRemoveFileRow = (rowId) => {
         setFileRows(fileRows.filter((row) => row.id !== rowId));
     };
 
-
+    // 파일 선택 시 용량 제한(5MB) 체크 및 상태 업데이트
     const handleFileChange = (rowId, event) => {
         const selectedFiles = Array.from(event.target.files);
-        const maxFileSize = 5 * 1024 * 1024; // 5MB
+        const maxFileSize = 5 * 1024 * 1024;
 
         for (let file of selectedFiles) {
             if (file.size > maxFileSize) {
-                alert('첨부파일 최대 용량을 넘었습니다. 다시 첨부해주세요.');
+                alert('첨부파일 최대 용량(5MB)을 넘었습니다.');
                 event.target.value = '';
                 return;
             }
@@ -43,64 +73,61 @@ const NoticeBoardWrite = () => {
         );
     };
 
+    // 입력된 데이터를 FormData에 실어 백엔드로 공지사항 등록 요청 전송
     const executeSubmit = async () => {
         try {
-            // 백엔드가 요구하는 JSON 객체 구성 (파일 제외, Board VO 필드명 일치)
-            const payload = {
-                boardTitle: title,
-                boardContent: content,
-                boardType: "FRE"
-            };
+            const formData = new FormData();
+            formData.append('boardTitle', title);
+            formData.append('boardContent', content);
+            formData.append('boardType', 'NOT');
 
-            const response = await fetch('http://localhost:8080/board/write', { 
+            fileRows.forEach(row => {
+                if (row.files && row.files.length > 0) {
+                    row.files.forEach(file => {
+                        formData.append('files', file);
+                    });
+                }
+            });
+
+            const response = await fetch('/react/board/write', {
                 method: 'POST',
                 headers: {
-                    'Content-Type': 'application/json', // JSON 통신 명시
-                    'Authorization': `Bearer ${localStorage.getItem('token')}` 
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`
                 },
-                body: JSON.stringify(payload)
+                body: formData
             });
 
             if (response.ok) {
-                alert('게시글이 성공적으로 등록되었습니다.');
-                navigate('/noticeboard'); // 성공 시 목록으로 이동
+                alert('공지사항이 성공적으로 등록되었습니다.');
+                navigate('/noticeboard');
             } else {
-                alert('게시글 등록에 실패했습니다. 서버 상태나 권한을 확인해주세요.');
+                alert('게시글 등록에 실패했습니다.');
             }
         } catch (error) {
-            console.error('글 등록 중 서버 통신 에러:', error);
+            console.error(error);
             alert('서버와의 통신에 실패했습니다.');
         }
     };
 
+    // 폼 전송 이벤트 발생 시 필수 데이터 유효성 검사 수행
     const handleSubmit = (e) => {
         e.preventDefault();
-        
-        if (!title.trim()) { 
-            alert('제목을 입력해주세요.'); 
-            return; 
+
+        if (!title.trim()) {
+            alert('제목을 입력해주세요.');
+            return;
         }
-        if (!content.trim()) { 
-
-            alert('내용을 입력해주세요.'); 
-            return; 
+        if (!content.trim()) {
+            alert('내용을 입력해주세요.');
+            return;
         }
 
-        const hasFiles = fileRows.some(row => row.files.length > 0);
-
-        // UI 상 파일 첨부 여부를 확인하지만, 실제 서버 통신은 텍스트(JSON)로만 이루어집니다.
-        if (!hasFiles) {
-            setIsModalOpen(true);
-        } else {
-            executeSubmit(); 
-        }
-    };
-
-    const confirmSubmit = () => {
-        setIsModalOpen(false);
         executeSubmit();
-
     };
+
+    if (isChecking) {
+        return null;
+    }
 
     return (
         <div className={styles.page}>
@@ -109,92 +136,54 @@ const NoticeBoardWrite = () => {
                     <h2 className={styles.writeTitle}>공지사항 글 작성</h2>
                 </div>
 
-                <form ref={formRef} onSubmit={handleSubmit}>
-
+                <form onSubmit={handleSubmit}>
                     <div className={styles.field}>
-                        <label htmlFor="board_title">
-                            제목<span className={styles.req}>*</span>
-                        </label>
-                        <input 
-                            type="text" 
-                            id="board_title" 
+                        <label htmlFor="board_title">제목<span className={styles.req}>*</span></label>
+                        <input
+                            type="text"
+                            id="board_title"
                             value={title}
                             onChange={(e) => setTitle(e.target.value)}
-                            placeholder="게시글 제목을 입력해주세요" 
-
+                            placeholder="공지사항 제목을 입력해주세요"
                         />
                     </div>
 
                     <div className={styles.field}>
-                        <label htmlFor="board_content">
-                            내용<span className={styles.req}>*</span>
-                        </label>
-                        <textarea 
-                            id="board_content" 
+                        <label htmlFor="board_content">내용<span className={styles.req}>*</span></label>
+                        <textarea
+                            id="board_content"
                             value={content}
                             onChange={(e) => setContent(e.target.value)}
-                            placeholder="청년복지 관련 자유로운 이야기를 나누어보세요. (욕설, 비방 등은 삭제될 수 있습니다.)" 
-
-
+                            placeholder="공지할 내용을 작성해주세요."
                         />
                     </div>
 
                     <div className={styles.field}>
                         <div className={styles.fileHeader}>
-                            <label>
-                                파일 첨부 
-                                <span style={{ fontSize: '12px', fontWeight: 'normal', color: '#ADB5BD', marginLeft: '6px' }}>
-                                    (최대 5MB, 현재 백엔드 버전에서는 첨부파일이 서버에 저장되지 않습니다.)
-
-                                </span>
-                            </label>
-                            <button 
-                                type="button" 
-                                id="addFile" 
-                                className={styles.btnAddFile} 
-                                onClick={handleAddFileRow}
-                            >
-                                + 파일 추가
-                            </button>
+                            <label>파일 첨부 <span style={{ fontSize: '12px', fontWeight: 'normal', color: '#ADB5BD', marginLeft: '6px' }}>(최대 5MB)</span></label>
+                            <button type="button" className={styles.btnAddFile} onClick={handleAddFileRow}>+ 파일 추가</button>
                         </div>
-                        
+
                         <div id="fileArea">
                             {fileRows.map((row, index) => (
                                 <div key={row.id} className={styles.fileRow}>
-                                    <input 
-                                        type="file" 
-                                        name="file" 
+                                    <input
+                                        type="file"
                                         id={`file_input_${row.id}`}
-                                        className={styles.fileInputHidden} 
-                                        multiple 
+                                        className={styles.fileInputHidden}
+                                        multiple
                                         onChange={(e) => handleFileChange(row.id, e)}
                                     />
-                                    
 
-                                    <input type="hidden" name="attm_id" value="" />
-                                    <input type="hidden" name="original_name" value={row.files.map(f => f.name).join(',')} />
-                                    <input type="hidden" name="rename_name" value="" />
-                                    <input type="hidden" name="attm_path" value="" />
-                                    <input type="hidden" name="attm_status" value="Y" />
-                                    <input type="hidden" name="board_id" value="" />
-                                    
-                                    <div 
-                                        className={styles.fileCustomBox} 
-                                        onClick={() => document.getElementById(`file_input_${row.id}`).click()}
-                                    >
+                                    <div className={styles.fileCustomBox} onClick={() => document.getElementById(`file_input_${row.id}`).click()}>
                                         <button type="button" className={styles.btnFile}>파일 선택</button>
                                         <span className={styles.fileName} style={{ color: row.files.length > 0 ? '#1A1D23' : '#ADB5BD' }}>
                                             {row.files.length > 0 ? row.files.map(f => f.name).join(', ') : '선택된 파일 없음'}
                                         </span>
                                     </div>
-                                    
+
                                     {index > 0 && (
-                                        <button 
-                                            type="button" 
-                                            className={styles.btnRemoveFile} 
-                                            title="삭제" 
-                                            onClick={() => handleRemoveFileRow(row.id)}
-                                        >
+                                        <button type="button" className={styles.btnRemoveFile} title="삭제" onClick={() => handleRemoveFileRow(row.id)}>
                                             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
                                                 <line x1="18" y1="6" x2="6" y2="18" />
                                                 <line x1="6" y1="6" x2="18" y2="18" />
@@ -207,11 +196,8 @@ const NoticeBoardWrite = () => {
                     </div>
 
                     <div className={styles.formActions}>
-                        <button type="button" className={styles.btnCancel} onClick={() => navigate(-1)}>
-                            취소
-                        </button>
+                        <button type="button" className={styles.btnCancel} onClick={() => navigate(-1)}>취소</button>
                         <button type="submit" className={styles.btnSubmit}>
-
                             <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#fff" strokeWidth={2}>
                                 <path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z" />
                             </svg>
@@ -220,34 +206,8 @@ const NoticeBoardWrite = () => {
                     </div>
                 </form>
             </div>
-
-            {/* 첨부파일 없음 모달 */}
-            {isModalOpen && (
-                <div id="modalChoice" className={styles.modalOverlay}>
-                    <div className={styles.modalContent}>
-                        <p>첨부파일이 하나도 첨부되지 않았습니다.<br />이대로 게시글을 등록하시겠습니까?</p>
-                        <div className={styles.modalActions}>
-                            <button 
-                                type="button" 
-                                className={`${styles.modalBtn} ${styles.cancel}`} 
-                                onClick={() => setIsModalOpen(false)}
-                            >
-                                취소
-                            </button>
-                            <button 
-                                type="button" 
-                                className={`${styles.modalBtn} ${styles.confirm}`} 
-                                onClick={confirmSubmit}
-                            >
-                                확인
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            )}
         </div>
     );
-
 };
 
 export default NoticeBoardWrite;

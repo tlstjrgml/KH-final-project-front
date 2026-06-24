@@ -2,38 +2,37 @@ import { useNavigate, useParams } from 'react-router-dom';
 import styles from './NoticeBoardDetail.module.css';
 import { useEffect, useState } from 'react';
 
-
-const NotieBoardDetail = () => {
+const NoticeBoardDetail = () => {
     const { id } = useParams();
     const navigate = useNavigate();
 
     const [post, setPost] = useState(null);
     const [isLiked, setIsLiked] = useState(false);
     const [likes, setLikes] = useState(0);
-
-    const [replyContent, setReplyContent] = useState("");
-
-    // 현재 로그인한 사용자 정보 (JWT 토큰 디코딩)
-    const [currentUser, setCurrentUser] = useState(null);
+    const [isAdminUser, setIsAdminUser] = useState(false);
 
     useEffect(() => {
         const token = localStorage.getItem("token");
 
+        // JWT 토큰 디코딩 후 현재 유저의 관리자(Admin) 권한 여부 확인
         if (token) {
             try {
-                const payload = JSON.parse(atob(token.split(".")[1]));
-                setCurrentUser({
-                    id: payload.memberId,
-                    nickname: payload.nickname,
-                });
-            } catch (err) {
-                console.error(err);
+                const base64Url = token.split('.')[1];
+                const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+                const jsonPayload = decodeURIComponent(atob(base64).split('').map(function (c) {
+                    return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+                }).join(''));
+
+                const decoded = JSON.parse(jsonPayload);
+                setIsAdminUser(decoded.isAdmin === 'Y');
+            } catch (error) {
+                console.error(error);
             }
         }
 
+        // 백엔드 API로부터 공지사항 상세 데이터 조회
         const fetchBoardDetail = async () => {
             try {
-
                 const response = await fetch(`/react/board/${id}`, {
                     headers: token ? { 'Authorization': `Bearer ${token}` } : {}
                 });
@@ -44,9 +43,8 @@ const NotieBoardDetail = () => {
 
                 const data = await response.json();
                 setPost(data);
-                // 초기 좋아요 수 세팅 로직 추가 가능
-                // setLikes(data.views || 0);
-
+                setIsLiked(data.isLiked || false);
+                setLikes(data.likeCount || 0);
             } catch (err) {
                 console.error(err);
             }
@@ -55,10 +53,57 @@ const NotieBoardDetail = () => {
         fetchBoardDetail();
     }, [id]);
 
-    const togglePostLike = () => {
+    // 게시글 좋아요 등록 및 취소 토글 처리
+    const togglePostLike = async () => {
+        const token = localStorage.getItem('token');
+        if (!token) {
+            alert('로그인이 필요합니다.');
+            return;
+        }
 
-        setIsLiked(!isLiked);
-        setLikes(prev => isLiked ? prev - 1 : prev + 1);
+        const prevLiked = isLiked;
+        const prevCount = likes;
+
+        setIsLiked(!prevLiked);
+        setLikes(prevLiked ? prevCount - 1 : prevCount + 1);
+
+        try {
+            const res = await fetch(`/react/board/${id}/likes`, {
+                method: prevLiked ? 'DELETE' : 'POST',
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+
+            if (!res.ok) throw new Error('좋아요 처리 실패');
+        } catch (err) {
+            console.error(err);
+            setIsLiked(prevLiked);
+            setLikes(prevCount);
+            alert('좋아요 처리 중 오류가 발생했습니다.');
+        }
+    };
+
+    // 현재 공지사항 게시글 삭제 처리
+    const handleDeletePost = async () => {
+        if (!window.confirm('공지사항을 삭제하시겠습니까?')) return;
+
+        const token = localStorage.getItem('token');
+        try {
+            const res = await fetch(`/react/board/${id}`, {
+                method: 'DELETE',
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+
+            if (!res.ok) {
+                const errMsg = await res.text();
+                throw new Error(errMsg || '삭제 실패');
+            }
+
+            alert('공지사항이 삭제되었습니다.');
+            navigate('/noticeboard');
+        } catch (err) {
+            console.error(err);
+            alert(`삭제 중 오류가 발생했습니다: ${err.message}`);
+        }
     };
 
     if (!post) return <div style={{ textAlign: 'center', padding: '50px' }}>로딩 중...</div>
@@ -66,12 +111,9 @@ const NotieBoardDetail = () => {
     return (
         <main className={styles.page}>
             <div className={styles.contentWrapper}>
-
                 <span className={styles.categoryLabel}>공지사항</span>
 
                 <div className={styles.detailCard}>
-
-                    {/* 게시글 헤더 */}
                     <div className={styles.postHeader}>
                         <h1 className={styles.postTitle}>{post.boardTitle}</h1>
                         <div className={styles.postMetaContainer}>
@@ -83,64 +125,70 @@ const NotieBoardDetail = () => {
                                 <span>{post.createDate ? post.createDate.split('T')[0] : ''}</span>
                             </div>
                             <div className={styles.postMetaRight}>
-
-                                {post.isOwner && (
+                                {/* 관리자(Admin) 권한 유저에게만 수정 및 삭제 버튼 노출 */}
+                                {isAdminUser && (
                                     <>
-                                        <button className={styles.actionBtn} onClick={() => { navigate(`/notice/edit/${id}`) }}>수정</button>
+                                        <button className={styles.actionBtn} onClick={() => navigate(`/noticeboard/edit/${id}`)}>수정</button>
                                         <span className={styles.metaDivider}>|</span>
-                                        <button className={`${styles.actionBtn} ${styles.danger}`}>삭제</button>
+                                        <button className={`${styles.actionBtn} ${styles.danger}`} onClick={handleDeletePost}>삭제</button>
                                         <span className={styles.metaDivider}>|</span>
                                     </>
                                 )}
-                                <button className={`${styles.actionBtn} ${styles.danger}`}>신고</button>
                             </div>
                         </div>
                     </div>
 
-
-                    {/* 게시글 본문 */}
                     <div className={styles.postContent}>
                         {post.boardContent}
                     </div>
 
-                    {/* 첨부파일 */}
+                    {/* 서버에서 받아온 첨부파일 목록 렌더링 및 다운로드 링크 활성화 */}
                     <div className={styles.attachmentBox}>
                         <div className={styles.attachmentTitle}>
                             <svg viewBox="0 0 24 24"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48" /></svg>
-                            첨부파일
+                            첨부파일 {post.attachments && post.attachments.length > 0 ? `(${post.attachments.length})` : ''}
                         </div>
                         <ul className={styles.attachmentList}>
-                            <li>
-                                <a href="#" className={styles.attachmentLink} onClick={(e) => e.preventDefault()}>
-                                    등록된 첨부파일이 없습니다.
-                                </a>
-                            </li>
+                            {post.attachments && post.attachments.length > 0 ? (
+                                post.attachments.map((file, index) => {
+                                    const fileId = file.attmId || file.fileId || index;
+                                    const fileName = file.originalName || file.originName || '첨부파일';
+                                    return (
+                                        <li key={fileId}>
+                                            <a href={`/react/board/download/${fileId}`} download={fileName} className={styles.attachmentLink}>
+                                                {fileName}
+                                            </a>
+                                        </li>
+                                    );
+                                })
+                            ) : (
+                                <li>
+                                    <a href="#" className={styles.attachmentLink} onClick={(e) => e.preventDefault()}>
+                                        등록된 첨부파일이 없습니다.
+                                    </a>
+                                </li>
+                            )}
                         </ul>
                     </div>
 
-                    {/* 좋아요 */}
                     <div className={styles.likeActionArea}>
                         <button
                             id="btn-post-like"
-                            className={styles.btnLike}
-                            style={isLiked ? { backgroundColor: '#378ADD', color: '#fff', borderColor: '#378ADD' } : {}}
+                            className={`${styles.btnLike} ${isLiked ? styles.liked : ''}`}
                             onClick={togglePostLike}
                         >
-                            <svg viewBox="0 0 24 24" stroke={isLiked ? "#fff" : "currentColor"}><path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3zM7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3" /></svg>
-                            좋아요 <span id="post-like-count">{likes}</span>
+                            <svg viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.5 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" /></svg>
+                            좋아요 <span>{likes}</span>
                         </button>
                     </div>
+                </div>
 
-
-                </div> 
                 <div className={styles.bottomActions}>
                     <button className={styles.btnList} onClick={() => navigate('/noticeboard')}>목록으로</button>
                 </div>
-
             </div>
         </main>
     );
-}
+};
 
-
-export default NotieBoardDetail;
+export default NoticeBoardDetail;

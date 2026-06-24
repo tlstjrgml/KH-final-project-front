@@ -197,9 +197,7 @@ body {
   gap: 6px;
 }
 
-.btnLike:hover {
-  background: #E6F1FB;
-}
+
 
 .liked {
   background: #185FA5;
