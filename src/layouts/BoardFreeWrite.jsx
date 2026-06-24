@@ -44,32 +44,49 @@ const BoardFreeWrite = () => {
         );
     };
 
+    // 데이터 구조화 및 서버 전송 로직
     const executeSubmit = async () => {
         try {
-            const payload = {
-                boardTitle: title,
-                boardContent: content,
-                boardType: "FRE"
-            };
+            const formData = new FormData();
+            
+            // 1. BOARD 테이블 매핑 텍스트 데이터
+            formData.append('boardTitle', title);
+            formData.append('boardContent', content);
+            formData.append('boardType', 'FRE'); 
 
-            const response = await fetch('http://localhost:8080/boardfree/write', { 
+            // 2. ATTACHMENT 테이블 매핑을 위한 파일 데이터
+            fileRows.forEach((row) => {
+                if (row.files && row.files.length > 0) {
+                    row.files.forEach(file => {
+                        // 💡 핵심: BoardService의 request.getFiles()와 완벽히 매핑되도록 'files'라는 키를 사용합니다.
+                        formData.append('files', file); 
+                    });
+                }
+            });
+
+            const token = localStorage.getItem('token');
+
+            const response = await fetch('http://localhost:8080/board/write', { 
                 method: 'POST',
                 headers: {
-                    'Content-Type': 'application/json', 
-                    'Authorization': `Bearer ${localStorage.getItem('token')}` 
+                    // 브라우저가 전송 경계선(boundary)을 포함한 Content-Type을 자동 설정하도록 위임
+                    'Authorization': token ? `Bearer ${token}` : '' 
                 },
-                body: JSON.stringify(payload)
+                body: formData
             });
 
             if (response.ok) {
-                alert('게시글이 성공적으로 등록되었습니다.');
+                alert('게시글과 첨부파일이 정상적으로 등록되었습니다.');
                 navigate('/boardfree'); 
+            } else if (response.status === 401) {
+                alert('인증이 유효하지 않습니다. 다시 로그인해 주십시오.');
+                navigate('/login');
             } else {
-                alert('게시글 등록에 실패했습니다. 서버 상태나 권한을 확인해주세요.');
+                alert('게시글 등록에 실패하였습니다. 권한 및 서버 상태를 점검해 주십시오.');
             }
         } catch (error) {
-            console.error('글 등록 중 서버 통신 에러:', error);
-            alert('서버와의 통신에 실패했습니다.');
+            console.error('서버 통신 중 예외 발생:', error);
+            alert('서버와의 통신에 실패하였습니다.');
         }
     };
 
