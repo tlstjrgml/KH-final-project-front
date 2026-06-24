@@ -2,6 +2,11 @@ import { useState, useEffect, useRef} from 'react'
 import styles from './MyPage.module.css'
 import { Link, useNavigate } from 'react-router-dom'
 
+const typeToPath = {
+  FRE: (id) => `/boardfree/detail/${id}`,
+  REV: (id) => `/boardreview/detail/${id}`,
+  NOT: (id) => `/notice/detail/${id}`
+};
 
 const MyPage = () => {
   const [isOpen, setIsOpen] = useState(false)
@@ -24,25 +29,24 @@ const MyPage = () => {
     })
   }, [])
 
-  const handleImageChange = (e) =>{
+  const handleImageChange = (e) => {
     const file = e.target.files[0]
-    if(!file) return
+    if (!file) return
 
     const formData = new FormData()
     formData.append('file', file)
 
     const token = localStorage.getItem('token')
 
-fetch('http://localhost:8080/member/me/profile-image', {
-  method: 'PATCH',
-  headers: {
-    'Authorization': `Bearer ${token}`
-  },
-  body: formData
-})
-.then(res=>res.text()).then(url => setProfile(prev => ({...prev, profileImg: url})))
-      
-    
+    fetch('http://localhost:8080/member/me/profile-image', {
+      method: 'PATCH',
+      headers: {
+        'Authorization': `Bearer ${token}`
+      },
+      body: formData
+    })
+    .then(res => res.text())
+    .then(url => setProfile(prev => ({...prev, profileImg: url})))
   }
 
   return (
@@ -52,10 +56,13 @@ fetch('http://localhost:8080/member/me/profile-image', {
         <aside className={styles.profileCard}>
           <div className={styles.avatarWrap}>
             <div className={styles.avatar}>
-              {profile?.profileImg ? (<img className={styles.avatar} src={profile?.profileImg} alt = "프로필 이미지"/>):(<svg viewBox = "0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" /></svg>)}
-              
+              {profile?.profileImg ? (
+                <img className={styles.avatar} src={profile?.profileImg} alt="프로필 이미지" />
+              ) : (
+                <svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" /></svg>
+              )}
             </div>
-             <input type="file" hidden accept="image/*" ref={fileInputRef} onChange={handleImageChange} />
+            <input type="file" hidden accept="image/*" ref={fileInputRef} onChange={handleImageChange} />
             <button className={styles.avatarEdit} aria-label="프로필 사진 수정" onClick={() => fileInputRef.current.click()}>
               <svg viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" /><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" /></svg>
             </button>
@@ -100,7 +107,7 @@ fetch('http://localhost:8080/member/me/profile-image', {
 
         <div className={styles.rightCol}>
 
-          {/* 찜한 복지 - 더미 데이터 유지 (WishResponseDto 작업 후 교체 예정) */}
+          {/* 찜한 복지 - 더미 데이터 유지 */}
           <section className={styles.sectionBox}>
             <div className={styles.sectionHeader}>
               <h2 className={styles.sectionTitle}>찜한 복지</h2>
@@ -128,18 +135,18 @@ fetch('http://localhost:8080/member/me/profile-image', {
             </div>
           </section>
 
-          {/* 내가 쓴 글 - 실제 API 데이터 */}
+          {/* 내가 쓴 글 */}
           <section className={styles.sectionBox}>
             <div className={styles.sectionHeader}>
               <h2 className={styles.sectionTitle}>내가 쓴 글</h2>
-              <Link to="#" className={styles.sectionMore}>
+              <Link to="/mypage/boards" className={styles.sectionMore}>
                 더 보러가기
                 <svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6" /></svg>
               </Link>
             </div>
             <div className={styles.postList}>
               {boards.map((board) => (
-                <Link to={`/board/${board.boardId}`} key={board.boardId} className={styles.postItem}>
+                <Link to={typeToPath[board.boardType]?.(board.boardId) ?? '/'} key={board.boardId} className={styles.postItem}>
                   <div className={styles.postLeft}>
                     <span className={styles.postType}>{board.boardType}</span>
                     <span className={styles.postTitle}>{board.boardTitle}</span>
@@ -154,18 +161,18 @@ fetch('http://localhost:8080/member/me/profile-image', {
             </div>
           </section>
 
-          {/* 내가 쓴 댓글 - 실제 API 데이터 */}
+          {/* 내가 쓴 댓글 */}
           <section className={styles.sectionBox}>
             <div className={styles.sectionHeader}>
               <h2 className={styles.sectionTitle}>내가 쓴 댓글</h2>
-              <Link to="#" className={styles.sectionMore}>
+              <Link to="/mypage/replies" className={styles.sectionMore}>
                 더 보러가기
                 <svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6" /></svg>
               </Link>
             </div>
             <div className={styles.postList}>
               {replies.map((reply) => (
-                <Link to={`/board/${reply.boardId}`} key={reply.replyId} className={styles.postItem}>
+                <Link to={typeToPath[reply.boardType]?.(reply.boardId) ?? '/'} key={reply.replyId} className={styles.postItem}>
                   <div className={styles.postLeft}>
                     <span className={styles.postType}>{reply.code === 'B' ? '댓글' : '대댓글'}</span>
                     <span className={styles.postTitle}>{reply.replyContent}</span>
