@@ -145,9 +145,9 @@ fetch('http://localhost:8080/member/me/profile-image', {
                     <span className={styles.postTitle}>{board.boardTitle}</span>
                   </div>
                   <div className={styles.postMeta}>
-                    <span>{board.views}</span>
-                    <span>{board.likes}</span>
-                    <span>{board.createDate}</span>
+                    <span>👁️{board.views}</span>
+                    <span>❤️{board.likes}</span>
+                    <span>{board.createDate.split('T')[0]}</span>
                   </div>
                 </Link>
               ))}
@@ -171,7 +171,7 @@ fetch('http://localhost:8080/member/me/profile-image', {
                     <span className={styles.postTitle}>{reply.replyContent}</span>
                   </div>
                   <div className={styles.postMeta}>
-                    <span>{reply.createDate}</span>
+                    <span>{reply.createDate.split('T')[0]}</span>
                   </div>
                 </Link>
               ))}
