@@ -23,6 +23,8 @@ import NoticeBoardWrite from './layouts/NoticeBoardWrite';
 import NoticeBoardEdit from './layouts/NoticeBoardEdit';
 import NoticeBoardDetail from './layouts/NoticeBoardDetail';
 import BoardFreeEdit from './layouts/BoardFreeEdit';
+import MyBoardList from './layouts/MyBoardList';
+import MyRepliesList from './layouts/MyRepliesList';
 
 const PrivateRoute = ({ element }) => {
   const token = localStorage.getItem('token');
@@ -84,6 +86,8 @@ const AppInner = () => {
         <Route path="/signup" element={<Signup />} />
         <Route path="/edit-profile" element={<PrivateRoute element={<EditProfile />} />} />
         <Route path="/mypage" element={<PrivateRoute element={<MyPage />} />} />
+        <Route path="/mypage/boards"element={<PrivateRoute element={<MyBoardList />} />} />
+        <Route path="/mypage/replies" element={<PrivateRoute element={<MyRepliesList />} />} />
         <Route path="/admin" element={<AdminRoute element={<AdminPage />} />} />
         
         {/* 후기 게시판 영역 */}
