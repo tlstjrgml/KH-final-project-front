@@ -24,6 +24,9 @@ const BoardReviewDetail = () => {
     const [editingReplyId, setEditingReplyId] = useState(null);
     const [editContent, setEditContent] = useState('');
 
+    const [isReportModalOpen, setIsReportModalOpen] = useState(false);
+    const [reportReason, setReportReason] = useState('');
+
     const currentMemberId = (() => {
         const token = localStorage.getItem('token');
         if (!token) return null;
@@ -62,7 +65,6 @@ const BoardReviewDetail = () => {
         fetchDetail();
     }, [id]);
 
-    // 댓글 목록 조회
     const fetchReplies = async () => {
         try {
             const res = await fetch(`/react/reply/list/${id}?page=${replyPage}&limit=10`);
@@ -111,7 +113,6 @@ const BoardReviewDetail = () => {
         }
     };
 
-    // 게시글 삭제
     const handleDeletePost = async () => {
         if (!window.confirm('게시글을 삭제하시겠습니까?')) return;
 
@@ -135,7 +136,6 @@ const BoardReviewDetail = () => {
         }
     };
 
-    // 원댓글 등록
     const handleCommentSubmit = async (e) => {
         e.preventDefault();
 
@@ -177,17 +177,14 @@ const BoardReviewDetail = () => {
         }
     };
 
-    // 대댓글 입력창 토글
     const toggleReplyForm = (replyId) => {
         setActiveReplyForm(activeReplyForm === replyId ? null : replyId);
     };
 
-    // 대댓글 입력값 변경
     const handleReplyInputChange = (replyId, value) => {
         setReplyInputs(prev => ({ ...prev, [replyId]: value }));
     };
 
-    // 대댓글 등록
     const handleReplySubmit = async (e, parentReplyId) => {
         e.preventDefault();
 
@@ -231,7 +228,6 @@ const BoardReviewDetail = () => {
         }
     };
 
-    // 댓글 수정 모드 진입
     const startEdit = (reply) => {
         setEditingReplyId(reply.replyId);
         setEditContent(reply.replyContent);
@@ -242,7 +238,6 @@ const BoardReviewDetail = () => {
         setEditContent('');
     };
 
-    // 댓글 수정 등록
     const submitEdit = async (replyId) => {
         if (!editContent.trim()) {
             alert('댓글 내용을 입력해주세요.');
@@ -279,7 +274,6 @@ const BoardReviewDetail = () => {
         }
     };
 
-    // 댓글 삭제
     const handleDeleteReply = async (replyId) => {
         if (!window.confirm('댓글을 삭제하시겠습니까?')) return;
 
@@ -298,6 +292,17 @@ const BoardReviewDetail = () => {
         }
     };
 
+    const handleReport = async () => {
+        if (!reportReason.trim()) {
+            alert('신고 사유를 입력해주세요.');
+            return;
+        }
+        alert('신고가 접수되었습니다.');
+        setIsReportModalOpen(false);
+        setReportReason('');
+    };
+
+    // 로딩 처리 위치
     if (!post) return <div>로딩 중...</div>;
 
     const parentReplies = replies.filter(r => r.code === 'B');
@@ -351,7 +356,7 @@ const BoardReviewDetail = () => {
                                         <span className={styles.metaDivider}>|</span>
                                     </>
                                 )}
-                                <button className={`${styles.actionBtn} ${styles.danger}`}>신고</button>
+                                <button className={`${styles.actionBtn} ${styles.danger}`} onClick={() => setIsReportModalOpen(true)}>신고</button>
                             </div>
                         </div>
                     </div>
@@ -360,7 +365,7 @@ const BoardReviewDetail = () => {
                         {post.boardContent}
                     </div>
 
-                    {post && post.attachments && post.attachments.length > 0 && (
+                    {post.attachments && post.attachments.length > 0 && (
                         <div className={styles.attachmentSection}>
                             <h4 className={styles.attachmentHeader}>첨부파일 ({post.attachments.length})</h4>
                             <ul className={styles.attachmentList}>
@@ -436,10 +441,8 @@ const BoardReviewDetail = () => {
                                             <button
                                                 type="button"
                                                 className={styles.actionBtn}
-                                                onClick={(e) => {
-                                                    console.log('onClick 실행됨!');
+                                                onClick={() => {
                                                     const newState = activeReplyForm === reply.replyId ? null : reply.replyId;
-                                                    console.log('activeReplyForm을 이렇게 변경:', newState);
                                                     setActiveReplyForm(newState);
                                                 }}
                                             >
@@ -540,6 +543,61 @@ const BoardReviewDetail = () => {
                     <button className={styles.btnList} onClick={() => navigate('/boardreview')}>목록으로</button>
                 </div>
             </div>
+
+            {/* 신고하기 모달을 화면을 그리는 return구문 안쪽 하단으로 이동시켰습니다! */}
+            {isReportModalOpen && (
+                <div style={{
+                    position: 'fixed', top: 0, left: 0, width: '100%', height: '100%',
+                    background: 'rgba(0,0,0,0.5)', zIndex: 1000,
+                    display: 'flex', justifyContent: 'center', alignItems: 'center'
+                }}>
+                    <div style={{
+                        background: 'white', borderRadius: '12px',
+                        padding: '30px', width: '400px'
+                    }}>
+                        <h3 style={{ marginBottom: '16px' }}>게시글 신고</h3>
+                        <select
+                            value={reportReason}
+                            onChange={(e) => setReportReason(e.target.value)}
+                            style={{
+                                width: '100%', height: '44px', borderRadius: '8px',
+                                border: '1px solid #ddd', padding: '0 12px',
+                                marginBottom: '16px', fontSize: '15px'
+                            }}
+                        >
+                            <option value="">신고 사유를 선택해주세요</option>
+                            <option value="spam">스팸/광고</option>
+                            <option value="abuse">욕설/비방</option>
+                            <option value="abuse">음란물/혐오</option>
+                            <option value="privacy">개인정보 노출</option>
+                            <option value="false">허위정보</option>
+                            <option value="etc">기타</option>
+                        </select>
+                        <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end' }}>
+                            <button
+                                onClick={() => { setIsReportModalOpen(false); setReportReason(''); }}
+                                style={{
+                                    padding: '10px 20px', borderRadius: '8px',
+                                    border: '1px solid #ddd', background: 'white',
+                                    cursor: 'pointer'
+                                }}
+                            >
+                                취소
+                            </button>
+                            <button
+                                onClick={handleReport}
+                                style={{
+                                    padding: '10px 20px', borderRadius: '8px',
+                                    border: 'none', background: '#e53e3e',
+                                    color: 'white', cursor: 'pointer'
+                                }}
+                            >
+                                신고하기
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </main>
     );
 };
