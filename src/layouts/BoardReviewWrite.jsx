@@ -1,10 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styles from './BoardReviewWrite.module.css';
 
 const BoardReviewWrite = () => {
     const navigate = useNavigate();
-    const [rating, setRating] = useState(0);
     const [boardTitle, setBoardTitle] = useState('');
     const [boardContent, setBoardContent] = useState('');
     const [selectedWelfare, setSelectedWelfare] = useState(null);
@@ -12,12 +11,16 @@ const BoardReviewWrite = () => {
     const [searchKeyword, setSearchKeyword] = useState('');
     const [searchResults, setSearchResults] = useState([]);
 
+    const nextRowId = useRef(1);
+    const [newFileRows, setNewFileRows] = useState([{ id: 0, fileNameDisplay: '선택된 파일 없음', hasFile: false }]);
+    const fileInputRefs = useRef({});
+
     const handleSearch = async () => {
         try {
             const res = await fetch(`/api/welfare/list?keyword=${encodeURIComponent(searchKeyword)}`);
             if (!res.ok) throw new Error('검색 실패');
             const data = await res.json();
-            setSearchResults(data.list || []);
+            setSearchResults(data.content || []);
         } catch (err) {
             console.error(err);
             alert('검색 중 오류가 발생했습니다.');
@@ -35,6 +38,28 @@ const BoardReviewWrite = () => {
         setIsModalOpen(false);
         setSearchResults([]);
         setSearchKeyword('');
+    };
+
+    const handleAddNewRow = () => {
+        setNewFileRows([...newFileRows, { id: nextRowId.current, fileNameDisplay: '선택된 파일 없음', hasFile: false }]);
+        nextRowId.current += 1;
+    };
+
+    const handleRemoveNewRow = (rowId) => {
+        setNewFileRows(newFileRows.filter(row => row.id !== rowId));
+    };
+
+    const triggerFileInput = (rowId) => {
+        fileInputRefs.current[rowId]?.click();
+    };
+
+    const handleFileChange = (e, rowId) => {
+        const files = e.target.files;
+        if (files && files.length > 0) {
+            setNewFileRows(newFileRows.map(row =>
+                row.id === rowId ? { ...row, fileNameDisplay: files[0].name, hasFile: true } : row
+            ));
+        }
     };
 
     const handleSubmit = async (e) => {
@@ -56,26 +81,33 @@ const BoardReviewWrite = () => {
         const token = localStorage.getItem('token');
 
         try {
+            const formData = new FormData();
+            formData.append('boardTitle', boardTitle);
+            formData.append('boardContent', boardContent);
+            formData.append('boardType', 'REV');
+            formData.append('welfareId', selectedWelfare.welfareId);
+
+            newFileRows.forEach(row => {
+                if (row.hasFile) {
+                    const file = fileInputRefs.current[row.id]?.files[0];
+                    if (file) {
+                        formData.append('files', file);
+                    }
+                }
+            });
+
             const res = await fetch('/react/board/write', {
                 method: 'POST',
                 headers: {
-                    'Content-Type': 'application/json',
                     'Authorization': `Bearer ${token}`
                 },
-                body: JSON.stringify({
-                    boardTitle: boardTitle,
-                    boardContent: boardContent,
-                    boardType: 'REV',
-                    welfareId: selectedWelfare ? selectedWelfare.welfareId : null,
-                    rating: rating
-                })
+                body: formData
             });
 
             if (!res.ok) {
                 throw new Error('등록 실패');
             }
 
-            const data = await res.json();
             alert('등록되었습니다.');
             navigate('/boardreview');
         } catch (err) {
@@ -94,7 +126,7 @@ const BoardReviewWrite = () => {
                 {isModalOpen && (
                     <div className={styles.modalOverlay}>
                         <div className={styles.modalContent}>
-                            <button className={styles.closeBtn} onClick={() => setIsModalOpen(false)}>&times;</button>
+                            <button type="button" className={styles.closeBtn} onClick={() => setIsModalOpen(false)}>&times;</button>
                             <h3>복지 서비스 검색</h3>
                             <div className={styles.searchBox}>
                                 <input
@@ -104,7 +136,7 @@ const BoardReviewWrite = () => {
                                     onKeyDown={handleKeyDown}
                                     placeholder="검색어를 입력하세요"
                                 />
-                                <button onClick={handleSearch}>검색</button>
+                                <button type="button" onClick={handleSearch}>검색</button>
                             </div>
                             <ul className={styles.resultList}>
                                 {searchResults.map((item) => (
@@ -158,10 +190,22 @@ const BoardReviewWrite = () => {
 
                     <div className={styles.field}>
                         <label>파일 첨부</label>
-                        <div className={styles.fileCustomBox}>
-                            <button type="button" className={styles.btnFile}>파일 선택</button>
-                            <span className={styles.fileName}>선택된 파일 없음</span>
-                        </div>
+                        {newFileRows.map((row) => (
+                            <div key={row.id} className={styles.fileCustomBox} style={{ marginBottom: '8px' }}>
+                                <input
+                                    type="file"
+                                    ref={el => fileInputRefs.current[row.id] = el}
+                                    onChange={(e) => handleFileChange(e, row.id)}
+                                    style={{ display: 'none' }}
+                                />
+                                <button type="button" className={styles.btnFile} onClick={() => triggerFileInput(row.id)}>파일 선택</button>
+                                <span className={styles.fileName}>{row.fileNameDisplay}</span>
+                                {row.id !== 0 && (
+                                    <button type="button" className={styles.btnRemoveRow} onClick={() => handleRemoveNewRow(row.id)}>삭제</button>
+                                )}
+                            </div>
+                        ))}
+                        <button type="button" className={styles.btnAddRow} onClick={handleAddNewRow}>+ 파일 추가</button>
                     </div>
 
                     <div className={styles.formActions}>
