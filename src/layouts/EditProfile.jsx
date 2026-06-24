@@ -18,7 +18,7 @@ const EditProfile = () => {
     });
 
     const navigate = useNavigate();
-
+    const token = localStorage.getItem('token');
     useEffect(() => {
         fetch('http://localhost:8080/member/me', {
             headers: { 'Authorization': `Bearer ${token}` }
@@ -72,7 +72,7 @@ const EditProfile = () => {
             alert('필수 항목을 모두 입력해주세요');
             return;
         }
-        const token = localStorage.getItem('token');
+
 
         fetch('http://localhost:8080/member/me', {
             method: 'PATCH',
