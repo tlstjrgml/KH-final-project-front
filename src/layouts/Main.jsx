@@ -133,8 +133,8 @@ const Main = () => {
         isOpen={showModal}
         onClose={() => setShowModal(false)}
         onSave={() => {
-          setShowModal(false)
-          navigate('/edit-profile')
+        setShowModal(false)
+        navigate('/edit-profile')
         }}
       />
 
