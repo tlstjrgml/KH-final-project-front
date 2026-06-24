@@ -544,7 +544,6 @@ const BoardReviewDetail = () => {
                 </div>
             </div>
 
-            {/* 신고하기 모달을 화면을 그리는 return구문 안쪽 하단으로 이동시켰습니다! */}
             {isReportModalOpen && (
                 <div style={{
                     position: 'fixed', top: 0, left: 0, width: '100%', height: '100%',

@@ -283,7 +283,7 @@ const Main = () => {
             </h2>
             <div className={styles.noticeList}>
               {noticeTop5.map(n => (
-                <Link to={`/notice/detail/${n.boardId}`} key={n.boardId} className={styles.noticeItem}>
+                <Link to={`/notice/detail/:id/${n.boardId}`} key={n.boardId} className={styles.noticeItem}>
                   <div className={styles.noticeDot}></div>
                   <span className={styles.noticeTitle}>{n.boardTitle}</span>
                 </Link>

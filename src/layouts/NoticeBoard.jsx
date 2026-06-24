@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
+import styles from './NoticeBoard.module.css'; // 공지사항 스타일시트 연동
 import { useNavigate } from 'react-router-dom';
-import styles from './NoticeBoard.module.css';
 
 const NoticeBoard = () => {
     const navigate = useNavigate();
@@ -9,48 +9,96 @@ const NoticeBoard = () => {
     const [currentPage, setCurrentPage] = useState(1);
     const [endPage, setEndPage] = useState(1);
 
+    const [searchType, setSearchType] = useState('title');
+    const [searchKeyword, setSearchKeyword] = useState('');
+    const [appliedKeyword, setAppliedKeyword] = useState('');
+
+    const [isAdmin, setIsAdmin] = useState(false);
+
     useEffect(() => {
+        const token = localStorage.getItem("token");
+
+        if (token) {
+            try {
+                const payload = JSON.parse(atob(token.split(".")[1]));
+                console.log("현재 로그인된 유저의 토큰 payload:", payload);
+
+                if (payload.isAdmin === "Y") {
+                    console.log("공지사항: 관리자 인증 성공 ");
+                    setIsAdmin(true);
+                } else {
+                    console.log("공지사항: 일반 유저입니다. (글쓰기 비활성화)");
+                    setIsAdmin(false);
+                }
+            } catch (err) {
+                console.error("토큰 검증 에러:", err);
+                setIsAdmin(false);
+            }
+        } else {
+            console.log("로그인 토큰이 없습니다.");
+            setIsAdmin(false);
+        }
+
         const fetchBoardList = async () => {
             try {
-                const res = await fetch(`http://localhost:8080/board/list?boardType=NOT&page=${currentPage}`);
+                const params = new URLSearchParams({
+                    boardType: 'NOT',
+                    page: currentPage
+                });
+                if (appliedKeyword) {
+                    params.set('keyword', appliedKeyword);
+                    params.set('searchType', searchType);
+                }
+
+                const res = await fetch(`/react/board/list?${params.toString()}`);
                 const data = await res.json();
-                console.log('공지사항 SQL 수신 데이터:', data);
 
                 setBoardList(data.content || []);
-
                 const maxPage = data.pagination?.endPage || 1;
                 setEndPage(maxPage);
                 setPages(Array.from({ length: maxPage }, (_, i) => i + 1));
-            
             } catch (err) {
-                console.error('목록 조회 실패:', err);
+                console.error('공지사항 목록 조회 실패:', err);
             }
         };
-        
-        fetchBoardList(); 
-    }, [currentPage]); 
+
+        fetchBoardList();
+    }, [currentPage, appliedKeyword, searchType]);
+
+    const handleSearch = () => {
+        setCurrentPage(1);
+        setAppliedKeyword(searchKeyword);
+    };
+
+    const handleSearchKeyDown = (e) => {
+        if (e.key === 'Enter') {
+            handleSearch();
+        }
+    };
 
     return (
         <main className={styles.page}>
             <div className={styles.boardCard}>
-
                 <div className={styles.boardHeader}>
                     <h2 className={styles.boardTitle}>공지사항</h2>
-                    <button
-                        type="button"
-                        className={styles.btnWrite}
-                        onClick={() => navigate('/notice/write')}
-                    >
-                        <svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14" /></svg>
-                        글쓰기
-                    </button>
+
+                    {isAdmin && (
+                        <button
+                            type="button"
+                            className={styles.btnWrite}
+                            onClick={() => { navigate('/notice/write'); }}
+                        >
+                            <svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14" /></svg>
+                            글쓰기
+                        </button>
+                    )}
                 </div>
 
                 <table className={styles.boardTable}>
                     <thead>
                         <tr>
-                            <th className={styles.colId}>글 번호</th>
-                            <th className={styles.colTitle}>글 제목</th>
+                            <th className={styles.colId}>번호</th>
+                            <th className={styles.colTitle}>제목</th>
                             <th className={styles.colAuthor}>작성자</th>
                             <th className={styles.colDate}>작성일자</th>
                             <th className={styles.colViews}>조회수</th>
@@ -59,49 +107,34 @@ const NoticeBoard = () => {
                     <tbody>
                         {boardList.length === 0 ? (
                             <tr>
-                                <td colSpan="5" style={{ textAlign: 'center' }}>등록된 게시글이 없습니다.</td>
+                                <td colSpan="5" style={{ textAlign: 'center' }}>등록된 공지사항이 없습니다.</td>
                             </tr>
                         ) : (
                             boardList.map((board) => (
                                 <tr
                                     key={board.boardId}
                                     className={styles.dataRow}
-                                    onClick={() => navigate(`/notice/detail/${board.boardId}`)}
+                                    onClick={() => navigate(`/notice/detail/:id/${board.boardId}`)}
                                     style={{ cursor: 'pointer' }}
                                 >
-                                    {/* 글 번호 */}
                                     <td className={`${styles.colId} ${styles.boardId}`}>{board.boardId}</td>
-                                    
-                                    {/* 글 제목 */}
-                                    <td className={styles.colTitle}>{board.boardTitle ?? board.title ?? '제목 없음'}</td>
-                                    
-                                    {/* 작성자 닉네임 */}
-                                    <td className={styles.colAuthor}>{board.writerNickname ?? '작성자 없음'}</td>
-                                    
-                                    {/* 작성일자  */}
-                                    <td className={styles.colDate}>
-                                        {board.createDate && typeof board.createDate === 'string'
-                                            ? board.createDate.split('T')[0]
-                                            : '-'}
-                                    </td>
-                                    
-                                    {/* 조회수 */}
-                                    <td className={styles.colViews}>{board.views ?? 0}</td>
+                                    <td className={styles.colTitle}>{board.boardTitle}</td>
+                                    <td className={styles.colAuthor}>{board.writerNickname}</td>
+                                    <td className={styles.colDate}>{board.createDate?.split('T')[0] || '-'}</td>
+                                    <td className={styles.colViews}>{board.views}</td>
                                 </tr>
                             ))
                         )}
                     </tbody>
                 </table>
 
-                {/* 페이지네이션 인터페이스 */}
-                <div className={styles.pagination} id="pagination-container">
+                <div className={styles.pagination}>
                     <a className={styles.pageItem}
-                        aria-label="Previous"
                         onClick={() => currentPage > 1 && setCurrentPage(currentPage - 1)}
                         style={{
                             pointerEvents: currentPage <= 1 ? 'none' : 'auto',
                             opacity: currentPage <= 1 ? 0.4 : 1,
-                            cursor: currentPage <= 1 ? 'default' : 'pointer'
+                            cursor: 'pointer'
                         }}
                     >
                         &lt;
@@ -119,12 +152,11 @@ const NoticeBoard = () => {
                     ))}
 
                     <a className={styles.pageItem}
-                        aria-label="Next"
                         onClick={() => currentPage < endPage && setCurrentPage(currentPage + 1)}
                         style={{
                             pointerEvents: currentPage >= endPage ? 'none' : 'auto',
                             opacity: currentPage >= endPage ? 0.4 : 1,
-                            cursor: currentPage >= endPage ? 'default' : 'pointer'
+                            cursor: 'pointer'
                         }}
                     >
                         &gt;
@@ -132,18 +164,28 @@ const NoticeBoard = () => {
                 </div>
 
                 <div className={styles.searchBar}>
-                    <select className={styles.searchSelect}>
+                    <select
+                        className={styles.searchSelect}
+                        value={searchType}
+                        onChange={(e) => setSearchType(e.target.value)}
+                    >
                         <option value="title">제목</option>
                         <option value="content">내용</option>
                         <option value="author">작성자</option>
                     </select>
-                    <input type="text" className={styles.searchInput} placeholder="검색어를 입력해주세요" />
-                    <button type="button" className={styles.btnSearch}>검색</button>
+                    <input
+                        type="text"
+                        className={styles.searchInput}
+                        placeholder="검색어를 입력해주세요"
+                        value={searchKeyword}
+                        onChange={(e) => setSearchKeyword(e.target.value)}
+                        onKeyDown={handleSearchKeyDown}
+                    />
+                    <button type="button" className={styles.btnSearch} onClick={handleSearch}>검색</button>
                 </div>
-
             </div>
         </main>
     );
-};
+}
 
 export default NoticeBoard;

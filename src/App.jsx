@@ -105,9 +105,11 @@ const AppInner = () => {
 
         {/* 공지사항 게시판 영역 */}
         <Route path="/noticeboard" element={<NoticeBoard />} />
-        <Route path="/notice/write" element={<PrivateRoute element={<NoticeBoardWrite />} />} />
-        <Route path="/notice/edit/:id" element={<PrivateRoute element={<NoticeBoardEdit />} />} />
+        <Route path="/noticeboard/write" element={<NoticeBoardWrite />} />
+        <Route path="/notice/write" element={<NoticeBoardWrite />} />
+        <Route path="/noticeboard/edit/:id" element={<PrivateRoute element={<NoticeBoardEdit />} />} />
         <Route path="/notice/detail/:id" element={<NoticeBoardDetail />} />
+        <Route path="/notice/detail/:id/:id" element={<NoticeBoardDetail />} />
       </Routes>
     </>
   );
