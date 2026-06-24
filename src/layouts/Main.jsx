@@ -48,7 +48,6 @@ const Main = () => {
             })
               .then(res => res.json())
               .then(data => {
-                console.log('recommend 응답:', data)
                 setRecommend(data)
           })
                 
