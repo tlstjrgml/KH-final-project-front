@@ -7,12 +7,10 @@ const BoardFreeWrite = () => {
     const navigate = useNavigate();
     const formRef = useRef(null);
     
-    // 상태 관리
     const [title, setTitle] = useState('');
     const [content, setContent] = useState('');
     const [isModalOpen, setIsModalOpen] = useState(false);
     
-    // 파일 첨부 UI 유지를 위한 상태 (백엔드 고정 전제로 인해 실제 전송은 되지 않습니다)
     const [fileRows, setFileRows] = useState([{ id: Date.now(), files: [] }]);
 
 
@@ -48,17 +46,16 @@ const BoardFreeWrite = () => {
 
     const executeSubmit = async () => {
         try {
-            // 백엔드가 요구하는 JSON 객체 구성 (파일 제외, Board VO 필드명 일치)
             const payload = {
                 boardTitle: title,
                 boardContent: content,
                 boardType: "FRE"
             };
 
-            const response = await fetch('http://localhost:8080/board/write', { 
+            const response = await fetch('http://localhost:8080/boardfree/write', { 
                 method: 'POST',
                 headers: {
-                    'Content-Type': 'application/json', // JSON 통신 명시
+                    'Content-Type': 'application/json', 
                     'Authorization': `Bearer ${localStorage.getItem('token')}` 
                 },
                 body: JSON.stringify(payload)
@@ -66,7 +63,7 @@ const BoardFreeWrite = () => {
 
             if (response.ok) {
                 alert('게시글이 성공적으로 등록되었습니다.');
-                navigate('/boardfree'); // 성공 시 목록으로 이동
+                navigate('/boardfree'); 
             } else {
                 alert('게시글 등록에 실패했습니다. 서버 상태나 권한을 확인해주세요.');
             }
@@ -91,7 +88,6 @@ const BoardFreeWrite = () => {
 
         const hasFiles = fileRows.some(row => row.files.length > 0);
 
-        // UI 상 파일 첨부 여부를 확인하지만, 실제 서버 통신은 텍스트(JSON)로만 이루어집니다.
         if (!hasFiles) {
             setIsModalOpen(true);
         } else {
@@ -224,7 +220,6 @@ const BoardFreeWrite = () => {
                 </form>
             </div>
 
-            {/* 첨부파일 없음 모달 */}
             {isModalOpen && (
                 <div id="modalChoice" className={styles.modalOverlay}>
                     <div className={styles.modalContent}>
