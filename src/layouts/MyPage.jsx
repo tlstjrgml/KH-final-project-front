@@ -1,6 +1,7 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef} from 'react'
 import styles from './MyPage.module.css'
 import { Link, useNavigate } from 'react-router-dom'
+
 
 const MyPage = () => {
   const [isOpen, setIsOpen] = useState(false)
@@ -8,6 +9,7 @@ const MyPage = () => {
   const [profile, setProfile] = useState(null);
   const [boards, setBoards] = useState([]);
   const [replies, setReplies] = useState([]);
+  const fileInputRef = useRef(null);
 
   useEffect(() => {
     const token = localStorage.getItem('token')
@@ -22,6 +24,27 @@ const MyPage = () => {
     })
   }, [])
 
+  const handleImageChange = (e) =>{
+    const file = e.target.files[0]
+    if(!file) return
+
+    const formData = new FormData()
+    formData.append('file', file)
+
+    const token = localStorage.getItem('token')
+
+fetch('http://localhost:8080/member/me/profile-image', {
+  method: 'PATCH',
+  headers: {
+    'Authorization': `Bearer ${token}`
+  },
+  body: formData
+})
+.then(res=>res.text()).then(url => setProfile(prev => ({...prev, profileImg: url})))
+      
+    
+  }
+
   return (
     <main className={styles.page}>
       <div className={styles.pageGrid}>
@@ -29,9 +52,11 @@ const MyPage = () => {
         <aside className={styles.profileCard}>
           <div className={styles.avatarWrap}>
             <div className={styles.avatar}>
-              <svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" /></svg>
+              {profile?.profileImg ? (<img className={styles.avatar} src={profile?.profileImg} alt = "프로필 이미지"/>):(<svg viewBox = "0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" /></svg>)}
+              
             </div>
-            <button className={styles.avatarEdit} aria-label="프로필 사진 수정">
+             <input type="file" hidden accept="image/*" ref={fileInputRef} onChange={handleImageChange} />
+            <button className={styles.avatarEdit} aria-label="프로필 사진 수정" onClick={() => fileInputRef.current.click()}>
               <svg viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" /><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" /></svg>
             </button>
           </div>
