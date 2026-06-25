@@ -13,7 +13,6 @@ const BoardFreeWrite = () => {
     
     const [fileRows, setFileRows] = useState([{ id: Date.now(), files: [] }]);
 
-
     const handleAddFileRow = () => {
         setFileRows([...fileRows, { id: Date.now(), files: [] }]);
     };
@@ -44,32 +43,47 @@ const BoardFreeWrite = () => {
         );
     };
 
-    const executeSubmit = async () => {
+    // 데이터 구조화 및 서버 전송 로직
+   const executeSubmit = async () => {
         try {
-            const payload = {
-                boardTitle: title,
-                boardContent: content,
-                boardType: "FRE"
-            };
+            const formData = new FormData();
+            
+            // 1. BOARD 테이블 매핑 텍스트 데이터
+            formData.append('boardTitle', title);
+            formData.append('boardContent', content);
+            formData.append('boardType', 'FRE'); 
 
-            const response = await fetch('http://localhost:8080/boardfree/write', { 
+            // 2. ATTACHMENT 테이블 매핑을 위한 파일 데이터
+            fileRows.forEach((row) => {
+                if (row.files && row.files.length > 0) {
+                    row.files.forEach(file => {
+                        formData.append('files', file); 
+                    });
+                }
+            });
+
+            const token = localStorage.getItem('token');
+
+            const response = await fetch('http://localhost:8080/board/write', { 
                 method: 'POST',
                 headers: {
-                    'Content-Type': 'application/json', 
-                    'Authorization': `Bearer ${localStorage.getItem('token')}` 
+                    'Authorization': token ? `Bearer ${token}` : '' 
                 },
-                body: JSON.stringify(payload)
+                body: formData
             });
 
             if (response.ok) {
-                alert('게시글이 성공적으로 등록되었습니다.');
+                alert('게시글 등록이 정상적으로 완료되었습니다.');
                 navigate('/boardfree'); 
+            } else if (response.status === 401) {
+                alert('인증이 유효하지 않습니다. 다시 로그인해 주십시오.');
+                navigate('/login');
             } else {
-                alert('게시글 등록에 실패했습니다. 서버 상태나 권한을 확인해주세요.');
+                alert('게시글 등록에 실패하였습니다. 권한 및 서버 상태를 점검해 주십시오.');
             }
         } catch (error) {
-            console.error('글 등록 중 서버 통신 에러:', error);
-            alert('서버와의 통신에 실패했습니다.');
+            console.error('서버 통신 중 예외 발생:', error);
+            alert('서버와의 통신에 실패하였습니다.');
         }
     };
 
@@ -81,18 +95,12 @@ const BoardFreeWrite = () => {
             return; 
         }
         if (!content.trim()) { 
-
             alert('내용을 입력해주세요.'); 
             return; 
         }
 
-        const hasFiles = fileRows.some(row => row.files.length > 0);
-
-        if (!hasFiles) {
-            setIsModalOpen(true);
-        } else {
-            executeSubmit(); 
-        }
+        // 첨부파일 유무를 확인하는 모달 호출 로직을 제거하고 즉시 전송을 실행합니다.
+        executeSubmit(); 
     };
 
     const confirmSubmit = () => {
@@ -143,7 +151,7 @@ const BoardFreeWrite = () => {
                             <label>
                                 파일 첨부 
                                 <span style={{ fontSize: '12px', fontWeight: 'normal', color: '#ADB5BD', marginLeft: '6px' }}>
-                                    (최대 5MB, 현재 백엔드 버전에서는 첨부파일이 서버에 저장되지 않습니다.)
+                                    (최대 5MB)
 
                                 </span>
                             </label>
@@ -220,29 +228,6 @@ const BoardFreeWrite = () => {
                 </form>
             </div>
 
-            {isModalOpen && (
-                <div id="modalChoice" className={styles.modalOverlay}>
-                    <div className={styles.modalContent}>
-                        <p>첨부파일이 하나도 첨부되지 않았습니다.<br />이대로 게시글을 등록하시겠습니까?</p>
-                        <div className={styles.modalActions}>
-                            <button 
-                                type="button" 
-                                className={`${styles.modalBtn} ${styles.cancel}`} 
-                                onClick={() => setIsModalOpen(false)}
-                            >
-                                취소
-                            </button>
-                            <button 
-                                type="button" 
-                                className={`${styles.modalBtn} ${styles.confirm}`} 
-                                onClick={confirmSubmit}
-                            >
-                                확인
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            )}
         </div>
     );
 
