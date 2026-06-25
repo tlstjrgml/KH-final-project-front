@@ -13,7 +13,6 @@ const BoardFreeWrite = () => {
     
     const [fileRows, setFileRows] = useState([{ id: Date.now(), files: [] }]);
 
-
     const handleAddFileRow = () => {
         setFileRows([...fileRows, { id: Date.now(), files: [] }]);
     };
@@ -45,7 +44,7 @@ const BoardFreeWrite = () => {
     };
 
     // 데이터 구조화 및 서버 전송 로직
-    const executeSubmit = async () => {
+   const executeSubmit = async () => {
         try {
             const formData = new FormData();
             
@@ -58,7 +57,6 @@ const BoardFreeWrite = () => {
             fileRows.forEach((row) => {
                 if (row.files && row.files.length > 0) {
                     row.files.forEach(file => {
-                        // 💡 핵심: BoardService의 request.getFiles()와 완벽히 매핑되도록 'files'라는 키를 사용합니다.
                         formData.append('files', file); 
                     });
                 }
@@ -69,14 +67,13 @@ const BoardFreeWrite = () => {
             const response = await fetch('http://localhost:8080/board/write', { 
                 method: 'POST',
                 headers: {
-                    // 브라우저가 전송 경계선(boundary)을 포함한 Content-Type을 자동 설정하도록 위임
                     'Authorization': token ? `Bearer ${token}` : '' 
                 },
                 body: formData
             });
 
             if (response.ok) {
-                alert('게시글과 첨부파일이 정상적으로 등록되었습니다.');
+                alert('게시글 등록이 정상적으로 완료되었습니다.');
                 navigate('/boardfree'); 
             } else if (response.status === 401) {
                 alert('인증이 유효하지 않습니다. 다시 로그인해 주십시오.');
@@ -98,18 +95,12 @@ const BoardFreeWrite = () => {
             return; 
         }
         if (!content.trim()) { 
-
             alert('내용을 입력해주세요.'); 
             return; 
         }
 
-        const hasFiles = fileRows.some(row => row.files.length > 0);
-
-        if (!hasFiles) {
-            setIsModalOpen(true);
-        } else {
-            executeSubmit(); 
-        }
+        // 첨부파일 유무를 확인하는 모달 호출 로직을 제거하고 즉시 전송을 실행합니다.
+        executeSubmit(); 
     };
 
     const confirmSubmit = () => {
@@ -160,7 +151,7 @@ const BoardFreeWrite = () => {
                             <label>
                                 파일 첨부 
                                 <span style={{ fontSize: '12px', fontWeight: 'normal', color: '#ADB5BD', marginLeft: '6px' }}>
-                                    (최대 5MB, 현재 백엔드 버전에서는 첨부파일이 서버에 저장되지 않습니다.)
+                                    (최대 5MB)
 
                                 </span>
                             </label>
@@ -237,29 +228,6 @@ const BoardFreeWrite = () => {
                 </form>
             </div>
 
-            {isModalOpen && (
-                <div id="modalChoice" className={styles.modalOverlay}>
-                    <div className={styles.modalContent}>
-                        <p>첨부파일이 하나도 첨부되지 않았습니다.<br />이대로 게시글을 등록하시겠습니까?</p>
-                        <div className={styles.modalActions}>
-                            <button 
-                                type="button" 
-                                className={`${styles.modalBtn} ${styles.cancel}`} 
-                                onClick={() => setIsModalOpen(false)}
-                            >
-                                취소
-                            </button>
-                            <button 
-                                type="button" 
-                                className={`${styles.modalBtn} ${styles.confirm}`} 
-                                onClick={confirmSubmit}
-                            >
-                                확인
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            )}
         </div>
     );
 
