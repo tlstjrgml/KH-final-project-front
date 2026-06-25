@@ -10,9 +10,17 @@ const BoardFreeDetail = () => {
     const [isLiked, setIsLiked] = useState(false);
     const [likes, setLikes] = useState(0);
 
-    const [replyContent, setReplyContent] = useState("");
+    const [replyContent, setReplyContent] = useState('');
+    const [replies, setReplies] = useState([]);
+    const [activeReplyForm, setActiveReplyForm] = useState(null); // 대댓글 입력창 제어용
+    const [replyInputs, setReplyInputs] = useState({}); // 대댓글 입력값 저장용
+    const [editingReplyId, setEditingReplyId] = useState(null);
+    const [editContent, setEditContent] = useState('');
 
     const [currentUser, setCurrentUser] = useState(null);
+
+    const [isReportModalOpen, setIsReportModalOpen] = useState(false);
+    const [reportReason, setReportReason] = useState("");
 
     useEffect(() => {
         const token = localStorage.getItem("token");
@@ -49,6 +57,7 @@ const BoardFreeDetail = () => {
 
         fetchBoardDetail();
     }, [id]);
+
     const togglePostLike = async () => {
         const token = localStorage.getItem('token');
         if (!token) {
@@ -73,11 +82,87 @@ const BoardFreeDetail = () => {
             }
         } catch (err) {
             console.error(err);
-            setIsPostLiked(prevLiked);
-            setPostLikes(prevCount);
+            setIsLiked(prevLiked);
+            setLikes(prevCount);
             alert('좋아요 처리 중 오류가 발생했습니다.');
         }
     };
+
+    const handleReport = async () => {
+        if (!reportReason.trim()) {
+            alert('신고 사유를 입력해주세요.');
+            return;
+        }
+        alert('신고가 접수되었습니다.');
+        setIsReportModalOpen(false);
+        setReportReason('');
+    };
+
+    const handleDeletePost = async () => {
+        if (!window.confirm('게시글을 삭제하시겠습니까?')) return;
+
+        const token = localStorage.getItem('token');
+        try {
+            const res = await fetch(`/react/board/${id}`, {
+                method: 'DELETE',
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+
+            if (!res.ok) {
+                const errMsg = await res.text();
+                throw new Error(errMsg || '삭제 실패');
+            }
+
+            alert('게시글이 삭제되었습니다.');
+            navigate('/boardfree');
+        } catch (err) {
+            console.error(err);
+            alert(`삭제 중 오류가 발생했습니다: ${err.message}`);
+        }
+    };
+
+    const handleReplySubmit = async (e, parentId = null, code = 'B') => {
+    e.preventDefault();
+    const content = parentId ? replyInputs[parentId] : replyContent;
+
+    if (!content?.trim()) return alert('내용을 입력해주세요.');
+
+    const token = localStorage.getItem('token');
+        try {
+            const res = await fetch('/reply/write', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                body: JSON.stringify({ replyContent: content, refId: parentId || id, code: code })
+            });
+
+            if (!res.ok) throw new Error(await res.text());
+            
+            // 입력 초기화 및 목록 재조회
+            parentId ? setReplyInputs({...replyInputs, [parentId]: ''}) : setReplyContent('');
+            setActiveReplyForm(null);
+            fetchReplies(); 
+        } catch (err) { alert(err.message); }
+    };
+
+    const submitEdit = async (replyId) => {
+    const token = localStorage.getItem('token');
+    const res = await fetch(`/reply/${replyId}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+            body: JSON.stringify({ replyContent: editContent })
+        });
+        if (res.ok) { setEditingReplyId(null); fetchReplies(); }
+    };
+
+    const handleDeleteReply = async (replyId) => {
+        if (!window.confirm('삭제하시겠습니까?')) return;
+        const token = localStorage.getItem('token');
+        await fetch(`/reply/${replyId}`, { method: 'DELETE', headers: { 'Authorization': `Bearer ${token}` } });
+        fetchReplies();
+    };
+
+    
+
     if (!post) return <div style={{ textAlign: 'center', padding: '50px' }}>로딩 중...</div>
 
     return (
@@ -102,13 +187,22 @@ const BoardFreeDetail = () => {
                             <div className={styles.postMetaRight}>
                                 {post.isOwner && (
                                     <>
-                                        <button className={styles.actionBtn} onClick={() => { navigate(`/boardfree/edit/${id}`) }}>수정</button>
+                                        <button
+                                            className={styles.actionBtn}
+                                            onClick={() => navigate(`//edit/${post.boardId || id}`)}>
+                                            수정
+                                        </button>
                                         <span className={styles.metaDivider}>|</span>
-                                        <button className={`${styles.actionBtn} ${styles.danger}`}>삭제</button>
+                                        <button
+                                            className={`${styles.actionBtn} ${styles.danger}`}
+                                            onClick={handleDeletePost}
+                                        >
+                                            삭제
+                                        </button>
                                         <span className={styles.metaDivider}>|</span>
                                     </>
                                 )}
-                                <button className={`${styles.actionBtn} ${styles.danger}`}>신고</button>
+                                <button className={`${styles.actionBtn} ${styles.danger}`} onClick={() => setIsReportModalOpen(true)}>신고</button>
                             </div>
                         </div>
                     </div>
@@ -118,7 +212,7 @@ const BoardFreeDetail = () => {
                         {post.boardContent}
                     </div>
 
-                   {/* 첨부파일 */}
+                    {/* 첨부파일 */}
                     <div className={styles.attachmentBox}>
                         <div className={styles.attachmentTitle}>
                             <svg viewBox="0 0 24 24">
@@ -128,17 +222,23 @@ const BoardFreeDetail = () => {
                         </div>
                         <ul className={styles.attachmentList}>
                             {post.attachments && post.attachments.length > 0 ? (
-                                post.attachments.map((file) => (
-                                    <li key={file.attmId}>
-                                        {/* 클릭 시 다운로드 로직 등을 연결할 수 있습니다 */}
-                                        <a 
-                                            href={`/download/${file.attmId}`} 
-                                            className={styles.attachmentLink}
-                                        >
-                                            {file.originalName}
-                                        </a>
-                                    </li>
-                                ))
+                                post.attachments.map((file) => {
+                                     const fileId = file.attmId || file.fileId || index;
+                                    const fileName = file.originalName || file.originName || '첨부파일';
+
+                                    return (
+                                        <li key={fileId} className={styles.attachmentItem}>
+                                            <a
+                                                href={`/react/board/dsownload/${fileId}`}
+                                                download={fileName}
+                                                className={styles.fileLink}
+                                            >
+                                                {fileName}
+                                            </a>
+                                        </li>
+
+                                    );
+                                })
                             ) : (
                                 <li>
                                     <span className={styles.attachmentLink} style={{ color: '#ADB5BD', cursor: 'default' }}>
@@ -184,10 +284,38 @@ const BoardFreeDetail = () => {
                             <button type="submit" className={styles.btnreplySubmit}>댓글 등록</button>
                         </form>
 
-                        <div className={styles.replyList}>
-                            <div className={styles.replyItem} style={{ textAlign: 'center', padding: '30px 0', color: '#adb5bd' }}>
-                                등록된 댓글이 없습니다.
-                            </div>
+                       <div className={styles.replyList}>
+                            {replies.filter(r => r.code === 'B').map(parent => (
+                                <div key={parent.replyId} className={styles.replyItem}>
+                                    {/* 원댓글 표시 */}
+                                    <div>{parent.writerNickname}: {parent.replyContent}</div>
+                                    <button onClick={() => setActiveReplyForm(parent.replyId)}>대댓글</button>
+
+                                    {/* 대댓글 입력창 (activeReplyForm이 parent.replyId일 때만 노출) */}
+                                    {activeReplyForm === parent.replyId && (
+                                        <form onSubmit={(e) => handleReplySubmit(e, parent.replyId, 'R')}>
+                                            <input 
+                                                value={replyInputs[parent.replyId] || ''} 
+                                                onChange={(e) => setReplyInputs({...replyInputs, [parent.replyId]: e.target.value})}
+                                            />
+                                            <button type="submit">등록</button>
+                                        </form>
+                                    )}
+
+                                    {/* 대댓글 목록 (refId가 부모 ID와 같은 것들) */}
+                                    {replies.filter(r => r.code === 'R' && r.refId === parent.replyId).map(child => (
+                                        <div key={child.replyId} style={{ marginLeft: '30px', color: '#666' }}>
+                                            ↳ {child.writerNickname}: {child.replyContent}
+                                            {currentMemberId === child.memberId && (
+                                                <>
+                                                    <button onClick={() => {setEditingReplyId(child.replyId); setEditContent(child.replyContent);}}>수정</button>
+                                                    <button onClick={() => handleDeleteReply(child.replyId)}>삭제</button>
+                                                </>
+                                            )}
+                                        </div>
+                                    ))}
+                                </div>
+                            ))}
                         </div>
 
                         <div className={styles.pagination}>
@@ -205,6 +333,61 @@ const BoardFreeDetail = () => {
                 </div>
 
             </div>
+            
+            {/* 신고창 */}
+            {isReportModalOpen && (
+                <div style={{
+                    position: 'fixed', top: 0, left: 0, width: '100%', height: '100%',
+                    background: 'rgba(0,0,0,0.5)', zIndex: 1000,
+                    display: 'flex', justifyContent: 'center', alignItems: 'center'
+                }}>
+                    <div style={{
+                        background: 'white', borderRadius: '12px',
+                        padding: '30px', width: '400px'
+                    }}>
+                        <h3 style={{ marginBottom: '16px' }}>게시글 신고</h3>
+                        <select
+                            value={reportReason}
+                            onChange={(e) => setReportReason(e.target.value)}
+                            style={{
+                                width: '100%', height: '44px', borderRadius: '8px',
+                                border: '1px solid #ddd', padding: '0 12px',
+                                marginBottom: '16px', fontSize: '15px'
+                            }}
+                        >
+                            <option value="">신고 사유를 선택해주세요</option>
+                            <option value="spam">스팸/광고</option>
+                            <option value="abuse">욕설/비방</option>
+                            <option value="abuse">음란물/혐오</option>
+                            <option value="privacy">개인정보 노출</option>
+                            <option value="false">허위정보</option>
+                            <option value="etc">기타</option>
+                        </select>
+                        <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end' }}>
+                            <button
+                                onClick={() => { setIsReportModalOpen(false); setReportReason(''); }}
+                                style={{
+                                    padding: '10px 20px', borderRadius: '8px',
+                                    border: '1px solid #ddd', background: 'white',
+                                    cursor: 'pointer'
+                                }}
+                            >
+                                취소
+                            </button>
+                            <button
+                                onClick={handleReport}
+                                style={{
+                                    padding: '10px 20px', borderRadius: '8px',
+                                    border: 'none', background: '#e53e3e',
+                                    color: 'white', cursor: 'pointer'
+                                }}
+                            >
+                                신고하기
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </main>
     );
 }

@@ -377,7 +377,7 @@ const BoardReviewDetail = () => {
                                         <li key={fileId} className={styles.attachmentItem}>
                                             <span className={styles.fileIcon}>📁</span>
                                             <a
-                                                href={`/react/board/download/${fileId}`}
+                                                href={`/react/board/dsownload/${fileId}`}
                                                 download={fileName}
                                                 className={styles.fileLink}
                                             >
