@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { BrowserRouter, Routes, Route, useSearchParams, Navigate, useNavigate } from 'react-router-dom';
 import { jwtDecode } from 'jwt-decode';
 import Navbar from './components/common/Navbar';
@@ -56,6 +56,7 @@ const AppInner = () => {
 
   const storedToken = localStorage.getItem('token');
   const isLoggedIn = !!storedToken;
+  const [toastMessage, setToastMessage] = useState(null);
 
   let isAdmin = false;
   let nickname = "";
@@ -70,6 +71,21 @@ const AppInner = () => {
     }
   }
 
+  useEffect(()=>{
+    if(!isLoggedIn) return;
+
+    const eventSource = new EventSource(`/react/sse/connect?token=${storedToken}`);;
+    eventSource.onmessage = (e) =>{
+      setToastMessage(e.data);
+      setTimeout(()=>{
+        setToastMessage(null);
+      }, 10000);
+    };
+    return () =>{
+      eventSource.close();
+    };
+  },[isLoggedIn]);
+
   useEffect(() => {
     if (urlToken) {
       localStorage.setItem('token', urlToken);
@@ -80,13 +96,27 @@ const AppInner = () => {
   return (
     <>
       <Navbar isLoggedIn={isLoggedIn} isAdmin={isAdmin} nickname={nickname} />
+      {toastMessage && (
+        <div style={{
+          position: 'fixed',
+          bottom: '20px',
+          right: '20px',
+          background: '#333',
+          color: '#fff',
+          padding: '16px 24px',
+          borderRadius: '8px',
+          zIndex: 9999
+        }}>
+          {toastMessage}
+        </div>
+      )}
       <Routes>
         <Route path="/" element={<Main />} />
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
         <Route path="/edit-profile" element={<PrivateRoute element={<EditProfile />} />} />
         <Route path="/mypage" element={<PrivateRoute element={<MyPage />} />} />
-        <Route path="/mypage/boards"element={<PrivateRoute element={<MyBoardList />} />} />
+        <Route path="/mypage/boards" element={<PrivateRoute element={<MyBoardList />} />} />
         <Route path="/mypage/replies" element={<PrivateRoute element={<MyRepliesList />} />} />
         <Route path="/admin" element={<AdminRoute element={<AdminPage />} />} />
         
