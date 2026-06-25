@@ -75,10 +75,15 @@ const WelfareList = () => {
       .map(([name]) => name)
   })
   const [selectedJobs, setSelectedJobs] = useState(() => {
-    const codes = searchParams.getAll('job')
-    return Object.entries(JOB_CODE)
-      .filter(([_, code]) => codes.includes(code))
+  const jobCodes = searchParams.getAll('job')
+  const schoolCodes = searchParams.getAll('school')
+  const jobNames = Object.entries(JOB_CODE)
+    .filter(([_, code]) => jobCodes.includes(code))
+    .map(([name]) => name)
+  const schoolNames = Object.entries(SCHOOL_CODE)
+      .filter(([_, code]) => schoolCodes.includes(code))
       .map(([name]) => name)
+    return [...jobNames, ...schoolNames]
   })
   const [sort, setSort] = useState(searchParams.get('sort') || '최신순')
   const [wished, setWished] = useState({})
