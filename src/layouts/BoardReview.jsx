@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import styles from './BoardReview.module.css'
+import styles from './BoardReview.module.css';
 import { useNavigate } from 'react-router-dom';
 
 const BoardReview = () => {
@@ -9,7 +9,7 @@ const BoardReview = () => {
     const [currentPage, setCurrentPage] = useState(1);
     const [endPage, setEndPage] = useState(1);
 
-    const [searchType, setSearchType] = useState('title');
+    const [searchType, setSearchType] = useState('keyword');
     const [searchKeyword, setSearchKeyword] = useState('');
     const [appliedKeyword, setAppliedKeyword] = useState('');
 
@@ -20,9 +20,9 @@ const BoardReview = () => {
                     boardType: 'REV',
                     page: currentPage
                 });
-                if (appliedKeyword) {
-                    params.set('keyword', appliedKeyword);
-                    params.set('searchType', searchType);
+
+                if (appliedKeyword && appliedKeyword.trim() !== '') {
+                    params.set(searchType, appliedKeyword);
                 }
 
                 const res = await fetch(`/react/board/list?${params.toString()}`);
@@ -34,7 +34,7 @@ const BoardReview = () => {
                 setEndPage(maxPage);
                 setPages(Array.from({ length: maxPage }, (_, i) => i + 1));
             } catch (err) {
-                console.error('목록 조회 실패:', err);
+                console.error(err);
             }
         };
         fetchBoardList();
@@ -43,6 +43,12 @@ const BoardReview = () => {
     const handleSearch = () => {
         setCurrentPage(1);
         setAppliedKeyword(searchKeyword);
+    };
+
+    const handleClearSearch = () => {
+        setSearchKeyword('');
+        setAppliedKeyword('');
+        setCurrentPage(1);
     };
 
     const handleSearchKeyDown = (e) => {
@@ -140,23 +146,46 @@ const BoardReview = () => {
                         value={searchType}
                         onChange={(e) => setSearchType(e.target.value)}
                     >
-                        <option value="title">제목</option>
-                        <option value="content">내용</option>
-                        <option value="author">작성자</option>
+                        <option value="keyword">제목</option>
+                        <option value="boardContent">내용</option>
+                        <option value="nickname">작성자</option>
                     </select>
-                    <input
-                        type="text"
-                        className={styles.searchInput}
-                        placeholder="검색어를 입력해주세요"
-                        value={searchKeyword}
-                        onChange={(e) => setSearchKeyword(e.target.value)}
-                        onKeyDown={handleSearchKeyDown}
-                    />
+
+                    <div style={{ position: 'relative', display: 'flex', alignItems: 'center', flex: 1 }}>
+                        <input
+                            type="text"
+                            className={styles.searchInput}
+                            placeholder="검색어를 입력해주세요"
+                            value={searchKeyword}
+                            onChange={(e) => setSearchKeyword(e.target.value)}
+                            onKeyDown={handleSearchKeyDown}
+                            style={{ width: '100%', paddingRight: '30px' }}
+                        />
+                        {searchKeyword && (
+                            <button
+                                type="button"
+                                onClick={handleClearSearch}
+                                style={{
+                                    position: 'absolute',
+                                    right: '10px',
+                                    background: 'none',
+                                    border: 'none',
+                                    cursor: 'pointer',
+                                    fontSize: '16px',
+                                    color: '#999',
+                                    padding: '4px'
+                                }}
+                            >
+                                x
+                            </button>
+                        )}
+                    </div>
+
                     <button type="button" className={styles.btnSearch} onClick={handleSearch}>검색</button>
                 </div>
             </div>
         </main>
     );
-}
+};
 
 export default BoardReview;
