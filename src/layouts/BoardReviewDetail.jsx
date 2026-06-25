@@ -413,7 +413,6 @@ const BoardReviewDetail = () => {
                                     return (
                                         <li key={fileId} className={styles.attachmentItem}>
                                             <span className={styles.fileIcon}>📁</span>
-                                            {/* ⭕ <a 태그 시작 기호 복구 완료 */}
                                             <a
                                                 href={`/react/board/download/${fileId}`}
                                                 download={fileName}
@@ -588,7 +587,7 @@ const BoardReviewDetail = () => {
                 </div>
             </div>
 
-            {/* ⭕ 신고 모달 조건부 렌더링 영역 깔끔하게 정돈 완료 */}
+            {/* 신고 모달 영역 */}
             {isReportModalOpen && (
                 <div style={{
                     position: 'fixed', top: 0, left: 0, width: '100%', height: '100%',
@@ -600,23 +599,20 @@ const BoardReviewDetail = () => {
                         padding: '30px', width: '400px'
                     }}>
                         <h3 style={{ marginBottom: '16px' }}>{reportTarget?.targetType === 'REP' ? '댓글 신고' : '게시글 신고'}</h3>
-                        <select
+
+                        {/* select 제거 후 textarea 추가 */}
+                        <textarea
                             value={reportReason}
                             onChange={(e) => setReportReason(e.target.value)}
+                            placeholder="신고 사유를 직접 입력해주세요."
                             style={{
-                                width: '100%', height: '44px', borderRadius: '8px',
-                                border: '1px solid #ddd', padding: '0 12px',
-                                marginBottom: '16px', fontSize: '15px'
+                                width: '100%', height: '120px', borderRadius: '8px',
+                                border: '1px solid #ddd', padding: '12px',
+                                marginBottom: '16px', fontSize: '15px', resize: 'none',
+                                boxSizing: 'border-box', fontFamily: 'inherit'
                             }}
-                        >
-                            <option value="">신고 사유를 선택해주세요</option>
-                            <option value="spam">스팸/광고</option>
-                            <option value="abuse">욕설/비방</option>
-                            <option value="obscene">음란물/혐오</option>
-                            <option value="privacy">개인정보 노출</option>
-                            <option value="false">허위정보</option>
-                            <option value="etc">기타</option>
-                        </select>
+                        />
+
                         <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end' }}>
                             <button
                                 type="button"

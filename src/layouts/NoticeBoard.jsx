@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import styles from './NoticeBoard.module.css'; // 공지사항 스타일시트 연동
+import styles from './NoticeBoard.module.css';
 import { useNavigate } from 'react-router-dom';
 
 const NoticeBoard = () => {
@@ -9,7 +9,7 @@ const NoticeBoard = () => {
     const [currentPage, setCurrentPage] = useState(1);
     const [endPage, setEndPage] = useState(1);
 
-    const [searchType, setSearchType] = useState('title');
+    const [searchType, setSearchType] = useState('keyword');
     const [searchKeyword, setSearchKeyword] = useState('');
     const [appliedKeyword, setAppliedKeyword] = useState('');
 
@@ -21,21 +21,16 @@ const NoticeBoard = () => {
         if (token) {
             try {
                 const payload = JSON.parse(atob(token.split(".")[1]));
-                console.log("현재 로그인된 유저의 토큰 payload:", payload);
-
                 if (payload.isAdmin === "Y") {
-                    console.log("공지사항: 관리자 인증 성공 ");
                     setIsAdmin(true);
                 } else {
-                    console.log("공지사항: 일반 유저입니다. (글쓰기 비활성화)");
                     setIsAdmin(false);
                 }
             } catch (err) {
-                console.error("토큰 검증 에러:", err);
+                console.error(err);
                 setIsAdmin(false);
             }
         } else {
-            console.log("로그인 토큰이 없습니다.");
             setIsAdmin(false);
         }
 
@@ -45,9 +40,9 @@ const NoticeBoard = () => {
                     boardType: 'NOT',
                     page: currentPage
                 });
-                if (appliedKeyword) {
-                    params.set('keyword', appliedKeyword);
-                    params.set('searchType', searchType);
+
+                if (appliedKeyword && appliedKeyword.trim() !== '') {
+                    params.set(searchType, appliedKeyword);
                 }
 
                 const res = await fetch(`/react/board/list?${params.toString()}`);
@@ -58,7 +53,7 @@ const NoticeBoard = () => {
                 setEndPage(maxPage);
                 setPages(Array.from({ length: maxPage }, (_, i) => i + 1));
             } catch (err) {
-                console.error('공지사항 목록 조회 실패:', err);
+                console.error(err);
             }
         };
 
@@ -68,6 +63,12 @@ const NoticeBoard = () => {
     const handleSearch = () => {
         setCurrentPage(1);
         setAppliedKeyword(searchKeyword);
+    };
+
+    const handleClearSearch = () => {
+        setSearchKeyword('');
+        setAppliedKeyword('');
+        setCurrentPage(1);
     };
 
     const handleSearchKeyDown = (e) => {
@@ -169,23 +170,46 @@ const NoticeBoard = () => {
                         value={searchType}
                         onChange={(e) => setSearchType(e.target.value)}
                     >
-                        <option value="title">제목</option>
-                        <option value="content">내용</option>
-                        <option value="author">작성자</option>
+                        <option value="keyword">제목</option>
+                        <option value="boardContent">내용</option>
+                        <option value="nickname">작성자</option>
                     </select>
-                    <input
-                        type="text"
-                        className={styles.searchInput}
-                        placeholder="검색어를 입력해주세요"
-                        value={searchKeyword}
-                        onChange={(e) => setSearchKeyword(e.target.value)}
-                        onKeyDown={handleSearchKeyDown}
-                    />
+
+                    <div style={{ position: 'relative', display: 'flex', alignItems: 'center', flex: 1 }}>
+                        <input
+                            type="text"
+                            className={styles.searchInput}
+                            placeholder="검색어를 입력해주세요"
+                            value={searchKeyword}
+                            onChange={(e) => setSearchKeyword(e.target.value)}
+                            onKeyDown={handleSearchKeyDown}
+                            style={{ width: '100%', paddingRight: '30px' }}
+                        />
+                        {searchKeyword && (
+                            <button
+                                type="button"
+                                onClick={handleClearSearch}
+                                style={{
+                                    position: 'absolute',
+                                    right: '10px',
+                                    background: 'none',
+                                    border: 'none',
+                                    cursor: 'pointer',
+                                    fontSize: '16px',
+                                    color: '#999',
+                                    padding: '4px'
+                                }}
+                            >
+                                ✕
+                            </button>
+                        )}
+                    </div>
+
                     <button type="button" className={styles.btnSearch} onClick={handleSearch}>검색</button>
                 </div>
             </div>
         </main>
     );
-}
+};
 
 export default NoticeBoard;
