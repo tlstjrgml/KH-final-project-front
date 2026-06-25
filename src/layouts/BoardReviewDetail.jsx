@@ -26,6 +26,7 @@ const BoardReviewDetail = () => {
 
     const [isReportModalOpen, setIsReportModalOpen] = useState(false);
     const [reportReason, setReportReason] = useState('');
+    const [reportTarget, setReportTarget] = useState(null);
 
     const currentMemberId = (() => {
         const token = localStorage.getItem('token');
@@ -251,7 +252,7 @@ const BoardReviewDetail = () => {
         }
 
         try {
-            const res = await fetch(`/react/reply/${replyId}`, {
+            const res = await fetch(`/react/board/reply/${replyId}`, {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
@@ -279,7 +280,7 @@ const BoardReviewDetail = () => {
 
         const token = localStorage.getItem('token');
         try {
-            const res = await fetch(`/react/reply/${replyId}`, {
+            const res = await fetch(`/react/board/reply/${replyId}`, {
                 method: 'DELETE',
                 headers: { 'Authorization': `Bearer ${token}` }
             });
@@ -292,14 +293,50 @@ const BoardReviewDetail = () => {
         }
     };
 
+    const openReportModal = (targetId, targetType) => {
+        setReportTarget({ targetId, targetType });
+        setIsReportModalOpen(true);
+    };
+
     const handleReport = async () => {
         if (!reportReason.trim()) {
             alert('신고 사유를 입력해주세요.');
             return;
         }
-        alert('신고가 접수되었습니다.');
-        setIsReportModalOpen(false);
-        setReportReason('');
+
+        const token = localStorage.getItem('token');
+        if (!token) {
+            alert('로그인이 필요합니다.');
+            return;
+        }
+
+        try {
+            const res = await fetch('/react/report', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify({
+                    targetId: reportTarget.targetId,
+                    targetType: reportTarget.targetType,
+                    reason: reportReason
+                })
+            });
+
+            if (!res.ok) {
+                const errMsg = await res.text();
+                throw new Error(errMsg || '신고 접수 실패');
+            }
+
+            alert('신고가 접수되었습니다.');
+            setIsReportModalOpen(false);
+            setReportReason('');
+            setReportTarget(null);
+        } catch (err) {
+            console.error(err);
+            alert(`신고 접수 중 오류가 발생했습니다: ${err.message}`);
+        }
     };
 
     // 로딩 처리 위치
@@ -356,7 +393,7 @@ const BoardReviewDetail = () => {
                                         <span className={styles.metaDivider}>|</span>
                                     </>
                                 )}
-                                <button className={`${styles.actionBtn} ${styles.danger}`} onClick={() => setIsReportModalOpen(true)}>신고</button>
+                                <button className={`${styles.actionBtn} ${styles.danger}`} onClick={() => openReportModal(post.boardId || id, 'REV')}>신고</button>
                             </div>
                         </div>
                     </div>
@@ -456,6 +493,8 @@ const BoardReviewDetail = () => {
                                                     <button className={`${styles.actionBtn} ${styles.danger}`} onClick={() => handleDeleteReply(reply.replyId)}>삭제</button>
                                                 </>
                                             )}
+                                            <span className={styles.metaDivider}>|</span>
+                                            <button className={`${styles.actionBtn} ${styles.danger}`} onClick={() => openReportModal(reply.replyId, 'REP')}>신고</button>
                                         </div>
 
                                         {activeReplyForm === reply.replyId && (
@@ -497,13 +536,17 @@ const BoardReviewDetail = () => {
                                                     <div className={styles.commentText}>{child.replyContent}</div>
                                                 )}
 
-                                                {currentMemberId === child.memberId && editingReplyId !== child.replyId && (
-                                                    <div className={styles.commentActions}>
-                                                        <button className={styles.actionBtn} onClick={() => startEdit(child)}>수정</button>
-                                                        <span className={styles.metaDivider}>|</span>
-                                                        <button className={`${styles.actionBtn} ${styles.danger}`} onClick={() => handleDeleteReply(child.replyId)}>삭제</button>
-                                                    </div>
-                                                )}
+                                                <div className={styles.commentActions}>
+                                                    {currentMemberId === child.memberId && editingReplyId !== child.replyId && (
+                                                        <>
+                                                            <button className={styles.actionBtn} onClick={() => startEdit(child)}>수정</button>
+                                                            <span className={styles.metaDivider}>|</span>
+                                                            <button className={`${styles.actionBtn} ${styles.danger}`} onClick={() => handleDeleteReply(child.replyId)}>삭제</button>
+                                                            <span className={styles.metaDivider}>|</span>
+                                                        </>
+                                                    )}
+                                                    <button className={`${styles.actionBtn} ${styles.danger}`} onClick={() => openReportModal(child.replyId, 'REP')}>신고</button>
+                                                </div>
                                             </div>
                                         ))}
                                     </div>
@@ -544,6 +587,7 @@ const BoardReviewDetail = () => {
                 </div>
             </div>
 
+            {/* 신고 모달 영역 */}
             {isReportModalOpen && (
                 <div style={{
                     position: 'fixed', top: 0, left: 0, width: '100%', height: '100%',
@@ -554,27 +598,25 @@ const BoardReviewDetail = () => {
                         background: 'white', borderRadius: '12px',
                         padding: '30px', width: '400px'
                     }}>
-                        <h3 style={{ marginBottom: '16px' }}>게시글 신고</h3>
-                        <select
+                        <h3 style={{ marginBottom: '16px' }}>{reportTarget?.targetType === 'REP' ? '댓글 신고' : '게시글 신고'}</h3>
+
+                        {/* select 제거 후 textarea 추가 */}
+                        <textarea
                             value={reportReason}
                             onChange={(e) => setReportReason(e.target.value)}
+                            placeholder="신고 사유를 직접 입력해주세요."
                             style={{
-                                width: '100%', height: '44px', borderRadius: '8px',
-                                border: '1px solid #ddd', padding: '0 12px',
-                                marginBottom: '16px', fontSize: '15px'
+                                width: '100%', height: '120px', borderRadius: '8px',
+                                border: '1px solid #ddd', padding: '12px',
+                                marginBottom: '16px', fontSize: '15px', resize: 'none',
+                                boxSizing: 'border-box', fontFamily: 'inherit'
                             }}
-                        >
-                            <option value="">신고 사유를 선택해주세요</option>
-                            <option value="spam">스팸/광고</option>
-                            <option value="abuse">욕설/비방</option>
-                            <option value="abuse">음란물/혐오</option>
-                            <option value="privacy">개인정보 노출</option>
-                            <option value="false">허위정보</option>
-                            <option value="etc">기타</option>
-                        </select>
+                        />
+
                         <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end' }}>
                             <button
-                                onClick={() => { setIsReportModalOpen(false); setReportReason(''); }}
+                                type="button"
+                                onClick={() => { setIsReportModalOpen(false); setReportReason(''); setReportTarget(null); }}
                                 style={{
                                     padding: '10px 20px', borderRadius: '8px',
                                     border: '1px solid #ddd', background: 'white',
@@ -584,6 +626,7 @@ const BoardReviewDetail = () => {
                                 취소
                             </button>
                             <button
+                                type="button"
                                 onClick={handleReport}
                                 style={{
                                     padding: '10px 20px', borderRadius: '8px',
