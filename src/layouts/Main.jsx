@@ -209,7 +209,7 @@ const Main = () => {
                   <p className={styles.welfareTitle}>{w.plcyNm}</p>
                   <div className={styles.welfareMeta}>
                     <span>{w.sprvsnInstCdNm}</span>
-                    <span>신청: {w.aplyYmd || '-'}</span>
+                    <span>신청: {w.aplyYmd || '상시'}</span>
                   </div>
                 </Link>
               ))}
