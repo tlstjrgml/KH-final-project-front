@@ -1,6 +1,6 @@
-import { useState, useEffect, useRef } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
-import styles from './BoardFreeEdit.module.css';
+import React, { useState, useEffect, useRef } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
+import styles from './BoardFreeWrite.module.css';  
 
 const BoardFreeEdit = () => {
     const { id } = useParams();
@@ -8,48 +8,53 @@ const BoardFreeEdit = () => {
 
     const [title, setTitle] = useState("");
     const [content, setContent] = useState("");
-    const [isLoading, setIsLoading] = useState(true);
+    const [loading, setLoading] = useState(true);
 
     const [existingFiles, setExistingFiles] = useState([]);
-    const [deletedExistingFiles, setDeletedExistingFiles] = useState([]); 
-    const [fileRows, setFileRows] = useState([{ id: 0, files: [] }]); 
-    const nextRowId = useRef(1);
+    const [deletedFileIds, setDeletedFileIds] = useState([]);
+    
+    const [fileRows, setFileRows] = useState([{ id: Date.now(), files: [] }]);
 
     useEffect(() => {
         const fetchBoardDetail = async () => {
-            const token = localStorage.getItem("token");
             try {
-                const response = await fetch(`/react/board/${id}`, {
+                const token = localStorage.getItem('token');
+                const res = await fetch(`/react/board/${id}`, {
                     headers: token ? { 'Authorization': `Bearer ${token}` } : {}
                 });
+                
+                if (!res.ok) throw new Error('게시글 조회 실패');
+                const data = await res.json();
 
-                if (response.ok) {
-                    const data = await response.json();
-                    setTitle(data.boardTitle || "");
-                    setContent(data.boardContent || "");
-                } else {
-                    alert("게시글 정보를 불러올 수 없거나 권한이 없습니다.");
-                    navigate(-1);
+                if (!data.isOwner) {
+                    alert('본인이 작성한 게시글만 수정할 수 있습니다.');
+                    navigate(`/boardfree/detail/${id}`);
+                    return;
+                }
+
+                setTitle(data.boardTitle);
+                setContent(data.boardContent);
+
+                if (data.attachments) {
+                    setExistingFiles(data.attachments.map(f => ({
+                        id: f.attmId || f.fileId,
+                        name: f.originalName || f.originName,
+                        size: f.fileSize ? `${(f.fileSize / 1024 / 1024).toFixed(1)}MB` : '0MB'
+                    })));
                 }
             } catch (err) {
-                console.error("게시글 로딩 오류:", err);
+                console.error(err);
+                navigate('/boardfree');
             } finally {
-                setIsLoading(false);
+                setLoading(false);
             }
         };
-
         fetchBoardDetail();
     }, [id, navigate]);
 
-    const handleDeleteExisting = (fileId) => {
-        if (window.confirm("기존 첨부파일을 삭제하시겠습니까? (수정 완료 시 최종 반영됩니다)")) {
-            setDeletedExistingFiles([...deletedExistingFiles, fileId]);
-        }
-    };
-
+    // 파일 로직 수정
     const handleAddFileRow = () => {
-        setFileRows([...fileRows, { id: nextRowId.current, files: [] }]);
-        nextRowId.current += 1;
+        setFileRows([...fileRows, { id: Date.now(), files: [] }]);
     };
 
     const handleRemoveFileRow = (rowId) => {
@@ -58,51 +63,50 @@ const BoardFreeEdit = () => {
 
     const handleFileChange = (rowId, e) => {
         const selectedFiles = Array.from(e.target.files);
-        if (selectedFiles.length > 0) {
-            setFileRows(fileRows.map(row => 
-                row.id === rowId ? { ...row, files: selectedFiles } : row
-            ));
-        }
+        setFileRows(fileRows.map(row => 
+            row.id === rowId ? { ...row, files: selectedFiles } : row
+        ));
+    };
+
+    const handleDeleteExisting = (fileId) => {
+        setExistingFiles(existingFiles.filter(file => file.id !== fileId));
+        setDeletedFileIds(prev => [...prev, fileId]);
     };
 
     const handleFormSubmit = async (e) => {
         e.preventDefault();
 
-        if (!title.trim() || !content.trim()) {
-            alert('제목과 내용을 모두 입력해주세요.');
-            return;
-        }
-
-        const token = localStorage.getItem("token");
+        const token = localStorage.getItem('token');
+        const formData = new FormData();
+        
+        formData.append('boardTitle', title);
+        formData.append('boardContent', content);
+        deletedFileIds.forEach(id => formData.append('deleteFileIds', id));
+        
+        fileRows.forEach(row => {
+            row.files.forEach(f => formData.append('newFiles', f));
+        });
 
         try {
-            const response = await fetch(`/react/board/${id}`, {
+            const res = await fetch(`/react/board/${id}`, {
                 method: 'PUT',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`
-                },
-                body: JSON.stringify({
-                    boardTitle: title,
-                    boardContent: content,
-                    deletedFileIds: deletedExistingFiles 
-                })
+                headers: { 'Authorization': `Bearer ${token}` },
+                body: formData
             });
 
-            if (response.ok) {
-                alert('수정이 성공적으로 완료되었습니다!');
+            if (res.ok) {
+                alert('수정 완료!');
                 navigate(`/boardfree/detail/${id}`);
             } else {
-                alert('게시글 수정에 실패했습니다.');
+                throw new Error(await res.text() || '수정 실패');
             }
-        } catch (error) {
-            console.error('수정 통신 오류:', error);
+        } catch (err) {
+            console.error(err);
+            alert(`수정 중 오류 발생: ${err.message}`);
         }
     };
 
-    if (isLoading) {
-        return <div style={{ textAlign: 'center', padding: '100px' }}>데이터를 불러오는 중입니다...</div>;
-    }
+    if (loading) return <div>로딩 중...</div>;
 
     return (
         <main className={styles.page}>
@@ -113,141 +117,92 @@ const BoardFreeEdit = () => {
 
                 <form onSubmit={handleFormSubmit}>
                     
-                    {/* 제목 입력 필드 */}
                     <div className={styles.field}>
                         <label>제목</label>
                         <input 
                             type="text" 
                             value={title} 
                             onChange={(e) => setTitle(e.target.value)} 
-                            placeholder="제목을 입력하세요"
-                            required
+                            style={{ width: '100%', padding: '10px', borderRadius: '4px', border: '1px solid #ddd' }}
                         />
                     </div>
 
-                    {/* 내용 입력 필드 */}
                     <div className={styles.field}>
                         <label>내용</label>
                         <textarea 
                             value={content} 
                             onChange={(e) => setContent(e.target.value)} 
-                            rows="12"
-                            placeholder="내용을 입력하세요"
-                            required
+                            style={{ width: '100%', height: '250px', padding: '10px', borderRadius: '4px', border: '1px solid #ddd', resize: 'none' }} 
                         />
                     </div>
 
-                    {/*  파일 첨부 전체 영역 시작 */}
+                    {/* 기존 첨부파일 관리 영역 */}
                     <div className={styles.field}>
-                        <div className={styles.fileHeader}>
-                            <label>
-                                파일 첨부 
-                                <span style={{ fontSize: '12px', fontWeight: 'normal', color: '#ADB5BD', marginLeft: '6px' }}>
-                                    (최대 5MB)
-                                </span>
-                            </label>
-                        </div>
-
-                        {/* 기존 첨부파일 영역 */}
-                        <div className={styles.existingFiles} id="existingFilesArea">
-                            <label style={{ fontSize: '12px', color: '#6C757D', fontWeight: 500, marginBottom: '6px', display: 'block' }}>
-                                <div className={styles.replyItem} style={{ textAlign: 'center', padding: '30px 0', color: '#adb5bd' }}>
-                                        등록된 첨부파일이 없습니다.
-                                </div>
-                            </label>
-                            
-                            {existingFiles.map((file) => (
-                                !deletedExistingFiles.includes(file.id) && (
-                                    <div key={`existing-${file.id}`} className={styles.existingFileItem}>
-                                        <div className={styles.existingFileName}>
-                                            <svg viewBox="0 0 24 24" style={{ width: '14px', height: '14px', stroke: 'currentColor', strokeWidth: 2, fill: 'none' }}>
-                                                <path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48" />
-                                            </svg>
-                                            {file.name} <span style={{ color: '#ADB5BD', fontSize: '11px' }}>({file.size})</span>
-                                        </div>
-                                        <button
-                                            type="button"
-                                            className={styles.btnRemoveExisting}
-                                            onClick={() => handleDeleteExisting(file.id)}
-                                            title="삭제"
+                        <label style={{ display: 'block', marginBottom: '8px', fontWeight: 'bold' }}>기존 첨부파일 관리</label>
+                        <ul style={{ listStyle: 'none', padding: 0, margin: 0, background: '#f8f9fa', borderRadius: '8px', padding: '15px' }}>
+                            {existingFiles.length === 0 ? (
+                                <li style={{ color: '#999', fontSize: '14px', textAlign: 'center' }}>첨부된 파일이 없습니다.</li>
+                            ) : (
+                                existingFiles.map(file => (
+                                    <li key={file.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '8px 0', borderBottom: '1px solid #eaeaea' }}>
+                                        <span style={{ fontSize: '14px', color: '#495057' }}> {file.name} <span style={{ color: '#adb5bd' }}>({file.size})</span></span>
+                                        <button 
+                                            type="button" 
+                                            onClick={() => handleDeleteExisting(file.id)} 
+                                            style={{ color: '#e53e3e', border: '1px solid #e53e3e', background: 'white', borderRadius: '4px', padding: '4px 8px', cursor: 'pointer', fontSize: '12px' }}
                                         >
-                                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
-                                                <line x1="18" y1="6" x2="6" y2="18" />
-                                                <line x1="6" y1="6" x2="18" y2="18" />
-                                            </svg>
+                                            삭제
                                         </button>
-                                    </div>
-                                )
-                            ))}
-                        </div>
+                                    </li>
+                                ))
+                            )}
+                        </ul>
+                    </div>
 
-                        {deletedExistingFiles.map((delId) => (
-                            <input key={`del-${delId}`} type="hidden" name="deleteFileIds" value={delId} />
-                        ))}
-
-                        {/* 새로운 파일 첨부 영역 */}
-                        <div className={styles.fileHeader} style={{ marginTop: '16px' }}>
-                            <label style={{ fontSize: '12px', color: '#6C757D', fontWeight: 500 }}>
-                                새 파일 추가하기
-                            </label>
-                            <button 
-                                type="button" 
-                                id="addFile" 
-                                className={styles.btnAddFile} 
-                                onClick={handleAddFileRow}
-                            >
-                                + 파일 추가
-                            </button>
+                    {/* 신규 첨부파일 영역 */}
+                   <div className={styles.field}>
+                        <div className={styles.fileHeader}>
+                            <label>파일 첨부 <span style={{ fontSize: '12px', color: '#ADB5BD' }}>(최대 5MB)</span></label>
+                            <button type="button" className={styles.btnAddFile} onClick={handleAddFileRow}>+ 파일 추가</button>
                         </div>
-                        
                         <div id="fileArea">
                             {fileRows.map((row, index) => (
                                 <div key={row.id} className={styles.fileRow}>
                                     <input 
                                         type="file" 
-                                        name="file" 
                                         id={`file_input_${row.id}`}
                                         className={styles.fileInputHidden} 
-                                        style={{ display: 'none' }} 
                                         multiple 
                                         onChange={(e) => handleFileChange(row.id, e)}
                                     />
-                                    
-                                    <div 
-                                        className={styles.fileCustomBox} 
-                                        onClick={() => document.getElementById(`file_input_${row.id}`).click()}
-                                    >
+                                    <div className={styles.fileCustomBox} onClick={() => document.getElementById(`file_input_${row.id}`).click()}>
                                         <button type="button" className={styles.btnFile}>파일 선택</button>
-                                        <span className={styles.fileName} style={{ color: row.files.length > 0 ? '#1A1D23' : '#ADB5BD' }}>
-                                            {row.files.length > 0 ? row.files.map(f => f.name).join(', ') : '선택된 파일 없음'}
-                                        </span>
+                                        <span style={{ color: row.files.length > 0 ? '#1A1D23' : '#ADB5BD' }}>{row.files.length > 0 ? row.files.map(f => f.name).join(', ') : '선택된 파일 없음'}</span>
                                     </div>
-                                    
                                     {index > 0 && (
-                                        <button 
-                                            type="button" 
-                                            className={styles.btnRemoveFile} 
-                                            title="삭제" 
-                                            onClick={(e) => {
-                                                e.stopPropagation(); 
-                                                handleRemoveFileRow(row.id);
-                                            }}
-                                        >
-                                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
-                                                <line x1="18" y1="6" x2="6" y2="18" />
-                                                <line x1="6" y1="6" x2="18" y2="18" />
-                                            </svg>
-                                        </button>
+                                        <button type="button" className={styles.btnRemoveFile} onClick={() => handleRemoveFileRow(row.id)}>삭제</button>
                                     )}
                                 </div>
                             ))}
                         </div>
                     </div>
 
-                    <div className={styles.formActions}>
-                        <button type="button" className={styles.btnCancel} onClick={() => navigate(-1)}>취소</button>
-                        <button type="submit" className={styles.btnSubmit}>수정 완료</button>
+                    <div className={styles.formActions} style={{ display: 'flex', gap: '10px', justifyContent: 'center', marginTop: '40px' }}>
+                        <button 
+                            type="button" 
+                            onClick={() => navigate(-1)} 
+                            style={{ padding: '12px 30px', background: '#6C757D', color: '#fff', border: 'none', borderRadius: '8px', cursor: 'pointer' }}
+                        >
+                            취소
+                        </button>
+                        <button 
+                            type="submit" 
+                            style={{ padding: '12px 30px', background: '#378ADD', color: '#fff', border: 'none', borderRadius: '8px', cursor: 'pointer' }}
+                        >
+                            수정 완료
+                        </button>
                     </div>
+
                 </form>
             </div>
         </main>

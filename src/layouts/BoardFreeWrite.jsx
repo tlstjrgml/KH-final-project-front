@@ -99,7 +99,6 @@ const BoardFreeWrite = () => {
             return; 
         }
 
-        // 첨부파일 유무를 확인하는 모달 호출 로직을 제거하고 즉시 전송을 실행합니다.
         executeSubmit(); 
     };
 

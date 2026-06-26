@@ -5,7 +5,7 @@ import styles from './BoardReviewEdit.module.css';
 const BoardReviewEdit = () => {
     const { id } = useParams();
     const navigate = useNavigate();
-
+    
     const [title, setTitle] = useState("");
     const [content, setContent] = useState("");
     const [selectedWelfare, setSelectedWelfare] = useState(null);
