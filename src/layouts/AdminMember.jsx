@@ -117,7 +117,7 @@ function AdminMember() {
                 <table className={styles['report-table']}>
                     <thead>
                         <tr>
-                            <th>회원번호</th><th>아이디</th><th>이름</th><th>가입일</th><th>누적 신고</th><th>관리</th>
+                            <th>회원번호</th><th>아이디</th><th>이름</th><th>가입일</th><th>신고 확정</th><th>관리</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -134,15 +134,25 @@ function AdminMember() {
                                     className={memberStatusFilter === 'BANNED' ? styles['banned-row'] : ''}
                                 >
                                     <td>{member.memberId}</td>
-                                    <td style={{color: member.email ? 'inherit' : '#856A00', fontWeight: member.email ? 'normal' : 'bold'}}>{member.email || '카카오 연동 계정'}</td>
+                                    <td style={{ color: member.email ? 'inherit' : '#856A00', fontWeight: member.email ? 'normal' : 'bold' }}>{member.email || '카카오 연동 계정'}</td>
                                     <td>{member.nickname}</td>
                                     <td>{member.signupDate ? member.signupDate.substring(0, 10) : ''}</td>
-                                    <td style={{ color: '#6C757D' }}>-</td>
+
+                                    {/* 수정 1: 누적 신고 횟수 출력 (3회 이상이면 빨간색 굵은 글씨로 경고 표시) */}
+                                    <td style={{
+                                        color: (member.reportCount || 0) >= 3 ? '#DC3545' : '#6C757D',
+                                        fontWeight: (member.reportCount || 0) >= 3 ? 'bold' : 'normal'
+                                    }}>
+                                        {member.reportCount || 0}
+                                    </td>
+
                                     <td>
                                         {memberStatusFilter === 'ACTIVE' ? (
+                                            /* 수정 2: 누적 신고 3회 이상 조건에 따른 버튼 제어 */
                                             <button
-                                                className={styles['danger-btn']}
+                                                className={(member.reportCount || 0) >= 3 ? styles['danger-btn'] : styles['disabled-btn']}
                                                 onClick={() => handleKickMember(member.memberId)}
+                                                disabled={(member.reportCount || 0) < 3}
                                             >
                                                 강제 탈퇴
                                             </button>
