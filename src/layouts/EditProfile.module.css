@@ -262,4 +262,23 @@
   transition: all 0.15s;
 }
 
+.pwChecklist {
+    list-style: none;
+    padding: 8px 0 0 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.valid {
+    color: #22c55e;
+    font-size: 13px;
+}
+
+.invalid {
+    color: #9ca3af;
+    font-size: 13px;
+}
+
 .btnCancel:hover { border-color: #ADB5BD; color: #1A1D23; background: #ffffff; }
