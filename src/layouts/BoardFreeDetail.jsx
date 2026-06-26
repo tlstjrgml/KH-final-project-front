@@ -19,6 +19,9 @@ const BoardFreeDetail = () => {
     const [editContent, setEditContent] = useState('');
     const [isReportModalOpen, setIsReportModalOpen] = useState(false);
     const [reportReason, setReportReason] = useState('');
+    const [reportTarget, setReportTarget] = useState(null);
+
+    
 
     // 2. 게시글 상세 조회 함수
     const fetchBoardDetail = async (token) => {
@@ -50,11 +53,17 @@ const BoardFreeDetail = () => {
     const startEdit = (reply) => {
         setEditingReplyId(reply.replyId);
         setEditContent(reply.replyContent);
+        setActiveReplyForm(null)
     };
 
     const cancelEdit = () => {
         setEditingReplyId(null);
         setEditContent('');
+    };
+
+    const toggleReplyForm = (replyId) => {
+        setActiveReplyForm(activeReplyForm === replyId ? null : replyId);
+        setEditingReplyId(null); 
     };
 
 
@@ -197,16 +206,17 @@ const BoardFreeDetail = () => {
         try {
             const res = await fetch(`/react/board/${id}/likes`, {
                 method: prevLiked ? 'DELETE' : 'POST',
-                headers: { 'Authorization': `Bearer ${token}` }
+                headers: { Authorization: `Bearer ${token}` }
             });
 
-            if (!res.ok) {
-                throw new Error('좋아요 처리 실패');
-            }
+            if (!res.ok) throw new Error('좋아요 처리 실패');
+
         } catch (err) {
             console.error(err);
-            setIsPostLiked(prevLiked);
-            setPostLikes(prevCount);
+
+            setIsLiked(prevLiked);
+            setLikes(prevCount);
+
             alert('좋아요 처리 중 오류가 발생했습니다.');
         }
     };
@@ -216,9 +226,45 @@ const BoardFreeDetail = () => {
             alert('신고 사유를 입력해주세요.');
             return;
         }
-        alert('신고가 접수되었습니다.');
-        setIsReportModalOpen(false);
-        setReportReason('');
+
+        const token = localStorage.getItem('token');
+        if (!token) {
+            alert('로그인이 필요합니다.');
+            return;
+        }
+
+        try {
+            const res = await fetch('/react/report', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify({
+                    targetId: reportTarget.targetId,
+                    targetType: reportTarget.targetType,
+                    reason: reportReason
+                })
+            });
+
+            if (!res.ok) {
+                const errMsg = await res.text();
+                throw new Error(errMsg || '신고 접수 실패');
+            }
+
+            alert('신고가 접수되었습니다.');
+            setIsReportModalOpen(false);
+            setReportReason('');
+            setReportTarget(null);
+        } catch (err) {
+            console.error(err);
+            alert(`신고 접수 중 오류가 발생했습니다: ${err.message}`);
+        }
+    };
+
+    const openReportModal = (targetId, targetType) => {
+        setReportTarget({ targetId, targetType });
+        setIsReportModalOpen(true);
     };
 
 
@@ -252,7 +298,7 @@ const BoardFreeDetail = () => {
                                         <span className={styles.metaDivider}>|</span>
                                     </>
                                 )}
-                                <button className={`${styles.actionBtn} ${styles.danger}`} onClick={() => setIsReportModalOpen(true)}>신고</button>
+                                <button className={`${styles.actionBtn} ${styles.danger}`} onClick={() => openReportModal(post.boardId || id, 'REV')}>신고</button>
                             </div>
                         </div>
                     </div>
@@ -334,22 +380,45 @@ const BoardFreeDetail = () => {
                             {replies.filter(r => r.code === 'B').length > 0 ? (
                                 replies.filter(r => r.code === 'B').map(parent => (
                                     <div key={parent.replyId} style={{ padding: '20px 0', borderBottom: '1px solid #f1f3f5' }}>
-                                        {/* 상단: 작성자 및 날짜 */}
+                                        {/* 작성자 및 날짜 */}
                                         <div style={{ display: 'flex', gap: '10px', marginBottom: '8px', alignItems: 'center' }}>
                                             <strong style={{ fontSize: '15px' }}>{parent.writerNickname}</strong>
                                             <span style={{ fontSize: '13px', color: '#888' }}>{parent.createDate?.split('T')[0]}</span>
                                         </div>
-                                        {/* 내용 */}
-                                        <div style={{ fontSize: '15px', marginBottom: '10px' }}>{parent.replyContent}</div>
-                                        {/* 액션 버튼 */}
+                                        
+                                        {/* 댓글 수정폼 */}
+                                        {editingReplyId === parent.replyId ? (
+                                            <div style={{ display: 'flex', gap: '8px', marginTop: '10px', marginBottom: '10px' }}>
+                                                <input
+                                                    type="text"
+                                                    value={editContent}
+                                                    onChange={(e) => setEditContent(e.target.value)}
+                                                    style={{ flex: 1, padding: '10px', borderRadius: '8px', border: '1px solid #ddd', fontSize: '15px' }}
+                                                    autoFocus
+                                                />
+                                                <button type="button" onClick={() => submitEdit(parent.replyId)} style={{ padding: '0 20px', borderRadius: '8px', background: '#378ADD', color: '#fff', border: 'none', cursor: 'pointer' }}>저장</button>
+                                                <button type="button" onClick={cancelEdit} style={{ padding: '0 20px', borderRadius: '8px', background: '#6C757D', color: '#fff', border: 'none', cursor: 'pointer' }}>취소</button>
+                                            </div>
+                                        ) : (
+                                            <>
+                                                <div className={styles.replyText} style={{ margin: '5px 0' }}>{parent.replyContent}</div>
+
+                                            </>
+                                        )}
+
+                                        {/*  버튼 */}
                                         <div style={{ display: 'flex', gap: '10px' }}>
                                             <button onClick={() => setActiveReplyForm(activeReplyForm === parent.replyId ? null : parent.replyId)} style={{ fontSize: '13px', border: 'none', background: 'none', color: '#666', cursor: 'pointer' }}>대댓글</button>
+                                            <span className={styles.metaDivider}>|</span>
                                             {currentUser?.id === parent.memberId && (
                                                 <>
                                                     <button onClick={() => {setEditingReplyId(parent.replyId); setEditContent(parent.replyContent);}} style={{ fontSize: '13px', border: 'none', background: 'none', color: '#666', cursor: 'pointer' }}>수정</button>
+                                                    <span className={styles.metaDivider}>|</span>
                                                     <button onClick={() => handleDeleteReply(parent.replyId)} style={{ fontSize: '13px', border: 'none', background: 'none', color: '#666', cursor: 'pointer' }}>삭제</button>
+                                                    <span className={styles.metaDivider}>|</span>      
                                                 </>
                                             )}
+                                            <button onClick={() => openReportModal(parent.replyId, 'REP')} style={{ fontSize: '13px', border: 'none', background: 'none', color: '#666', cursor: 'pointer' }}>신고</button>
                                         </div>
 
                                         {activeReplyForm === parent.replyId && (
@@ -364,7 +433,6 @@ const BoardFreeDetail = () => {
                                                 <button type="submit" style={{ padding: '0 20px', borderRadius: '4px', background: '#888', color: '#fff', border: 'none' }}>등록</button>
                                             </form>
                                         )}
-
 
 
                                         {/* 대댓글 입력 및 목록 */}
@@ -385,22 +453,28 @@ const BoardFreeDetail = () => {
                                                             onChange={(e) => setEditContent(e.target.value)}
                                                             style={{ padding: '5px' }}
                                                         />
-                                                        <button type="button" className={styles.btnreplySubmit} onClick={() => submitEdit(child.replyId)}>저장</button>
+                                                        <button type="button" style={{ padding: '0 10px', borderRadius: '4px', background: '#888', color: '#fff', border: 'none' }} onClick={() => submitEdit(child.replyId)}>저장</button>
                                                         <button type="button" className={styles.actionBtn} onClick={cancelEdit}>취소</button>
                                                     </div>
                                                 ) : (
                                                     <div className={styles.replyText} style={{ margin: '5px 0' }}>{child.replyContent}</div>
                                                 )}
 
-                                                {currentUser?.id === child.memberId && editingReplyId !== child.replyId && (
                                                     <div className={styles.replyActions}>
-                                                        <button className={styles.actionBtn} onClick={() => startEdit(child)}>수정</button>
-                                                        <span className={styles.metaDivider}>|</span>
-                                                        <button className={`${styles.actionBtn} ${styles.danger}`} onClick={() => handleDeleteReply(child.replyId)}>삭제</button>
+                                                        {currentUser?.id === child.memberId && editingReplyId !== child.replyId && (
+                                                            <>
+                                                                <button className={styles.actionBtn} onClick={() => startEdit(child)} > 수정 </button>
+                                                                <span className={styles.metaDivider}>|</span>
+                                                                <button className={`${styles.actionBtn} ${styles.danger}`} onClick={() => handleDeleteReply(child.replyId)} > 삭제 </button>
+                                                                <span className={styles.metaDivider}>|</span>
+                                                            </>                                                           
+                                                        )}
+                                                        <button className={`${styles.actionBtn} ${styles.danger}`} onClick={() => openReportModal(child.replyId, 'REP')}> 신고 </button>
+
                                                     </div>
-                                                )}
-                                            </div>
+                                                </div>
                                         ))}
+
                                     </div>
                                 ))
                             ) : (<div style={{ textAlign: 'center', padding: '40px', color: '#adb5bd' }}>등록된 댓글이 없습니다.</div> )}
@@ -415,61 +489,58 @@ const BoardFreeDetail = () => {
 
             </div>
 
+            {/* 신고 영역 */}
             {isReportModalOpen && (
+                <div style={{
+                    position: 'fixed', top: 0, left: 0, width: '100%', height: '100%',
+                    background: 'rgba(0,0,0,0.5)', zIndex: 1000,
+                    display: 'flex', justifyContent: 'center', alignItems: 'center'
+                }}>
                     <div style={{
-                        position: 'fixed', top: 0, left: 0, width: '100%', height: '100%',
-                        background: 'rgba(0,0,0,0.5)', zIndex: 1000,
-                        display: 'flex', justifyContent: 'center', alignItems: 'center'
+                        background: 'white', borderRadius: '12px',
+                        padding: '30px', width: '400px'
                     }}>
-                        <div style={{
-                            background: 'white', borderRadius: '12px',
-                            padding: '30px', width: '400px'
-                        }}>
-                            <h3 style={{ marginBottom: '16px', marginTop: 0 }}>게시글 신고</h3>
-                            
-                            <textarea
-                                value={reportReason}
-                                onChange={(e) => setReportReason(e.target.value)}
-                                placeholder="신고 사유를 입력해 주세요."
+                        <h3 style={{ marginBottom: '16px' }}>{reportTarget?.targetType === 'REP' ? '댓글 신고' : '게시글 신고'}</h3>
+
+                        <textarea
+                            value={reportReason}
+                            onChange={(e) => setReportReason(e.target.value)}
+                            placeholder="신고 사유를 직접 입력해주세요."
+                            style={{
+                                width: '100%', height: '120px', borderRadius: '8px',
+                                border: '1px solid #ddd', padding: '12px',
+                                marginBottom: '16px', fontSize: '15px', resize: 'none',
+                                boxSizing: 'border-box', fontFamily: 'inherit'
+                            }}
+                        />
+
+                        <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end' }}>
+                            <button
+                                type="button"
+                                onClick={() => { setIsReportModalOpen(false); setReportReason(''); setReportTarget(null); }}
                                 style={{
-                                    width: '100%', 
-                                    height: '100px', 
-                                    borderRadius: '8px',
-                                    border: '1px solid #ddd', 
-                                    padding: '12px',
-                                    marginBottom: '16px', 
-                                    fontSize: '15px',
-                                    resize: 'none', 
-                                    boxSizing: 'border-box' 
+                                    padding: '10px 20px', borderRadius: '8px',
+                                    border: '1px solid #ddd', background: 'white',
+                                    cursor: 'pointer'
                                 }}
-                            />
-                            
-                            <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end' }}>
-                                <button
-                                    onClick={() => { setIsReportModalOpen(false); setReportReason(''); }}
-                                    style={{
-                                        padding: '10px 20px', borderRadius: '8px',
-                                        border: '1px solid #ddd', background: 'white',
-                                        cursor: 'pointer'
-                                    }}
-                                >
-                                    취소
-                                </button>
-                                <button
-                                    onClick={handleReport}
-                                    style={{
-                                        padding: '10px 20px', borderRadius: '8px',
-                                        border: 'none', background: '#e53e3e',
-                                        color: 'white', cursor: 'pointer'
-                                    }}
-                                >
-                                    신고하기
-                                </button>
-                            </div>
+                            >
+                                취소
+                            </button>
+                            <button
+                                type="button"
+                                onClick={handleReport}
+                                style={{
+                                    padding: '10px 20px', borderRadius: '8px',
+                                    border: 'none', background: '#e53e3e',
+                                    color: 'white', cursor: 'pointer'
+                                }}
+                            >
+                                신고하기
+                            </button>
                         </div>
                     </div>
-                )}
-
+                </div>
+            )}
 
         </main>
     );
