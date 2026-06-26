@@ -198,9 +198,8 @@ const WelfareList = () => {
     setCurrentPage(1)
   }
 
-  // 화면에 보여줄 지역명 목록 ('전국' + DB에서 가져온 지역명들)
   const regionNames = ['전국', ...regionList.map(r => r.regionName)]
-  // 취업여부 체크박스에 표시할 옵션: jobCd(재직자/자영업자/미취업자) + schoolCd(대학 재학)
+
   const jobCheckOptions = [
     ...jobOptions.filter(j => ['재직자', '자영업자', '미취업자'].includes(j.subName)),
     ...schoolOptions.filter(s => s.subName === '대학 재학')

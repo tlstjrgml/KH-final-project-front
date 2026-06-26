@@ -27,6 +27,7 @@ function Navbar({ isLoggedIn = false, nickname = '' , isAdmin = false}) {
             <li><Link to="/boardreview" className={styles.navLink}>복지후기</Link></li>
             <li><Link to="/boardfree" className={styles.navLink}>커뮤니티</Link></li>
             <li><Link to="/noticeboard" className={styles.navLink}>공지사항</Link></li>
+            <li><Link to="/persona" className={styles.navLink}>큐레이션</Link></li>
         </ul>
 
 
