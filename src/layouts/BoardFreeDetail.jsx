@@ -31,12 +31,14 @@ const BoardFreeDetail = () => {
             });
             if (!response.ok) throw new Error("게시글 조회 실패");
             const data = await response.json();
+            
+            console.log("서버에서 받아온 게시글 데이터:", data); 
+            
             setPost(data);
-            setIsLiked(data.isLiked); // 좋아요 상태 초기화
+            setIsLiked(data.isLiked);
             setLikes(data.likeCount);
         } catch (err) { console.error(err); }
     };
-
     // 3. 댓글 목록 조회 함수
     const fetchReplies = async () => {
         try {
@@ -308,16 +310,14 @@ const BoardFreeDetail = () => {
                         {post.boardContent}
                     </div>
 
-                   {/* 첨부파일 */}
+                    {/* 첨부파일 */}
                     <div className={styles.attachmentBox}>
                         <div className={styles.attachmentTitle}>
-                            <svg viewBox="0 0 24 24">
-                                <path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48" />
-                            </svg>
-                            첨부파일
+                            <svg viewBox="0 0 24 24"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48" /></svg>
+                            첨부파일 ({post?.attachments?.length || 0})
                         </div>
                         <ul className={styles.attachmentList}>
-                            {post.attachments && post.attachments.length > 0 ? (
+                            {post?.attachments && post.attachments.length > 0 ? (
                                 post.attachments.map((file) => (
                                     <li key={file.attmId}>
                                         <a 
@@ -326,7 +326,7 @@ const BoardFreeDetail = () => {
                                             download={file.originalName} 
                                             onClick={(e) => e.stopPropagation()}
                                         >
-                                            {file.originalName}
+                                            {file.originalName || '첨부파일'}
                                         </a>
                                     </li>
                                 ))
