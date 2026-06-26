@@ -19,6 +19,7 @@ const EditProfile = () => {
 
     const navigate = useNavigate();
     const token = localStorage.getItem('token');
+
     useEffect(() => {
         fetch('http://localhost:8080/member/me', {
             headers: { 'Authorization': `Bearer ${token}` }
@@ -38,6 +39,7 @@ const EditProfile = () => {
                 passwordConfirm: ''
             }));
     }, []);
+
     const rawParts = profile.birthDate ? profile.birthDate.substring(0, 10).split('-') : ['', '', ''];
     const birthParts = [
         rawParts[0] || '',
@@ -67,13 +69,30 @@ const EditProfile = () => {
         setProfile(prev => ({ ...prev, birthDate: parts.join('-') }));
     };
 
+    const pwChecks = {
+        hasLower: /[a-z]/.test(profile.password),
+        hasUpper: /[A-Z]/.test(profile.password),
+        hasSpecial: /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(profile.password),
+        hasLength: profile.password.length >= 9
+    };
+
     const handleSave = () => {
-        if(!profile.nickname || !profile.birthDate || !profile.phone || !profile.gender){
+        // 1. 필수항목 체크
+        if (!profile.nickname || !profile.birthDate || !profile.phone || !profile.gender) {
             alert('필수 항목을 모두 입력해주세요');
             return;
         }
 
+        // 2. 비밀번호 형식 체크 (fetch 보내기 전에 먼저)
+        if (profile.password) {
+            const allValid = Object.values(pwChecks).every(v => v === true);
+            if (!allValid) {
+                alert('비밀번호 형식을 확인해주세요');
+                return;
+            }
+        }
 
+        // 3. 검증 다 통과하면 fetch 실행
         fetch('http://localhost:8080/member/me', {
             method: 'PATCH',
             headers: {
@@ -84,7 +103,7 @@ const EditProfile = () => {
                 nickname: profile.nickname,
                 email: profile.email,
                 name: profile.name,
-                birthDate: profile.birthDate.substring(0,10),
+                birthDate: profile.birthDate.substring(0, 10),
                 gender: profile.gender,
                 phone: profile.phone,
                 region: profile.region,
@@ -129,6 +148,22 @@ const EditProfile = () => {
                     <label htmlFor="password">비밀번호 <span className={styles.sectionHint}>(변경 시에만 입력)</span></label>
                     <input type="password" id="password" name="password" placeholder="새 비밀번호" autoComplete="new-password" value={profile.password} onChange={handleChange} />
                 </div>
+                {profile.password && (
+                    <ul className={styles.pwChecklist}>
+                        <li className={pwChecks.hasLower ? styles.valid : styles.invalid}>
+                            ✓ 영문 소문자 포함
+                        </li>
+                        <li className={pwChecks.hasUpper ? styles.valid : styles.invalid}>
+                            ✓ 영문 대문자 1자리 이상
+                        </li>
+                        <li className={pwChecks.hasSpecial ? styles.valid : styles.invalid}>
+                            ✓ 특수문자 1자리 이상
+                        </li>
+                        <li className={pwChecks.hasLength ? styles.valid : styles.invalid}>
+                            ✓ 9자리 이상
+                        </li>
+                    </ul>
+                )}
 
                 <div className={styles.field}>
                     <label htmlFor="passwordConfirm">비밀번호 확인 <span className={styles.sectionHint}>(변경 시에만 입력)</span></label>
