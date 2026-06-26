@@ -20,9 +20,27 @@ const BoardFreeDetail = () => {
     const [isReportModalOpen, setIsReportModalOpen] = useState(false);
     const [reportReason, setReportReason] = useState('');
     const [reportTarget, setReportTarget] = useState(null);
-
     
+    // 이미지 확장자 체크
+    const isImage = (fileName = '') => {
+        return /\.(jpg|jpeg|png|gif|webp)$/i.test(fileName);
+    };
 
+    // 이미지 URL 결정 로직
+    const getImageSrc = (file) => {
+        if (!file) return null;
+
+        // S3에 이미 올라간 경우
+        if (file.attmPath) return file.attmPath;
+
+        // 서버에서 파일로 서빙해야 하는 경우 (핵심 수정)
+        if (file.attmId) {
+            return `/react/board/image/${file.attmId}`;
+        }
+
+        return null;
+    };
+    
     // 2. 게시글 상세 조회 함수
     const fetchBoardDetail = async (token) => {
         try {
@@ -33,6 +51,7 @@ const BoardFreeDetail = () => {
             const data = await response.json();
             
             console.log("서버에서 받아온 게시글 데이터:", data); 
+            console.log("첨부파일:", data.attachments);   
             
             setPost(data);
             setIsLiked(data.isLiked);
@@ -70,7 +89,7 @@ const BoardFreeDetail = () => {
 
 
 
-    // 4. 통합 초기화 useEffect (데이터 로드 오케스트레이터)
+    // 4. 통합 초기화 useEffect 
     useEffect(() => {
         const token = localStorage.getItem("token");
         
@@ -110,7 +129,7 @@ const BoardFreeDetail = () => {
 
             if (res.ok) {
                 alert('게시글이 성공적으로 삭제되었습니다.');
-                navigate('/boardfree'); // 삭제 후 자유게시판 목록으로 이동
+                navigate('/boardfree'); 
             } else {
                 const errorText = await res.text();
                 alert(`게시글 삭제 실패: ${errorText}`);
@@ -311,25 +330,85 @@ const BoardFreeDetail = () => {
                     </div>
 
                     {/* 첨부파일 */}
-                    <div className={styles.attachmentBox}>
+                   <div className={styles.attachmentBox}>
                         <div className={styles.attachmentTitle}>
-                            <svg viewBox="0 0 24 24"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48" /></svg>
+                            <svg viewBox="0 0 24 24">
+                                <path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48" />
+                            </svg>
                             첨부파일 ({post?.attachments?.length || 0})
                         </div>
-                        <ul className={styles.attachmentList}>
-                            {post?.attachments && post.attachments.length > 0 ? (
-                                post.attachments.map((file) => (
-                                    <li key={file.attmId}>
-                                        <a 
-                                            href={`/react/board/download/${file.attmId}`} 
-                                            className={styles.attachmentLink}
-                                            download={file.originalName} 
-                                            onClick={(e) => e.stopPropagation()}
-                                        >
-                                            {file.originalName || '첨부파일'}
-                                        </a>
-                                    </li>
-                                ))
+
+                        <ul className={styles.attachmentList} style={{ listStyle: 'none', padding: 0 }}>
+                            {post?.attachments?.length > 0 ? (
+                                post.attachments.map((file) => {
+
+                                    //  이미지 여부 체크
+                                    const isImage = (fileName = '') =>
+                                        /\.(jpg|jpeg|png|gif|webp)$/i.test(fileName);
+
+                                    // 이미지 URL 결정 
+                                    const getImageSrc = (file) => {
+                                        if (!file) return null;
+
+                                        if (file.attmPath) return file.attmPath;
+
+                                        if (file.renameName) {
+                                            return `/react/board/image/${file.renameName}`;
+                                        }
+
+                                        return null;
+                                    };
+
+                                    const src = getImageSrc(file);
+
+                                    return (
+                                        <li key={file.attmId} style={{ marginBottom: '15px' }}>
+
+                                            {/*  이미지 미리보기 */}
+                                            {isImage(file.originalName) && src && (
+                                                <img
+                                                    src={src}
+                                                    alt={file.originalName}
+                                                    onError={(e) => {
+                                                        e.target.style.display = 'none';
+                                                    }}
+                                                    style={{
+                                                        maxWidth: "100%",
+                                                        maxHeight: "500px",
+                                                        borderRadius: "8px",
+                                                        display: "block",
+                                                        objectFit: "contain"
+                                                    }}
+                                                />
+                                            )}
+
+                                            {/* 다운로드 */}
+                                            <a
+                                                href={`/react/board/download/${file.attmId}`}
+                                                className={styles.attachmentLink}
+                                                download={file.originalName}
+                                                onClick={(e) => e.stopPropagation()}
+                                                style={{
+                                                    display: 'inline-flex',
+                                                    alignItems: 'center',
+                                                    gap: '5px',
+                                                    textDecoration: 'none',
+                                                    color: '#378ADD',
+                                                    background: '#f8f9fa',
+                                                    padding: '8px 12px',
+                                                    borderRadius: '4px',
+                                                    border: '1px solid #e9ecef'
+                                                }}
+                                            >
+                                                <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" fill="none" strokeWidth="2">
+                                                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3" />
+                                                </svg>
+                                                {file.originalName || '첨부파일'}
+                                            </a>
+
+                                        </li>
+                                    );
+                                })
                             ) : (
                                 <li>
                                     <span className={styles.attachmentLink} style={{ color: '#ADB5BD', cursor: 'default' }}>
