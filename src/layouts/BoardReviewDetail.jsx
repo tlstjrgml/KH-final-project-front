@@ -252,7 +252,7 @@ const BoardReviewDetail = () => {
         }
 
         try {
-            const res = await fetch(`/react/board/reply/${replyId}`, {
+            const res = await fetch(`/react/reply/${replyId}`, {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
@@ -280,7 +280,7 @@ const BoardReviewDetail = () => {
 
         const token = localStorage.getItem('token');
         try {
-            const res = await fetch(`/react/board/reply/${replyId}`, {
+            const res = await fetch(`/react/reply/${replyId}`, {
                 method: 'DELETE',
                 headers: { 'Authorization': `Bearer ${token}` }
             });
