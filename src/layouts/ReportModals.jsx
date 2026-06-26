@@ -53,11 +53,18 @@ function ReportModals({ report, onClose, onComplete }) {
                             </div>
                             <div className={styles['info-row']}>
                                 <span className={styles.label}>신고대상</span>
-                                <span className={styles.value}>{report.target}</span>
+                                <span className={styles.value}>
+                                    {report.targetType === 'FRE' ? '자유게시판' :
+                                        report.targetType === 'REV' ? '복지후기' :
+                                            report.targetType === 'REP' ? '댓글' : '기타'}
+                                    ({report.target}번)
+                                </span>
                             </div>
                             <div className={`${styles['info-row']} ${styles['align-top']}`}>
                                 <span className={styles.label}>신고사유</span>
-                                <div className={`${styles.value} ${styles['reported-box']}`}>{report.content}</div>
+                                <div className={`${styles.value} ${styles['reported-box']}`}>
+                                    {report.reason || "사유 없음"}
+                                </div>
                             </div>
                         </div>
                         <div className={styles['modal-footer']}>
