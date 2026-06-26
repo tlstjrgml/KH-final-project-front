@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import styles from './ReportModals.module.css'; // 나중에 일괄 세팅할 CSS
+import styles from './ReportModals.module.css';
 
 function ReportModals({ report, onClose, onComplete }) {
     // step: 'detail' (상세 모달) 또는 'process' (처리 모달)
@@ -21,10 +21,14 @@ function ReportModals({ report, onClose, onComplete }) {
             alert("처리사유를 입력하세요.");
             return;
         }
-        
-        // DB STATUS 컬럼에 맞게 영어 코드로 변환 (기존 로직 유지)
+
+        // DB STATUS 컬럼에 맞게 영어 코드로 변환
         const statusCode = processResult === '처리완료' ? 'DONE' : 'REJECT';
-        onComplete(report.no, statusCode, processReason);
+        onComplete({
+            reportId: report.no,
+            status: statusCode,
+            reportResult: processReason
+        });
     };
 
     return (
@@ -51,12 +55,8 @@ function ReportModals({ report, onClose, onComplete }) {
                                 <span className={styles.label}>신고대상</span>
                                 <span className={styles.value}>{report.target}</span>
                             </div>
-                            <div className={styles['info-row']}>
-                                <span className={styles.label}>신고사유</span>
-                                <span className={styles.value}>{report.reason}</span>
-                            </div>
                             <div className={`${styles['info-row']} ${styles['align-top']}`}>
-                                <span className={styles.label}>신고내용</span>
+                                <span className={styles.label}>신고사유</span>
                                 <div className={`${styles.value} ${styles['reported-box']}`}>{report.content}</div>
                             </div>
                         </div>
@@ -104,7 +104,6 @@ function ReportModals({ report, onClose, onComplete }) {
                             </div>
                         </div>
                         <div className={styles['modal-footer']}>
-                            {/* 이전 단계(상세화면)로 돌아가기 또는 아예 모달 닫기 */}
                             <button className={styles['outline-btn']} onClick={() => setStep('detail')}>이전</button>
                             <button className={styles['primary-btn']} onClick={handleSave}>저장</button>
                         </div>
