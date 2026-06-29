@@ -106,28 +106,7 @@ const NoticeBoardDetail = () => {
         }
     };
 
-    // 첨부파일을 Blob으로 받아와 강제 다운로드시키는 함수 (다른 도메인 URL에서도 동작하도록)
-    const handleFileDownload = async (fileUrl, fileName) => {
-        try {
-            const res = await fetch(fileUrl);
-            if (!res.ok) throw new Error('파일을 가져오지 못했습니다.');
-
-            const blob = await res.blob();
-            const blobUrl = window.URL.createObjectURL(blob);
-
-            const link = document.createElement('a');
-            link.href = blobUrl;
-            link.download = fileName;
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-
-            window.URL.revokeObjectURL(blobUrl);
-        } catch (err) {
-            console.error(err);
-            alert('파일 다운로드 중 오류가 발생했습니다.');
-        }
-    };
+    
 
     if (!post) return <div style={{ textAlign: 'center', padding: '50px' }}>로딩 중...</div>
 
@@ -165,57 +144,7 @@ const NoticeBoardDetail = () => {
                         {post.boardContent}
                     </div>
 
-                    {/* 서버에서 받아온 첨부파일 목록 렌더링, 이미지는 미리보기 표시, 클릭 시 Blob 방식으로 다운로드 */}
-                    <div className={styles.attachmentBox}>
-                        <div className={styles.attachmentTitle}>
-                            <svg viewBox="0 0 24 24"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48" /></svg>
-                            첨부파일 {post.attachments && post.attachments.length > 0 ? `(${post.attachments.length})` : ''}
-                        </div>
-                        <ul className={styles.attachmentList}>
-                            {post.attachments && post.attachments.length > 0 ? (
-                                post.attachments.map((file, index) => {
-                                    const fileId = file.attmId || file.fileId || index;
-                                    const fileName = file.originalName || file.originName || '첨부파일';
-                                    const isImage = /\.(jpg|jpeg|png|gif|webp)$/i.test(fileName);
-
-                                    return (
-                                        <li key={fileId}>
-                                            {isImage ? (
-                                                <div className={styles.imagePreviewBox}>
-                                                    <img
-                                                        src={file.attmPath}
-                                                        alt={fileName}
-                                                        className={styles.previewImage}
-                                                    />
-                                                    <button
-                                                        type="button"
-                                                        className={styles.attachmentLink}
-                                                        onClick={() => handleFileDownload(file.attmPath, fileName)}
-                                                    >
-                                                        {fileName}
-                                                    </button>
-                                                </div>
-                                            ) : (
-                                                <button
-                                                    type="button"
-                                                    className={styles.attachmentLink}
-                                                    onClick={() => handleFileDownload(file.attmPath, fileName)}
-                                                >
-                                                    {fileName}
-                                                </button>
-                                            )}
-                                        </li>
-                                    );
-                                })
-                            ) : (
-                                <li>
-                                    <a href="#" className={styles.attachmentLink} onClick={(e) => e.preventDefault()}>
-                                        등록된 첨부파일이 없습니다.
-                                    </a>
-                                </li>
-                            )}
-                        </ul>
-                    </div>
+                    
 
                     <div className={styles.likeActionArea}>
                         <button
