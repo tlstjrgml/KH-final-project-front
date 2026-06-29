@@ -1,9 +1,41 @@
-import React from 'react';
+import React, {useState} from 'react';
 import { useNavigate } from 'react-router-dom';
 import styles from './AdminWelfare.module.css'; // 나중에 일괄 세팅할 CSS
 
 function AdminWelfare() {
     const navigate = useNavigate();
+
+
+    const[loading, setLoading] = useState(false);
+    const[message, setMessage] = useState('');
+    const[isSuccess, setIsSuccess] = useState(null);
+
+    const handleRefresh = async () => {
+    setLoading(true);
+    setMessage('');
+    
+    const token = localStorage.getItem('token');
+    
+    try {
+        const res = await fetch('/react/admin/welfare/refresh', {
+            method: 'POST',
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        
+        if (res.ok) {
+            setIsSuccess(true);
+            setMessage('갱신 완료!');
+        } else {
+            setIsSuccess(false);
+            setMessage('갱신 실패: 서버 오류');
+        }
+    } catch (e) {
+        setIsSuccess(false);
+        setMessage('갱신 중 오류 발생');
+    } finally {
+        setLoading(false);
+    }
+};
 
     return (
         <section className={`${styles['tab-content']} ${styles['active-tab']}`}>
@@ -17,6 +49,19 @@ function AdminWelfare() {
                 <button className={styles['primary-btn']} onClick={() => navigate('/welfarelist')}>
                     메인 복지 게시판으로 이동하기 ➔
                 </button>
+            </div>
+
+            <div className={styles.card} style={{ textAlign: 'center', padding: '70px 20px' }}>
+                <h3>공공데이터 수동 갱신</h3>
+                <p>매일 자정 자동 갱신되지만, 즉시 갱신이 필요할 때 사용하세요.</p>
+                <button className={styles['primary-btn']} onClick={handleRefresh} disabled={loading}>
+                    {loading ? '갱신 중...' : '지금 갱신하기'}
+                </button>
+                {message && (
+                    <p style={{ color: isSuccess ? 'blue' : 'red', marginTop: '15px' }}>
+                        {message}
+                    </p>
+                )}
             </div>
         </section>
     );
