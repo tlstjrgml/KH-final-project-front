@@ -106,8 +106,6 @@ const NoticeBoardDetail = () => {
         }
     };
 
-    
-
     if (!post) return <div style={{ textAlign: 'center', padding: '50px' }}>로딩 중...</div>
 
     return (
@@ -144,7 +142,37 @@ const NoticeBoardDetail = () => {
                         {post.boardContent}
                     </div>
 
-                    
+                    {/* 이미지 파일 레이아웃 출력 영역 */}
+                    {post.attachments && post.attachments.length > 0 && (
+                        <div style={{ marginTop: '30px', display: 'flex', flexDirection: 'column', gap: '20px', width: '100%' }}>
+                            {post.attachments.map((file, idx) => {
+                                const fileName = file.originalName || file.originName || '';
+                                const isImage = /\.(jpg|jpeg|png|gif|webp)$/i.test(fileName);
+
+                                if (!isImage) return null;
+
+                                return (
+                                    <div key={file.attmId || file.fileId || idx} style={{ width: '100%', display: 'flex', justifyContent: 'center' }}>
+                                        <img
+                                            src={file.attmPath}
+                                            alt={fileName}
+                                            style={{
+                                                width: '100%',
+                                                maxWidth: '100%',
+                                                height: 'auto',
+                                                objectFit: 'contain',
+                                                borderRadius: '8px',
+                                                border: '1px solid #f1f3f5'
+                                            }}
+                                            onError={(e) => {
+                                                e.target.style.display = 'none';
+                                            }}
+                                        />
+                                    </div>
+                                );
+                            })}
+                        </div>
+                    )}
 
                     <div className={styles.likeActionArea}>
                         <button

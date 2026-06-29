@@ -126,7 +126,7 @@ const NoticeBoardEdit = () => {
 
             if (response.ok) {
                 alert('수정이 성공적으로 완료되었습니다!');
-                navigate(`/noticeboard/detail/${id}`); // 기존 공지사항 상세 주소 규칙에 맞춤
+                navigate(`/notice/detail/${id}`);
             } else {
                 const errMsg = await response.text();
                 throw new Error(errMsg || '게시글 수정에 실패했습니다.');
