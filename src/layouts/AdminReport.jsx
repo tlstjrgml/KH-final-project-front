@@ -120,16 +120,56 @@ function AdminReport() {
                         {reports.length === 0 ? (
                             <tr><td colSpan="5" style={{ padding: '30px', color: '#6C757D', textAlign: 'center' }}>현재 처리할 신고 내역이 없습니다.</td></tr>
                         ) : (
-                            reports.map(report => (
-                                <tr key={report.reportId}>
-                                    <td>{report.reportId}</td>
-                                    <td>{report.writerNickname || report.memberId}</td>
-                                    <td>{report.targetId}</td>
-                                    <td>
-                                        <button className={styles['detail-btn']} onClick={() => setSelectedReport(report)}>처리</button>
-                                    </td>
-                                </tr>
-                            ))
+                            reports.map(report => {
+                                // 💡 1. 정상적인 카테고리(자유게시판/복지후기)인지 확인
+                                const isValidCategory = report.targetCategory?.trim() === 'FRE' || report.targetCategory?.trim() === 'REV';
+                                
+                                // 💡 2. 삭제된 데이터인지 판별 (내용없음 OR 상태 N OR 부모글 삭제되어 카테고리 알 수 없음)
+                                const isDeleted = !report.targetContent || report.targetStatus === 'N' || !isValidCategory;
+
+                                return (
+                                    <tr key={report.reportId}>
+                                        <td>{report.reportId}</td>
+                                        <td>{report.writerNickname || report.memberId}</td>
+                                        <td>
+                                            <span style={{ fontWeight: 'bold', color: '#0d6efd', marginRight: '5px' }}>
+                                                {report.targetCategory?.trim() === 'FRE' ? '[자유게시판 ' :
+                                                    report.targetCategory?.trim() === 'REV' ? '[복지후기 ' : '[삭제된 글의 '}
+                                                {report.targetType?.trim() === 'REP' ? '댓글]' : '게시글]'}
+                                            </span>
+                                            
+                                            <span style={{ fontSize: '0.9em', color: '#333' }}>
+                                                {isDeleted
+                                                    ? <span style={{ color: '#dc3545', fontWeight: 'bold' }}>이미 삭제된 데이터입니다.</span>
+                                                    : (report.targetContent.length > 20 ? report.targetContent.substring(0, 20) + '...' : report.targetContent)
+                                                }
+                                            </span>
+
+                                            <span style={{
+                                                marginLeft: '8px',
+                                                backgroundColor: '#f1f3f5',
+                                                color: '#868e96',
+                                                padding: '2px 6px',
+                                                borderRadius: '4px',
+                                                fontSize: '0.75em',
+                                                verticalAlign: 'middle'
+                                            }}>
+                                                #{report.targetId}
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <button 
+                                                className={styles['detail-btn']} 
+                                                onClick={() => setSelectedReport(report)}
+                                                disabled={isDeleted}
+                                                style={isDeleted ? { backgroundColor: '#e9ecef', color: '#adb5bd', cursor: 'not-allowed', border: 'none' } : {}}
+                                            >
+                                                {isDeleted ? '처리불가' : '처리'}
+                                            </button>
+                                        </td>
+                                    </tr>
+                                );
+                            })
                         )}
                     </tbody>
                 </table>
@@ -169,8 +209,10 @@ function AdminReport() {
                         no: selectedReport.reportId,
                         reporter: selectedReport.writerNickname || selectedReport.memberId,
                         target: selectedReport.targetId,
+                        targetType: selectedReport.targetType,
+                        targetCategory: selectedReport.targetCategory,
                         reason: selectedReport.reason,
-                        content: selectedReport.reason
+                        content: selectedReport.targetContent
                     }}
                     onClose={() => setSelectedReport(null)}
                     onComplete={(data) => handleProcessComplete(data)}

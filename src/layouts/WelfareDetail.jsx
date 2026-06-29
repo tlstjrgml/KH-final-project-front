@@ -88,12 +88,12 @@ const WelfareDetail = () => {
            {w.aplyUrlAddr ? (
               <>
                 <div className={styles.btnRow}>
-                  <button className={`${styles.btnHeart} ${wished ? styles.on : ''}`} onClick={toggleWish}>
-                    {wished ? '♥ 찜 해제' : '♡ 찜하기'}
-                  </button>
-                  <button className={styles.btnApply} onClick={() => window.open(w.aplyUrlAddr, '_blank')}>
+                   <button className={styles.btnApply} onClick={() => window.open(w.aplyUrlAddr, '_blank')}>
                     신청하러 가기 →
                   </button>
+                  <button className={`${styles.btnHeart} ${wished ? styles.on : ''}`} onClick={toggleWish}>
+                    {wished ? '♥ 찜 해제' : '♡ 찜하기'}
+                  </button>  
                 </div>
                 <div className={styles.wishCount}>총 <span>{w.wishCount}</span>명이 찜했어요</div>
               </>

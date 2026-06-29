@@ -9,26 +9,54 @@ const BoardFree = () => {
     const [currentPage, setCurrentPage] = useState(1);
     const [endPage, setEndPage] = useState(1);
 
+    const [searchType, setSearchType] = useState('keyword');
+    const [searchKeyword, setSearchKeyword] = useState('');
+    const [appliedKeyword, setAppliedKeyword] = useState('');
+
     useEffect(() => {
         const fetchBoardList = async () => {
             try {
-                const res = await fetch(`http://localhost:8080/board/list?boardType=FRE&page=${currentPage}`);
+                const params = new URLSearchParams({
+                    boardType: 'FRE',
+                    page: currentPage
+                });
+
+                if (appliedKeyword && appliedKeyword.trim() !== '') {
+                    params.set(searchType, appliedKeyword);
+                }
+
+                const res = await fetch(`/react/board/list?${params.toString()}`);
                 const data = await res.json();
-                //console.log('자유게시판 SQL 수신 데이터:', data);
 
                 setBoardList(data.content || []);
 
                 const maxPage = data.pagination?.endPage || 1;
                 setEndPage(maxPage);
                 setPages(Array.from({ length: maxPage }, (_, i) => i + 1));
-            
             } catch (err) {
                 console.error('목록 조회 실패:', err);
             }
         };
-        
-        fetchBoardList(); 
-    }, [currentPage]); 
+        fetchBoardList();
+    }, [currentPage, appliedKeyword, searchType]);
+
+    const handleSearch = () => {
+        setCurrentPage(1);
+        setAppliedKeyword(searchKeyword);
+    };
+
+    const handleClearSearch = () => {
+        setSearchKeyword('');
+        setAppliedKeyword('');
+        setCurrentPage(1);
+    };
+
+    const handleSearchKeyDown = (e) => {
+        if (e.key === 'Enter') {
+            handleSearch();
+        }
+    };
+
 
     return (
         <main className={styles.page}>
@@ -130,15 +158,50 @@ const BoardFree = () => {
                         &gt;
                     </a>
                 </div>
-
+                
+                {/* 게시글 검색 */}
                 <div className={styles.searchBar}>
-                    <select className={styles.searchSelect}>
-                        <option value="title">제목</option>
-                        <option value="content">내용</option>
-                        <option value="author">작성자</option>
+                    <select
+                        className={styles.searchSelect}
+                        value={searchType}
+                        onChange={(e) => setSearchType(e.target.value)}
+                    >
+                        <option value="keyword">제목</option>
+                        <option value="boardContent">내용</option>
+                        <option value="nickname">작성자</option>
                     </select>
-                    <input type="text" className={styles.searchInput} placeholder="검색어를 입력해주세요" />
-                    <button type="button" className={styles.btnSearch}>검색</button>
+
+                    <div style={{ position: 'relative', display: 'flex', alignItems: 'center', flex: 1 }}>
+                        <input
+                            type="text"
+                            className={styles.searchInput}
+                            placeholder="검색어를 입력해주세요"
+                            value={searchKeyword}
+                            onChange={(e) => setSearchKeyword(e.target.value)}
+                            onKeyDown={handleSearchKeyDown}
+                            style={{ width: '100%', paddingRight: '30px' }}
+                        />
+                        {searchKeyword && (
+                            <button
+                                type="button"
+                                onClick={handleClearSearch}
+                                style={{
+                                    position: 'absolute',
+                                    right: '10px',
+                                    background: 'none',
+                                    border: 'none',
+                                    cursor: 'pointer',
+                                    fontSize: '16px',
+                                    color: '#999',
+                                    padding: '4px'
+                                }}
+                            >
+                                x
+                            </button>
+                        )}
+                    </div>
+
+                    <button type="button" className={styles.btnSearch} onClick={handleSearch}>검색</button>
                 </div>
 
             </div>

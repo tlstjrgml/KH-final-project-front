@@ -3,11 +3,7 @@ import { useNavigate, useSearchParams } from 'react-router-dom'
 import styles from './WelfareList.module.css'
 import Pagination from '../components/common/Pagination'
 
-const CATEGORIES = ['주거', '일자리', '교육', '참여･기반', '금융･복지･문화']
-const REGIONS = ['전국', '서울', '부산', '대구', '인천', '광주', '대전', '울산', '세종', '경기', '강원', '충북', '충남', '전북', '전남', '경북', '경남', '제주']
 const AGE_OPTIONS = ['19~24세', '25~29세', '30~34세', '35~39세']
-const INCOME_OPTIONS = ['무관', '연소득', '기타']
-const JOB_OPTIONS = ['미취업', '재직중', '자영업', '대학생']
 
 const BADGE_CLASS = {
   '주거': styles.badgeBlue,
@@ -26,65 +22,29 @@ const AGE_RANGE = {
   '35~39세': { min: 35, max: 39 },
 }
 
-const INCOME_CODE = {
-  '무관': '0043001',
-  '연소득': '0043002',
-  '기타': '0043003'
-}
-
-const JOB_CODE = {
-  '미취업': '0013003',
-  '재직중': '0013001',
-  '자영업': '0013002'
-}
-
-const SCHOOL_CODE = {
-  '대학생': '0049005'
-}
-
-const REGION_CODE = {
-  '서울': '11', '부산': '26', '대구': '27', '인천': '28',
-  '광주': '29', '대전': '30', '울산': '31', '세종': '36',
-  '경기': '41', '강원': '42', '충북': '43', '충남': '44',
-  '전북': '45', '전남': '46', '경북': '47', '경남': '48', '제주': '50'
-}
+const CATEGORIES = ['주거', '일자리', '교육', '참여･기반', '금융･복지･문화']
 
 const WelfareList = () => {
   const navigate = useNavigate()
   const [searchParams] = useSearchParams()
   const token = localStorage.getItem('token')
 
+  const [regionList, setRegionList] = useState([]) 
+  const [jobOptions, setJobOptions] = useState([])  
+  const [schoolOptions, setSchoolOptions] = useState([]) 
+  const [incomeOptions, setIncomeOptions] = useState([]) 
+  const [codesLoaded, setCodesLoaded] = useState(false)
+
   const [selectedCats, setSelectedCats] = useState(searchParams.getAll('lclsfNm'))
-  const [selectedRegions, setSelectedRegions] = useState(() => {
-    const regionCodes = searchParams.getAll('region')
-    if (regionCodes.length === 0) return ['전국']
-    return Object.entries(REGION_CODE)
-      .filter(([_, code]) => regionCodes.includes(code))
-      .map(([name]) => name)
-  })
+  const [selectedRegions, setSelectedRegions] = useState(['전국'])
   const [selectedAge, setSelectedAge] = useState(() => {
     const ageMin = searchParams.get('ageMin')
     const ageMax = searchParams.get('ageMax')
     if (!ageMin || !ageMax) return ''
     return Object.entries(AGE_RANGE).find(([_, v]) => v.min == ageMin && v.max == ageMax)?.[0] || ''
   })
-  const [selectedIncomes, setSelectedIncomes] = useState(() => {
-    const codes = searchParams.getAll('income')
-    return Object.entries(INCOME_CODE)
-      .filter(([_, code]) => codes.includes(code))
-      .map(([name]) => name)
-  })
-  const [selectedJobs, setSelectedJobs] = useState(() => {
-  const jobCodes = searchParams.getAll('job')
-  const schoolCodes = searchParams.getAll('school')
-  const jobNames = Object.entries(JOB_CODE)
-    .filter(([_, code]) => jobCodes.includes(code))
-    .map(([name]) => name)
-  const schoolNames = Object.entries(SCHOOL_CODE)
-      .filter(([_, code]) => schoolCodes.includes(code))
-      .map(([name]) => name)
-    return [...jobNames, ...schoolNames]
-  })
+  const [selectedIncomes, setSelectedIncomes] = useState([])
+  const [selectedJobs, setSelectedJobs] = useState([])
   const [sort, setSort] = useState(searchParams.get('sort') || '최신순')
   const [wished, setWished] = useState({})
   const [currentPage, setCurrentPage] = useState(1)
@@ -101,6 +61,45 @@ const WelfareList = () => {
   }
 
   useEffect(() => {
+    Promise.all([
+      fetch('http://localhost:8080/api/welfare/regions').then(res => res.json()),
+      fetch('http://localhost:8080/api/welfare/categories').then(res => res.json())
+    ]).then(([regions, categories]) => {
+      setRegionList(regions)
+      setJobOptions(categories.filter(c => c.mainId === 'jobCd'))
+      setSchoolOptions(categories.filter(c => c.mainId === 'schoolCd'))
+      setIncomeOptions(categories.filter(c => c.mainId === 'earnCndSeCd'))
+      setCodesLoaded(true)
+    })
+  }, [])
+
+  useEffect(() => {
+    if (!codesLoaded) return
+
+    const regionCodes = searchParams.getAll('region')
+    if (regionCodes.length > 0) {
+      const names = regionList
+        .filter(r => regionCodes.includes(r.zipCd))
+        .map(r => r.regionName)
+      setSelectedRegions(names.length > 0 ? names : ['전국'])
+    }
+
+    const incomeCodes = searchParams.getAll('income')
+    if (incomeCodes.length > 0) {
+      const names = incomeOptions
+        .filter(i => incomeCodes.includes(i.subId))
+        .map(i => i.subName)
+      setSelectedIncomes(names)
+    }
+
+    const jobCodes = searchParams.getAll('job')
+    const schoolCodes = searchParams.getAll('school')
+    const jobNames = jobOptions.filter(j => jobCodes.includes(j.subId)).map(j => j.subName)
+    const schoolNames = schoolOptions.filter(s => schoolCodes.includes(s.subId)).map(s => s.subName)
+    setSelectedJobs([...jobNames, ...schoolNames])
+  }, [codesLoaded])
+
+  useEffect(() => {
     if (token) {
       fetch('http://localhost:8080/api/wish', {
         headers: { 'Authorization': `Bearer ${token}` }
@@ -115,14 +114,22 @@ const WelfareList = () => {
   }, [])
 
   useEffect(() => {
+    if (!codesLoaded) return
+
+    const regionCodeMap = Object.fromEntries(regionList.map(r => [r.regionName, r.zipCd]))
+    const jobCodeMap = Object.fromEntries(jobOptions.map(j => [j.subName, j.subId]))
+    const schoolCodeMap = Object.fromEntries(schoolOptions.map(s => [s.subName, s.subId]))
+    const incomeCodeMap = Object.fromEntries(incomeOptions.map(i => [i.subName, i.subId]))
+    const schoolNames = schoolOptions.map(s => s.subName)
+
     const params = new URLSearchParams()
     params.append('keyword', keyword)
     params.append('page', currentPage)
     selectedCats.forEach(c => params.append('lclsfNm', c))
-    selectedRegions.filter(r => r !== '전국').forEach(r => params.append('region', REGION_CODE[r]))
-    selectedIncomes.forEach(i => params.append('income', INCOME_CODE[i]))
-    selectedJobs.filter(j => j !== '대학생').forEach(j => params.append('job', JOB_CODE[j]))
-    if (selectedJobs.includes('대학생')) params.append('school', SCHOOL_CODE['대학생'])
+    selectedRegions.filter(r => r !== '전국').forEach(r => params.append('region', regionCodeMap[r]))
+    selectedIncomes.forEach(i => params.append('income', incomeCodeMap[i]))
+    selectedJobs.filter(j => !schoolNames.includes(j)).forEach(j => params.append('job', jobCodeMap[j]))
+    selectedJobs.filter(j => schoolNames.includes(j)).forEach(j => params.append('school', schoolCodeMap[j]))
     if (selectedAge) {
       params.append('ageMin', AGE_RANGE[selectedAge].min)
       params.append('ageMax', AGE_RANGE[selectedAge].max)
@@ -137,7 +144,7 @@ const WelfareList = () => {
         setWelfareList(data.content)
         setPageInfo(data.pagination)
       })
-  }, [keyword, selectedCats, selectedRegions, selectedAge, selectedIncomes, selectedJobs, sort, currentPage])
+  }, [keyword, selectedCats, selectedRegions, selectedAge, selectedIncomes, selectedJobs, sort, currentPage, codesLoaded])
 
   const toggleCheck = (val, setList) => {
     setList(prev => prev.includes(val) ? prev.filter(v => v !== val) : [...prev, val])
@@ -191,6 +198,13 @@ const WelfareList = () => {
     setCurrentPage(1)
   }
 
+  const regionNames = ['전국', ...regionList.map(r => r.regionName)]
+
+  const jobCheckOptions = [
+    ...jobOptions.filter(j => ['재직자', '자영업자', '미취업자'].includes(j.subName)),
+    ...schoolOptions.filter(s => s.subName === '대학 재학')
+  ]
+
   return (
     <div className={styles.pageBg}>
       <div className={styles.pageContainer}>
@@ -222,7 +236,7 @@ const WelfareList = () => {
             <div className={styles.fg}>
               <div className={styles.flabel}>지역</div>
               <div className={styles.regionScroll}>
-                {REGIONS.map(r => (
+                {regionNames.map(r => (
                   <label key={r} className={styles.fopt}>
                     <input type="checkbox" checked={selectedRegions.includes(r)} onChange={() => toggleCheck(r, setSelectedRegions)} />
                     {r}
@@ -243,20 +257,20 @@ const WelfareList = () => {
 
             <div className={styles.fg}>
               <div className={styles.flabel}>소득</div>
-              {INCOME_OPTIONS.map(i => (
-                <label key={i} className={styles.fopt}>
-                  <input type="checkbox" checked={selectedIncomes.includes(i)} onChange={() => toggleCheck(i, setSelectedIncomes)} />
-                  {i}
+              {incomeOptions.map(i => (
+                <label key={i.subId} className={styles.fopt}>
+                  <input type="checkbox" checked={selectedIncomes.includes(i.subName)} onChange={() => toggleCheck(i.subName, setSelectedIncomes)} />
+                  {i.subName}
                 </label>
               ))}
             </div>
 
             <div className={styles.fgLast}>
               <div className={styles.flabel}>취업 여부</div>
-              {JOB_OPTIONS.map(j => (
-                <label key={j} className={styles.fopt}>
-                  <input type="checkbox" checked={selectedJobs.includes(j)} onChange={() => toggleCheck(j, setSelectedJobs)} />
-                  {j}
+              {jobCheckOptions.map(j => (
+                <label key={j.subId} className={styles.fopt}>
+                  <input type="checkbox" checked={selectedJobs.includes(j.subName)} onChange={() => toggleCheck(j.subName, setSelectedJobs)} />
+                  {j.subName}
                 </label>
               ))}
             </div>
