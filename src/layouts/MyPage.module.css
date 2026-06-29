@@ -331,3 +331,37 @@
   border-color: #378ADD;
   color: #ffffff;
 }
+
+.imgMenu {
+  position: absolute;
+  bottom: -90px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: white;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.12);
+  z-index: 100;
+  min-width: 140px;
+  overflow: hidden;
+}
+
+.imgMenu button {
+  display: block;
+  width: 100%;
+  padding: 10px 16px;
+  text-align: left;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 14px;
+  color: #374151;
+}
+
+.imgMenu button:hover {
+  background: #f3f4f6;
+}
+
+.imgMenu button:last-child {
+  color: #ef4444;
+}
