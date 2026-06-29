@@ -330,7 +330,7 @@ const BoardFreeDetail = () => {
                     </div>
 
                     {/* 첨부파일 */}
-                   <div className={styles.attachmentBox}>
+                    <div className={styles.attachmentBox}>
                         <div className={styles.attachmentTitle}>
                             <svg viewBox="0 0 24 24">
                                 <path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48" />
@@ -338,85 +338,90 @@ const BoardFreeDetail = () => {
                             첨부파일 ({post?.attachments?.length || 0})
                         </div>
 
-                        <ul className={styles.attachmentList} style={{ listStyle: 'none', padding: 0 }}>
-                            {post?.attachments?.length > 0 ? (
-                                post.attachments.map((file) => {
+                       <ul className={styles.attachmentList} style={{ listStyle: 'none', padding: 0 }}>
+                        {post?.attachments?.length > 0 ? (
+                            post.attachments.map((file) => {
 
-                                    //  이미지 여부 체크
-                                    const isImage = (fileName = '') =>
-                                        /\.(jpg|jpeg|png|gif|webp)$/i.test(fileName);
+                                // 이미지 여부 체크
+                                const isImage = (fileName = '') =>
+                                    /\.(jpg|jpeg|png|gif|webp)$/i.test(fileName);
 
-                                    // 이미지 URL 결정 
-                                    const getImageSrc = (file) => {
-                                        if (!file) return null;
+                                // 수정된 이미지 URL 결정 로직
+                                const getImageSrc = (file) => {
+                                    if (!file) return null;
 
-                                        if (file.attmPath) return file.attmPath;
+                                    // 1. 외부 클라우드 링크(http)가 저장된 경우 그대로 사용
+                                    if (file.attmPath && file.attmPath.startsWith('http')) {
+                                        return file.attmPath;
+                                    }
 
-                                        if (file.renameName) {
-                                            return `/react/board/image/${file.renameName}`;
-                                        }
+                                    // 2. 그 외의 경우 (attmPath가 null이거나 로컬 경로일 때)
+                                    // 별도의 이미지 조회 API 없이, 다운로드 API를 통해 이미지 바이너리를 직접 받아옵니다.
+                                    if (file.attmId) {
+                                        return `/react/board/download/${file.attmId}`;
+                                    }
 
-                                        return null;
-                                    };
+                                    return null;
+                                };
 
-                                    const src = getImageSrc(file);
+                                const src = getImageSrc(file);
 
-                                    return (
-                                        <li key={file.attmId} style={{ marginBottom: '15px' }}>
+                                return (
+                                    <li key={file.attmId} style={{ marginBottom: '15px' }}>
 
-                                            {/*  이미지 미리보기 */}
-                                            {isImage(file.originalName) && src && (
-                                                <img
-                                                    src={src}
-                                                    alt={file.originalName}
-                                                    onError={(e) => {
-                                                        e.target.style.display = 'none';
-                                                    }}
-                                                    style={{
-                                                        maxWidth: "100%",
-                                                        maxHeight: "500px",
-                                                        borderRadius: "8px",
-                                                        display: "block",
-                                                        objectFit: "contain"
-                                                    }}
-                                                />
-                                            )}
-
-                                            {/* 다운로드 */}
-                                            <a
-                                                href={`/react/board/download/${file.attmId}`}
-                                                className={styles.attachmentLink}
-                                                download={file.originalName}
-                                                onClick={(e) => e.stopPropagation()}
-                                                style={{
-                                                    display: 'inline-flex',
-                                                    alignItems: 'center',
-                                                    gap: '5px',
-                                                    textDecoration: 'none',
-                                                    color: '#378ADD',
-                                                    background: '#f8f9fa',
-                                                    padding: '8px 12px',
-                                                    borderRadius: '4px',
-                                                    border: '1px solid #e9ecef'
+                                        {/* 이미지 미리보기 */}
+                                        {isImage(file.originalName) && src && (
+                                            <img
+                                                src={src}
+                                                alt={file.originalName}
+                                                onError={(e) => {
+                                                    e.target.style.display = 'none';
                                                 }}
-                                            >
-                                                <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" fill="none" strokeWidth="2">
-                                                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3" />
-                                                </svg>
-                                                {file.originalName || '첨부파일'}
-                                            </a>
+                                                style={{
+                                                    maxWidth: "100%",
+                                                    maxHeight: "500px",
+                                                    borderRadius: "8px",
+                                                    display: "block",
+                                                    objectFit: "contain",
+                                                    marginBottom: "10px"
+                                                }}
+                                            />
+                                        )}
 
-                                        </li>
-                                    );
-                                })
-                            ) : (
-                                <li>
-                                    <span className={styles.attachmentLink} style={{ color: '#ADB5BD', cursor: 'default' }}>
-                                        등록된 첨부파일이 없습니다.
-                                    </span>
-                                </li>
-                            )}
-                        </ul>
+                                        {/* 다운로드 링크 */}
+                                        <a
+                                            href={`/react/board/download/${file.attmId}`}
+                                            className={styles.attachmentLink}
+                                            download={file.originalName}
+                                            onClick={(e) => e.stopPropagation()}
+                                            style={{
+                                                display: 'inline-flex',
+                                                alignItems: 'center',
+                                                gap: '5px',
+                                                textDecoration: 'none',
+                                                color: '#378ADD',
+                                                background: '#f8f9fa',
+                                                padding: '8px 12px',
+                                                borderRadius: '4px',
+                                                border: '1px solid #e9ecef'
+                                            }}
+                                        >
+                                            <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" fill="none" strokeWidth="2">
+                                                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3" />
+                                            </svg>
+                                            {file.originalName || '첨부파일'}
+                                        </a>
+                                    </li>
+                                );
+                            })
+                        ) : (
+                            <li>
+                                <span className={styles.attachmentLink} style={{ color: '#ADB5BD', cursor: 'default' }}>
+                                    등록된 첨부파일이 없습니다.
+                                </span>
+                            </li>
+                        )}
+                    </ul>
                     </div>
 
                     {/* 좋아요 */}
