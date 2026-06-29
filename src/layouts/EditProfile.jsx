@@ -92,6 +92,19 @@ const EditProfile = () => {
             }
         }
 
+        const updatedFields = {};
+
+        // 지금 구조에서 가장 안전하게 '바뀐 필드만' 백엔드로 넘기는 스크립트:
+        if (profile.nickname) updatedFields.nickname = profile.nickname;
+        if (profile.email) updatedFields.email = profile.email;
+        if (profile.name) updatedFields.name = profile.name;
+        if (profile.birthDate) updatedFields.birthDate = profile.birthDate.substring(0, 10);
+        if (profile.gender) updatedFields.gender = profile.gender;
+        if (profile.phone) updatedFields.phone = profile.phone;
+        if (profile.region) updatedFields.region = profile.region;
+        if (profile.jobStatus) updatedFields.jobStatus = profile.jobStatus;
+        if (profile.incomeLevel) updatedFields.incomeLevel = Number(profile.incomeLevel);
+
         // 3. 검증 다 통과하면 fetch 실행
         fetch('http://localhost:8080/member/me', {
             method: 'PATCH',
@@ -99,17 +112,7 @@ const EditProfile = () => {
                 'Authorization': `Bearer ${token}`,
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify({
-                nickname: profile.nickname,
-                email: profile.email,
-                name: profile.name,
-                birthDate: profile.birthDate.substring(0, 10),
-                gender: profile.gender,
-                phone: profile.phone,
-                region: profile.region,
-                jobStatus: profile.jobStatus,
-                incomeLevel: profile.incomeLevel ? Number(profile.incomeLevel) : null
-            })
+            body: JSON.stringify(updatedFields)
         });
 
         if (profile.password) {
