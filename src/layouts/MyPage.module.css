@@ -300,3 +300,34 @@
 
 .btnDanger:hover { background: #C0392B; }
 .btnDanger svg { width: 16px; height: 16px; fill: none; stroke: #fff; stroke-width: 2; }
+
+/* ── 페이지네이션 ── */
+.pagination {
+  display: flex;
+  justify-content: center;
+  gap: 6px;
+  margin-top: 1rem;
+}
+
+.pageBtn {
+  width: 32px; height: 32px;
+  border-radius: 8px;
+  border: 1px solid #DEE2E6;
+  background: #ffffff;
+  font-size: 13px; font-weight: 500;
+  color: #6C757D;
+  cursor: pointer;
+  font-family: inherit;
+  transition: all 0.15s;
+}
+
+.pageBtn:hover {
+  border-color: #378ADD;
+  color: #378ADD;
+}
+
+.pageBtnActive {
+  background: #378ADD;
+  border-color: #378ADD;
+  color: #ffffff;
+}
