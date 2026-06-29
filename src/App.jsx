@@ -25,6 +25,7 @@ import NoticeBoardDetail from './layouts/NoticeBoardDetail';
 import BoardFreeEdit from './layouts/BoardFreeEdit';
 import MyBoardList from './layouts/MyBoardList';
 import MyRepliesList from './layouts/MyRepliesList';
+import MyReports from './layouts/MyReports';
 
 const PrivateRoute = ({ element }) => {
   const token = localStorage.getItem('token');
@@ -119,7 +120,7 @@ const AppInner = () => {
         <Route path="/mypage/boards" element={<PrivateRoute element={<MyBoardList />} />} />
         <Route path="/mypage/replies" element={<PrivateRoute element={<MyRepliesList />} />} />
         <Route path="/admin" element={<AdminRoute element={<AdminPage />} />} />
-        
+        <Route path="/mypage/reports" element = {<PrivateRoute element={<MyReports />}/>}/>
         {/* 후기 게시판 영역 */}
         <Route path="/boardreview" element={<BoardReview />} />
         <Route path="/boardreview/write" element={<PrivateRoute element={<BoardReviewWrite />} />} />
