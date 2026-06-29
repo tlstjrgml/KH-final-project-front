@@ -8,58 +8,55 @@ const BoardFree = () => {
     const [pages, setPages] = useState([1]);
     const [currentPage, setCurrentPage] = useState(1);
     const [endPage, setEndPage] = useState(1);
-    const [searchType, setSearchType] = useState("title");
-    const [searchKeyword, setSearchKeyword] = useState("");
+
+    const [searchType, setSearchType] = useState('keyword');
+    const [searchKeyword, setSearchKeyword] = useState('');
+    const [appliedKeyword, setAppliedKeyword] = useState('');
 
     useEffect(() => {
         const fetchBoardList = async () => {
             try {
-                const res = await fetch(`http://localhost:8080/board/list?boardType=FRE&page=${currentPage}`);
+                const params = new URLSearchParams({
+                    boardType: 'FRE',
+                    page: currentPage
+                });
+
+                if (appliedKeyword && appliedKeyword.trim() !== '') {
+                    params.set(searchType, appliedKeyword);
+                }
+
+                const res = await fetch(`/react/board/list?${params.toString()}`);
                 const data = await res.json();
+
                 setBoardList(data.content || []);
 
                 const maxPage = data.pagination?.endPage || 1;
                 setEndPage(maxPage);
                 setPages(Array.from({ length: maxPage }, (_, i) => i + 1));
-            
             } catch (err) {
                 console.error('목록 조회 실패:', err);
             }
         };
-        
-        fetchBoardList(); 
-    }, [currentPage]); 
+        fetchBoardList();
+    }, [currentPage, appliedKeyword, searchType]);
+
+    const handleSearch = () => {
+        setCurrentPage(1);
+        setAppliedKeyword(searchKeyword);
+    };
+
+    const handleClearSearch = () => {
+        setSearchKeyword('');
+        setAppliedKeyword('');
+        setCurrentPage(1);
+    };
 
     const handleSearchKeyDown = (e) => {
-        if (e.key === "Enter") {
+        if (e.key === 'Enter') {
             handleSearch();
         }
     };
 
-    const handleSearch = async () => {
-        try {
-            setCurrentPage(1);
-
-            const res = await fetch(
-                `http://localhost:8080/board/list?boardType=FRE&page=1&searchType=${searchType}&keyword=${encodeURIComponent(searchKeyword)}`
-            );
-
-            const data = await res.json();
-
-            setBoardList(data.content || []);
-
-            const maxPage = data.pagination?.endPage || 1;
-            setEndPage(maxPage);
-            setPages(Array.from({ length: maxPage }, (_, i) => i + 1));
-        } catch (err) {
-            console.error(err);
-        }
-    };
-
-    const handleClearSearch = () => {
-        setSearchKeyword("");
-        setCurrentPage(1);
-    };
 
     return (
         <main className={styles.page}>
