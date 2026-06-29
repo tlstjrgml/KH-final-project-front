@@ -339,6 +339,29 @@ const BoardReviewDetail = () => {
         }
     };
 
+    // 첨부파일을 Blob으로 받아와 강제 다운로드시키는 함수 (다른 도메인 URL에서도 동작하도록)
+    const handleFileDownload = async (fileUrl, fileName) => {
+        try {
+            const res = await fetch(fileUrl);
+            if (!res.ok) throw new Error('파일을 가져오지 못했습니다.');
+
+            const blob = await res.blob();
+            const blobUrl = window.URL.createObjectURL(blob);
+
+            const link = document.createElement('a');
+            link.href = blobUrl;
+            link.download = fileName;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+
+            window.URL.revokeObjectURL(blobUrl);
+        } catch (err) {
+            console.error(err);
+            alert('파일 다운로드 중 오류가 발생했습니다.');
+        }
+    };
+
     // 로딩 처리 위치
     if (!post) return <div>로딩 중...</div>;
 
@@ -409,17 +432,37 @@ const BoardReviewDetail = () => {
                                 {post.attachments.map((file, index) => {
                                     const fileId = file.attmId || file.fileId || index;
                                     const fileName = file.originalName || file.originName || '첨부파일';
+                                    const isImage = /\.(jpg|jpeg|png|gif|webp)$/i.test(fileName);
 
                                     return (
                                         <li key={fileId} className={styles.attachmentItem}>
-                                            <span className={styles.fileIcon}>📁</span>
-                                            <a
-                                                href={`/react/board/download/${fileId}`}
-                                                download={fileName}
-                                                className={styles.fileLink}
-                                            >
-                                                {fileName}
-                                            </a>
+                                            {isImage ? (
+                                                <div className={styles.imagePreviewBox}>
+                                                    <img
+                                                        src={file.attmPath}
+                                                        alt={fileName}
+                                                        className={styles.previewImage}
+                                                    />
+                                                    <button
+                                                        type="button"
+                                                        className={styles.fileLink}
+                                                        onClick={() => handleFileDownload(file.attmPath, fileName)}
+                                                    >
+                                                        {fileName}
+                                                    </button>
+                                                </div>
+                                            ) : (
+                                                <>
+                                                    <span className={styles.fileIcon}>📁</span>
+                                                    <button
+                                                        type="button"
+                                                        className={styles.fileLink}
+                                                        onClick={() => handleFileDownload(file.attmPath, fileName)}
+                                                    >
+                                                        {fileName}
+                                                    </button>
+                                                </>
+                                            )}
                                         </li>
                                     );
                                 })}
