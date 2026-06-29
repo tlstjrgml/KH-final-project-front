@@ -12,21 +12,24 @@ const PAGE_SIZE = 10;
 
 const MyPage = () => {
   const [isOpen, setIsOpen] = useState(false)
+  const [showImgMenu, setShowImgMenu] = useState(false)
   const navigate = useNavigate();
   const [profile, setProfile] = useState(null);
   const [boards, setBoards] = useState([]);
   const [replies, setReplies] = useState([]);
   const fileInputRef = useRef(null);
+  const menuRef = useRef(null);
   const [boardPage, setBoardPage] = useState(1);
   const [replyPage, setReplyPage] = useState(1);
-  const[wishes, setWishes] = useState([]);
+  const [wishes, setWishes] = useState([]);
+
   useEffect(() => {
     const token = localStorage.getItem('token')
     Promise.all([
       fetch('http://localhost:8080/member/me', { headers: { 'Authorization': `Bearer ${token}` } }).then(res => res.json()),
       fetch('http://localhost:8080/member/me/boards', { headers: { 'Authorization': `Bearer ${token}` } }).then(res => res.json()),
       fetch('http://localhost:8080/member/me/replies', { headers: { 'Authorization': `Bearer ${token}` } }).then(res => res.json()),
-      fetch('http://localhost:8080/api/wish', {headers: { 'Authorization': `Bearer ${token}` }}).then(res=>res.json())
+      fetch('http://localhost:8080/api/wish', { headers: { 'Authorization': `Bearer ${token}` } }).then(res => res.json())
     ]).then(([profileData, boardsData, repliesData, wishesData]) => {
       setProfile(profileData);
       setBoards(boardsData);
@@ -34,6 +37,16 @@ const MyPage = () => {
       setWishes(wishesData);
     })
   }, [])
+
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (menuRef.current && !menuRef.current.contains(e.target)) {
+        setShowImgMenu(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   const handleImageChange = (e) => {
     const file = e.target.files[0]
@@ -46,21 +59,30 @@ const MyPage = () => {
 
     fetch('http://localhost:8080/member/me/profile-image', {
       method: 'PATCH',
-      headers: {
-        'Authorization': `Bearer ${token}`
-      },
+      headers: { 'Authorization': `Bearer ${token}` },
       body: formData
     })
     .then(res => res.text())
-    .then(url => setProfile(prev => ({...prev, profileImg: url})))
+    .then(url => setProfile(prev => ({ ...prev, profileImg: url })))
   }
+
+  const handleImageDelete = () => {
+    const token = localStorage.getItem('token');
+    fetch('http://localhost:8080/member/me/profile-image', {
+      method: 'DELETE',
+      headers: { 'Authorization': `Bearer ${token}` }
+    }).then(() => {
+      setProfile(prev => ({ ...prev, profileImg: null }));
+      setShowImgMenu(false);
+    });
+  };
 
   return (
     <main className={styles.page}>
       <div className={styles.pageGrid}>
 
         <aside className={styles.profileCard}>
-          <div className={styles.avatarWrap}>
+          <div className={styles.avatarWrap} ref={menuRef}>
             <div className={styles.avatar}>
               {profile?.profileImg ? (
                 <img className={styles.avatar} src={profile?.profileImg} alt="프로필 이미지" />
@@ -69,9 +91,20 @@ const MyPage = () => {
               )}
             </div>
             <input type="file" hidden accept="image/*" ref={fileInputRef} onChange={handleImageChange} />
-            <button className={styles.avatarEdit} aria-label="프로필 사진 수정" onClick={() => fileInputRef.current.click()}>
+            <button className={styles.avatarEdit} aria-label="프로필 사진 수정"
+              onClick={() => setShowImgMenu(prev => !prev)}>
               <svg viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" /><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" /></svg>
             </button>
+            {showImgMenu && (
+              <div className={styles.imgMenu}>
+                <button onClick={() => { setShowImgMenu(false); fileInputRef.current.click(); }}>
+                  프로필 사진 변경
+                </button>
+                <button onClick={handleImageDelete}>
+                  프로필 사진 삭제
+                </button>
+              </div>
+            )}
           </div>
 
           <p className={styles.profileName}>{profile?.nickname}</p>
@@ -122,17 +155,15 @@ const MyPage = () => {
                 <svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6" /></svg>
               </Link>
             </div>
-            
-              <div className={styles.wishGrid}>
-                {wishes.map((wish) => (
-                  <Link to={`/welfaredetail/${wish.welfareId}`} key={wish.welfareId} className={styles.wishCard}>
-                    <span className={styles.wishBadge}>{wish.lclsfNm}</span>
-                    <p className={styles.wishTitle}>{wish.plcyNm}</p>
-                    <p className={styles.wishDate}>찜한 날짜: {wish.wishDate?.split(' ')[0]}</p>
-                  </Link>
-                ))}
-              </div>
-            
+            <div className={styles.wishGrid}>
+              {wishes.map((wish) => (
+                <Link to={`/welfaredetail/${wish.welfareId}`} key={wish.welfareId} className={styles.wishCard}>
+                  <span className={styles.wishBadge}>{wish.lclsfNm}</span>
+                  <p className={styles.wishTitle}>{wish.plcyNm}</p>
+                  <p className={styles.wishDate}>찜한 날짜: {wish.wishDate?.split(' ')[0]}</p>
+                </Link>
+              ))}
+            </div>
           </section>
 
           {/* 내가 쓴 글 */}
