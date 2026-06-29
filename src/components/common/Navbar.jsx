@@ -24,8 +24,8 @@ function Navbar({ isLoggedIn = false, nickname = '' , isAdmin = false}) {
         {/* 내비 링크 메뉴 영역 (.navList, .navLink) */}
         <ul className={styles.navList}>
             <li><Link to="/welfarelist" className={styles.navLink}>복지서비스</Link></li>
-            <li><Link to="/boardreview" className={styles.navLink}>복지후기</Link></li>
-            <li><Link to="/boardfree" className={styles.navLink}>커뮤니티</Link></li>
+            <li><Link to="/boardreview" className={styles.navLink}>후기게시판</Link></li>
+            <li><Link to="/boardfree" className={styles.navLink}>자유게시판</Link></li>
             <li><Link to="/noticeboard" className={styles.navLink}>공지사항</Link></li>
             <li><Link to="/persona" className={styles.navLink}>큐레이션</Link></li>
         </ul>
@@ -40,7 +40,11 @@ function Navbar({ isLoggedIn = false, nickname = '' , isAdmin = false}) {
               {isAdmin && (
                 <button className={`${styles.btn} ${styles.btnOutline}`} onClick={()=>{navigate('/admin')}}>관리자 페이지</button>
               )}
-
+              <button className={`${styles.btn} ${styles.btnOutline}`} onClick={()=>navigate('/mypage/reports')}><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
+                <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+              </svg>
+              </button>
               <button className={`${styles.btn} ${styles.btnOutline}`} onClick={()=>{navigate('/MyPage')}}>마이페이지</button>
               <button className={`${styles.btn} ${styles.btnGhost}`} onClick={()=>{
                 localStorage.removeItem('token');
