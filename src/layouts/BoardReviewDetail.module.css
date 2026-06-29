@@ -356,3 +356,23 @@
     color: #3182ce;
     text-decoration: underline;
 }
+
+.imagePreviewBox {
+    width: 100%;
+    max-width: 100%;
+    overflow: hidden;
+    display: flex;
+    justify-content: center;
+    margin-bottom: 15px;
+}
+
+.previewImage {
+    width: 100%;
+    height: auto;
+    max-width: 100%;
+
+    object-fit: contain;
+
+    border-radius: 8px;
+    border: 1px solid #eee;
+}

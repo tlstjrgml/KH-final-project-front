@@ -106,6 +106,8 @@ const NoticeBoardDetail = () => {
         }
     };
 
+    
+
     if (!post) return <div style={{ textAlign: 'center', padding: '50px' }}>로딩 중...</div>
 
     return (
@@ -142,34 +144,7 @@ const NoticeBoardDetail = () => {
                         {post.boardContent}
                     </div>
 
-                    {/* 서버에서 받아온 첨부파일 목록 렌더링 및 다운로드 링크 활성화 */}
-                    <div className={styles.attachmentBox}>
-                        <div className={styles.attachmentTitle}>
-                            <svg viewBox="0 0 24 24"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48" /></svg>
-                            첨부파일 {post.attachments && post.attachments.length > 0 ? `(${post.attachments.length})` : ''}
-                        </div>
-                        <ul className={styles.attachmentList}>
-                            {post.attachments && post.attachments.length > 0 ? (
-                                post.attachments.map((file, index) => {
-                                    const fileId = file.attmId || file.fileId || index;
-                                    const fileName = file.originalName || file.originName || '첨부파일';
-                                    return (
-                                        <li key={fileId}>
-                                            <a href={`/react/board/download/${fileId}`} download={fileName} className={styles.attachmentLink}>
-                                                {fileName}
-                                            </a>
-                                        </li>
-                                    );
-                                })
-                            ) : (
-                                <li>
-                                    <a href="#" className={styles.attachmentLink} onClick={(e) => e.preventDefault()}>
-                                        등록된 첨부파일이 없습니다.
-                                    </a>
-                                </li>
-                            )}
-                        </ul>
-                    </div>
+                    
 
                     <div className={styles.likeActionArea}>
                         <button

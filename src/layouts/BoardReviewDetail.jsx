@@ -252,7 +252,7 @@ const BoardReviewDetail = () => {
         }
 
         try {
-            const res = await fetch(`/react/board/reply/${replyId}`, {
+            const res = await fetch(`/react/reply/${replyId}`, {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
@@ -280,7 +280,7 @@ const BoardReviewDetail = () => {
 
         const token = localStorage.getItem('token');
         try {
-            const res = await fetch(`/react/board/reply/${replyId}`, {
+            const res = await fetch(`/react/reply/${replyId}`, {
                 method: 'DELETE',
                 headers: { 'Authorization': `Bearer ${token}` }
             });
@@ -338,6 +338,8 @@ const BoardReviewDetail = () => {
             alert(`신고 접수 중 오류가 발생했습니다: ${err.message}`);
         }
     };
+
+    
 
     // 로딩 처리 위치
     if (!post) return <div>로딩 중...</div>;
@@ -404,22 +406,24 @@ const BoardReviewDetail = () => {
 
                     {post.attachments && post.attachments.length > 0 && (
                         <div className={styles.attachmentSection}>
-                            <h4 className={styles.attachmentHeader}>첨부파일 ({post.attachments.length})</h4>
+                            <h4 className={styles.attachmentHeader}>첨부파일 미리보기</h4>
                             <ul className={styles.attachmentList}>
                                 {post.attachments.map((file, index) => {
                                     const fileId = file.attmId || file.fileId || index;
                                     const fileName = file.originalName || file.originName || '첨부파일';
+                                    const isImage = /\.(jpg|jpeg|png|gif|webp)$/i.test(fileName);
+
+                                    if (!isImage) return null;
 
                                     return (
                                         <li key={fileId} className={styles.attachmentItem}>
-                                            <span className={styles.fileIcon}>📁</span>
-                                            <a
-                                                href={`/react/board/download/${fileId}`}
-                                                download={fileName}
-                                                className={styles.fileLink}
-                                            >
-                                                {fileName}
-                                            </a>
+                                            <div className={styles.imagePreviewBox}>
+                                                <img
+                                                    src={file.attmPath}
+                                                    alt={fileName}
+                                                    className={styles.previewImage}
+                                                />
+                                            </div>
                                         </li>
                                     );
                                 })}
