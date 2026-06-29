@@ -8,6 +8,8 @@ const typeToPath = {
   NOT: (id) => `/notice/detail/${id}`
 };
 
+const PAGE_SIZE = 10;
+
 const MyPage = () => {
   const [isOpen, setIsOpen] = useState(false)
   const navigate = useNavigate();
@@ -15,17 +17,21 @@ const MyPage = () => {
   const [boards, setBoards] = useState([]);
   const [replies, setReplies] = useState([]);
   const fileInputRef = useRef(null);
-
+  const [boardPage, setBoardPage] = useState(1);
+  const [replyPage, setReplyPage] = useState(1);
+  const[wishes, setWishes] = useState([]);
   useEffect(() => {
     const token = localStorage.getItem('token')
     Promise.all([
       fetch('http://localhost:8080/member/me', { headers: { 'Authorization': `Bearer ${token}` } }).then(res => res.json()),
       fetch('http://localhost:8080/member/me/boards', { headers: { 'Authorization': `Bearer ${token}` } }).then(res => res.json()),
       fetch('http://localhost:8080/member/me/replies', { headers: { 'Authorization': `Bearer ${token}` } }).then(res => res.json()),
-    ]).then(([profileData, boardsData, repliesData]) => {
+      fetch('http://localhost:8080/api/wish', {headers: { 'Authorization': `Bearer ${token}` }}).then(res=>res.json())
+    ]).then(([profileData, boardsData, repliesData, wishesData]) => {
       setProfile(profileData);
       setBoards(boardsData);
       setReplies(repliesData);
+      setWishes(wishesData);
     })
   }, [])
 
@@ -107,32 +113,26 @@ const MyPage = () => {
 
         <div className={styles.rightCol}>
 
-          {/* 찜한 복지 - 더미 데이터 유지 */}
+          {/* 찜한 복지 */}
           <section className={styles.sectionBox}>
             <div className={styles.sectionHeader}>
               <h2 className={styles.sectionTitle}>찜한 복지</h2>
-              <Link to="#" className={styles.sectionMore}>
+              <Link to="/mypage/wishes" className={styles.sectionMore}>
                 더 보러가기
                 <svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6" /></svg>
               </Link>
             </div>
-            <div className={styles.wishGrid}>
-              <Link to="#" className={styles.wishCard}>
-                <span className={styles.wishBadge}>주거</span>
-                <p className={styles.wishTitle}>청년 월세 한시 특별지원</p>
-                <p className={styles.wishDate}>찜한 날짜: 2025.03.12</p>
-              </Link>
-              <Link to="#" className={styles.wishCard}>
-                <span className={styles.wishBadge}>금융</span>
-                <p className={styles.wishTitle}>청년도약계좌 가입 지원</p>
-                <p className={styles.wishDate}>찜한 날짜: 2025.03.10</p>
-              </Link>
-              <Link to="#" className={styles.wishCard}>
-                <span className={styles.wishBadge}>교육</span>
-                <p className={styles.wishTitle}>국가장학금 1유형 지원</p>
-                <p className={styles.wishDate}>찜한 날짜: 2025.03.08</p>
-              </Link>
-            </div>
+            
+              <div className={styles.wishGrid}>
+                {wishes.map((wish) => (
+                  <Link to={`/welfaredetail/${wish.welfareId}`} key={wish.welfareId} className={styles.wishCard}>
+                    <span className={styles.wishBadge}>{wish.lclsfNm}</span>
+                    <p className={styles.wishTitle}>{wish.plcyNm}</p>
+                    <p className={styles.wishDate}>찜한 날짜: {wish.wishDate?.split(' ')[0]}</p>
+                  </Link>
+                ))}
+              </div>
+            
           </section>
 
           {/* 내가 쓴 글 */}
@@ -145,7 +145,7 @@ const MyPage = () => {
               </Link>
             </div>
             <div className={styles.postList}>
-              {boards.map((board) => (
+              {boards.slice((boardPage - 1) * PAGE_SIZE, boardPage * PAGE_SIZE).map((board) => (
                 <Link to={typeToPath[board.boardType]?.(board.boardId) ?? '/'} key={board.boardId} className={styles.postItem}>
                   <div className={styles.postLeft}>
                     <span className={styles.postType}>{board.boardType}</span>
@@ -157,6 +157,17 @@ const MyPage = () => {
                     <span>{board.createDate.split('T')[0]}</span>
                   </div>
                 </Link>
+              ))}
+            </div>
+            <div className={styles.pagination}>
+              {Array.from({ length: Math.ceil(boards.length / PAGE_SIZE) }, (_, i) => i + 1).map(num => (
+                <button
+                  key={num}
+                  className={`${styles.pageBtn} ${boardPage === num ? styles.pageBtnActive : ''}`}
+                  onClick={() => setBoardPage(num)}
+                >
+                  {num}
+                </button>
               ))}
             </div>
           </section>
@@ -171,7 +182,7 @@ const MyPage = () => {
               </Link>
             </div>
             <div className={styles.postList}>
-              {replies.map((reply) => (
+              {replies.slice((replyPage - 1) * PAGE_SIZE, replyPage * PAGE_SIZE).map((reply) => (
                 <Link to={typeToPath[reply.boardType]?.(reply.boardId) ?? '/'} key={reply.replyId} className={styles.postItem}>
                   <div className={styles.postLeft}>
                     <span className={styles.postType}>{reply.code === 'B' ? '댓글' : '대댓글'}</span>
@@ -181,6 +192,17 @@ const MyPage = () => {
                     <span>{reply.createDate.split('T')[0]}</span>
                   </div>
                 </Link>
+              ))}
+            </div>
+            <div className={styles.pagination}>
+              {Array.from({ length: Math.ceil(replies.length / PAGE_SIZE) }, (_, i) => i + 1).map(num => (
+                <button
+                  key={num}
+                  className={`${styles.pageBtn} ${replyPage === num ? styles.pageBtnActive : ''}`}
+                  onClick={() => setReplyPage(num)}
+                >
+                  {num}
+                </button>
               ))}
             </div>
           </section>
