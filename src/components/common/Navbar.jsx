@@ -24,8 +24,8 @@ function Navbar({ isLoggedIn = false, nickname = '' , isAdmin = false}) {
         {/* 내비 링크 메뉴 영역 (.navList, .navLink) */}
         <ul className={styles.navList}>
             <li><Link to="/welfarelist" className={styles.navLink}>복지서비스</Link></li>
-            <li><Link to="/boardreview" className={styles.navLink}>복지후기</Link></li>
-            <li><Link to="/boardfree" className={styles.navLink}>커뮤니티</Link></li>
+            <li><Link to="/boardreview" className={styles.navLink}>후기게시판</Link></li>
+            <li><Link to="/boardfree" className={styles.navLink}>자유게시판</Link></li>
             <li><Link to="/noticeboard" className={styles.navLink}>공지사항</Link></li>
             <li><Link to="/persona" className={styles.navLink}>큐레이션</Link></li>
         </ul>
