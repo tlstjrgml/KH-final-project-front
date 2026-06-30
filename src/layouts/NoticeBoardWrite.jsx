@@ -172,6 +172,7 @@ const NoticeBoardWrite = () => {
                                         id={`file_input_${row.id}`}
                                         className={styles.fileInputHidden}
                                         multiple
+                                        accept=".jpg,.jpeg,.png,.gif,.webp,.pdf,.doc,.docx"
                                         onChange={(e) => handleFileChange(row.id, e)}
                                     />
 

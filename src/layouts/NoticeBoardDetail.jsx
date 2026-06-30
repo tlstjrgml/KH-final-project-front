@@ -14,7 +14,6 @@ const NoticeBoardDetail = () => {
     useEffect(() => {
         const token = localStorage.getItem("token");
 
-        // JWT 토큰 디코딩 후 현재 유저의 관리자(Admin) 권한 여부 확인
         if (token) {
             try {
                 const base64Url = token.split('.')[1];
@@ -30,7 +29,6 @@ const NoticeBoardDetail = () => {
             }
         }
 
-        // 백엔드 API로부터 공지사항 상세 데이터 조회
         const fetchBoardDetail = async () => {
             try {
                 const response = await fetch(`/react/board/${id}`, {
@@ -53,7 +51,6 @@ const NoticeBoardDetail = () => {
         fetchBoardDetail();
     }, [id]);
 
-    // 게시글 좋아요 등록 및 취소 토글 처리
     const togglePostLike = async () => {
         const token = localStorage.getItem('token');
         if (!token) {
@@ -82,7 +79,6 @@ const NoticeBoardDetail = () => {
         }
     };
 
-    // 현재 공지사항 게시글 삭제 처리
     const handleDeletePost = async () => {
         if (!window.confirm('공지사항을 삭제하시겠습니까?')) return;
 
@@ -125,7 +121,6 @@ const NoticeBoardDetail = () => {
                                 <span>{post.createDate ? post.createDate.split('T')[0] : ''}</span>
                             </div>
                             <div className={styles.postMetaRight}>
-                                {/* 관리자(Admin) 권한 유저에게만 수정 및 삭제 버튼 노출 */}
                                 {isAdminUser && (
                                     <>
                                         <button className={styles.actionBtn} onClick={() => navigate(`/noticeboard/edit/${id}`)}>수정</button>
@@ -142,35 +137,43 @@ const NoticeBoardDetail = () => {
                         {post.boardContent}
                     </div>
 
-                    {/* 이미지 파일 레이아웃 출력 영역 */}
-                    {post.attachments && post.attachments.length > 0 && (
-                        <div style={{ marginTop: '30px', display: 'flex', flexDirection: 'column', gap: '20px', width: '100%' }}>
+                    {/* 이미지 미리보기 영역 */}
+                    {post.attachments && post.attachments.some(f => /\.(jpg|jpeg|png|gif|webp)$/i.test(f.originalName || f.originName || '')) && (
+                        <div style={{ marginTop: '20px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
                             {post.attachments.map((file, idx) => {
                                 const fileName = file.originalName || file.originName || '';
-                                const isImage = /\.(jpg|jpeg|png|gif|webp)$/i.test(fileName);
-
-                                if (!isImage) return null;
-
+                                const isImg = /\.(jpg|jpeg|png|gif|webp)$/i.test(fileName);
+                                if (!isImg) return null;
                                 return (
-                                    <div key={file.attmId || file.fileId || idx} style={{ width: '100%', display: 'flex', justifyContent: 'center' }}>
+                                    <div key={file.attmId || idx} className={styles.imagePreviewBox}>
                                         <img
                                             src={file.attmPath}
                                             alt={fileName}
-                                            style={{
-                                                width: '100%',
-                                                maxWidth: '100%',
-                                                height: 'auto',
-                                                objectFit: 'contain',
-                                                borderRadius: '8px',
-                                                border: '1px solid #f1f3f5'
-                                            }}
-                                            onError={(e) => {
-                                                e.target.style.display = 'none';
-                                            }}
+                                            className={styles.previewImage}
+                                            onError={(e) => { e.target.style.display = 'none'; }}
                                         />
                                     </div>
                                 );
                             })}
+                        </div>
+                    )}
+
+                    {/* 첨부파일 다운로드 영역 */}
+                    {post.attachments && post.attachments.length > 0 && (
+                        <div className={styles.attachmentBox}>
+                            <div className={styles.attachmentTitle}>첨부파일</div>
+                            <ul className={styles.attachmentList}>
+                                {post.attachments.map((file, idx) => {
+                                    const fileName = file.originalName || file.originName || '';
+                                    return (
+                                        <li key={file.attmId || idx}>
+                                            <a href={file.attmPath} target="_blank" rel="noreferrer" className={styles.attachmentLink}>
+                                                📎 {fileName}
+                                            </a>
+                                        </li>
+                                    );
+                                })}
+                            </ul>
                         </div>
                     )}
 
