@@ -132,6 +132,23 @@ const EditProfile = () => {
         navigate(-1);
     };
 
+    const formatPhoneNumber = (value) => {
+        const numbersOnly = value.replace(/[^0-9]/g, '').slice(0, 11);
+
+        if (numbersOnly.length < 4) {
+            return numbersOnly;
+        } else if (numbersOnly.length < 8) {
+            return `${numbersOnly.slice(0, 3)}-${numbersOnly.slice(3)}`;
+        } else {
+            return `${numbersOnly.slice(0, 3)}-${numbersOnly.slice(3, 7)}-${numbersOnly.slice(7)}`;
+        }
+    };
+
+    const handlePhoneChange = (e) => {
+        const formatted = formatPhoneNumber(e.target.value);
+        setProfile(prev => ({ ...prev, phone: formatted }));
+    };
+
     return (
         <main className={styles.page}>
             <h1 className={styles.pageTitle}>개인정보 수정</h1>
@@ -225,7 +242,15 @@ const EditProfile = () => {
 
                 <div className={styles.field}>
                     <label htmlFor="phone">전화번호<span className={styles.req}>*</span></label>
-                    <input type="tel" id="phone" name="phone" placeholder="010-0000-0000" value={profile.phone} onChange={handleChange} />
+                    <input
+                        type="tel"
+                        id="phone"
+                        name="phone"
+                        placeholder="010-0000-0000"
+                        value={profile.phone}
+                        onChange={handlePhoneChange}
+                        maxLength={13}
+                    />
                 </div>
             </section>
 
