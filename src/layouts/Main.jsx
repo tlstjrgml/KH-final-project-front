@@ -14,9 +14,13 @@ const Main = () => {
   const [boardTop5, setBoardTop5] = useState([])
   const [noticeTop5, setNoticeTop5] = useState([])
   const [searchInput, setSearchInput] = useState('')
-  const token = localStorage.getItem('token')
+ const [token, setToken] = useState(localStorage.getItem('token'))
 
   useEffect(() => {
+    setToken(localStorage.getItem('token'))
+  }, [])
+
+ useEffect(() => {
     fetch('http://localhost:8080/api/welfare/main')
       .then(res => res.json())
       .then(data => setWelfareList(data))
@@ -24,37 +28,38 @@ const Main = () => {
     fetch('http://localhost:8080/api/welfare/topten')
       .then(res => res.json())
       .then(data => setTop10(data))
-
-    if (token) {
-      fetch('http://localhost:8080/member/me', {
-        headers: { 'Authorization': `Bearer ${token}` }
-      })
-        .then(res => res.json())
-        .then(data => {
-          setMemberInfo(data)
-          if (!data.jobStatus && !data.incomeLevel && !data.region) {
-            const modalShown = sessionStorage.getItem('extraInfoModalShown')
-            if (!modalShown) {
-              setShowModal(true)
-              sessionStorage.setItem('extraInfoModalShown', 'true')
-            }
-          } else {
-            const params = new URLSearchParams()
-            if (data.region) params.append('region', data.region)
-            if (data.jobStatus) params.append('jobStatus', data.jobStatus)
-            if (data.incomeLevel) params.append('incomeLevel', data.incomeLevel)
-            fetch(`http://localhost:8080/api/welfare/recommend?${params.toString()}`, {
-              headers: { 'Authorization': `Bearer ${token}` }
-            })
-              .then(res => res.json())
-              .then(data => {
-                setRecommend(data)
-          })
-                
-          }
-        })
-    }
   }, [])
+
+  useEffect(() => {
+    if (!token) return
+
+    fetch('http://localhost:8080/member/me', {
+      headers: { 'Authorization': `Bearer ${token}` }
+    })
+      .then(res => res.json())
+      .then(data => {
+        setMemberInfo(data)
+        if (!data.jobStatus && !data.incomeLevel && !data.region) {
+          const modalShown = sessionStorage.getItem('extraInfoModalShown')
+          if (!modalShown) {
+            setShowModal(true)
+            sessionStorage.setItem('extraInfoModalShown', 'true')
+          }
+        } else {
+          const params = new URLSearchParams()
+          if (data.region) params.append('region', data.region)
+          if (data.jobStatus) params.append('jobStatus', data.jobStatus)
+          if (data.incomeLevel) params.append('incomeLevel', data.incomeLevel)
+          fetch(`http://localhost:8080/api/welfare/recommend?${params.toString()}`, {
+            headers: { 'Authorization': `Bearer ${token}` }
+          })
+            .then(res => res.json())
+            .then(data => {
+              setRecommend(data)
+            })
+        }
+      })
+  }, [token])
 
       useEffect(() => {
       fetch(`http://localhost:8080/board/top5?boardType=${boardType}`)

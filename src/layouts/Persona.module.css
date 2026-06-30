@@ -214,6 +214,17 @@
   font-size:14px;
 }
 
+.pcardMeta{
+  font-size :11px;
+  color:#ADB5BD;
+  line-height: 1.7;
+  margin-top: 6px;
+}
+
+.pcardMeta span{
+  display: block;
+}
+
 @keyframes pulse {
   0%, 100% { opacity: 1; }
   50%       { opacity: 0.4; }

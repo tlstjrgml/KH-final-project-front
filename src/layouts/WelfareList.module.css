@@ -323,3 +323,20 @@
 .pgbtn:hover:not(:disabled) { border-color: #85B7EB; color: #185FA5; }
 .pgbtn.on    { background: #378ADD; color: #fff; border-color: #378ADD; }
 .pgbtn:disabled { opacity: 0.4; cursor: default; }
+
+.expiredBadge {
+  font-size: 11px;
+  padding: 2px 8px;
+  border-radius: 20px;
+  display: inline-block;
+  font-weight: 500;
+  background: #F1F3F5;
+  color: #ADB5BD;
+  margin-left: 4px;
+}
+
+.wcardRightGroup{
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
