@@ -27,6 +27,7 @@ const BoardFree = () => {
 
                 const res = await fetch(`/react/board/list?${params.toString()}`);
                 const data = await res.json();
+                
 
                 setBoardList(data.content || []);
 
