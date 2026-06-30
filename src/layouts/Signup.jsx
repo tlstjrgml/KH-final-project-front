@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import styles from './Signup.module.css'
 import { Link, useNavigate } from 'react-router-dom'
 
@@ -16,7 +16,7 @@ const Signup = () => {
   const [expireTime, setExpireTime] = useState(null);
   const [isVerified, setIsVerified] = useState(false);
   const [isEmailChecked, setIsEmailChecked] = useState(false);
-
+  const[emailError, setEmailError] = useState('');
   const handleChange = (e) => {
     const { name, value } = e.target;
     setForm(prev => ({ ...prev, [name]: value }));
@@ -33,11 +33,32 @@ const Signup = () => {
     hasSpecial: /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(form.password),
     hasLength: form.password.length >= 9
   };
+const EMAIL_REGEX = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+  useEffect(()=>{
+    if(!form.email){
+      return;
+    }
+    const timer = setTimeout(()=>{
+      if(EMAIL_REGEX.test(form.email)){
+        setEmailError('');
+      }else{
+        setEmailError('올바르지 않은 형식의 이메일입니다');
+      }
+    },1000);
+    return () =>{
+      clearTimeout(timer);
+    };
+  },[form.email]);
 
   // 1. 이메일 중복확인
+  
   const checkEmailDuplicate = () => {
     if (!form.email) {
       alert('이메일을 입력해주세요.');
+      return;
+    }
+    if(!EMAIL_REGEX.test(form.email)){
+      alert('부적절한 형식의 이메일입니다.');
       return;
     }
     fetch(`http://localhost:8080/member/check-email?email=${form.email}`)
@@ -166,6 +187,7 @@ const Signup = () => {
                 autoComplete="email" value={form.email} onChange={handleChange} />
               <button type="button" className={styles.btnInline} onClick={checkEmailDuplicate}>중복확인</button>
             </div>
+            {emailError && <p style={{color: '#E03101', fontSize:'13px', marginTop: '6px'}}>{emailError}</p>}
           </div>
 
           <div className={styles.field}>
