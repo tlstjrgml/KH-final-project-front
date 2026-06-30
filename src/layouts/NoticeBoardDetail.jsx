@@ -11,6 +11,9 @@ const NoticeBoardDetail = () => {
     const [likes, setLikes] = useState(0);
     const [isAdminUser, setIsAdminUser] = useState(false);
 
+    const [isReportModalOpen, setIsReportModalOpen] = useState(false);
+    const [reportReason, setReportReason] = useState('');
+
     useEffect(() => {
         const token = localStorage.getItem("token");
 
@@ -102,6 +105,50 @@ const NoticeBoardDetail = () => {
         }
     };
 
+    const openReportModal = () => {
+        setIsReportModalOpen(true);
+    };
+
+    const handleReport = async () => {
+        if (!reportReason.trim()) {
+            alert('신고 사유를 입력해주세요.');
+            return;
+        }
+
+        const token = localStorage.getItem('token');
+        if (!token) {
+            alert('로그인이 필요합니다.');
+            return;
+        }
+
+        try {
+            const res = await fetch('/react/report', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify({
+                    targetId: post.boardId || id,
+                    targetType: 'NOT',
+                    reason: reportReason
+                })
+            });
+
+            if (!res.ok) {
+                const errMsg = await res.text();
+                throw new Error(errMsg || '신고 접수 실패');
+            }
+
+            alert('신고가 접수되었습니다.');
+            setIsReportModalOpen(false);
+            setReportReason('');
+        } catch (err) {
+            console.error(err);
+            alert(`신고 접수 중 오류가 발생했습니다: ${err.message}`);
+        }
+    };
+
     if (!post) return <div style={{ textAlign: 'center', padding: '50px' }}>로딩 중...</div>
 
     return (
@@ -129,6 +176,17 @@ const NoticeBoardDetail = () => {
                                         <span className={styles.metaDivider}>|</span>
                                     </>
                                 )}
+                            </div>
+                            <div className={styles.postMetaRight}>
+                                {isAdminUser && (
+                                    <>
+                                        <button className={styles.actionBtn} onClick={() => navigate(`/noticeboard/edit/${id}`)}>수정</button>
+                                        <span className={styles.metaDivider}>|</span>
+                                        <button className={`${styles.actionBtn} ${styles.danger}`} onClick={handleDeletePost}>삭제</button>
+                                        <span className={styles.metaDivider}>|</span>
+                                    </>
+                                )}
+                                <button className={`${styles.actionBtn} ${styles.danger}`} onClick={openReportModal}>신고</button>
                             </div>
                         </div>
                     </div>
@@ -193,6 +251,30 @@ const NoticeBoardDetail = () => {
                     <button className={styles.btnList} onClick={() => navigate('/noticeboard')}>목록으로</button>
                 </div>
             </div>
+            {isReportModalOpen && (
+                <div style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', background: 'rgba(0,0,0,0.5)', zIndex: 1000, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+                    <div style={{ background: 'white', borderRadius: '12px', padding: '30px', width: '400px' }}>
+                        <h3 style={{ marginBottom: '16px' }}>공지사항 신고</h3>
+                        <textarea
+                            value={reportReason}
+                            onChange={(e) => setReportReason(e.target.value)}
+                            placeholder="신고 사유를 직접 입력해주세요."
+                            style={{ width: '100%', height: '120px', borderRadius: '8px', border: '1px solid #ddd', padding: '12px', marginBottom: '16px', fontSize: '15px', resize: 'none', boxSizing: 'border-box', fontFamily: 'inherit' }}
+                        />
+                        <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end' }}>
+                            <button type="button" onClick={() => { setIsReportModalOpen(false); setReportReason(''); }}
+                                style={{ padding: '10px 20px', borderRadius: '8px', border: '1px solid #ddd', background: 'white', cursor: 'pointer' }}>
+                                취소
+                            </button>
+                            <button type="button" onClick={handleReport}
+                                style={{ padding: '10px 20px', borderRadius: '8px', border: 'none', background: '#e53e3e', color: 'white', cursor: 'pointer' }}>
+                                신고하기
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
         </main>
     );
 };
