@@ -27,6 +27,7 @@ const BoardFreeDetail = () => {
             });
             if (!response.ok) throw new Error("게시글 조회 실패");
             const data = await response.json();
+            console.log("attachments:", JSON.stringify(data.attachments, null, 2));
             setPost(data);
             setIsLiked(data.isLiked);
             setLikes(data.likeCount);
@@ -311,7 +312,7 @@ const BoardFreeDetail = () => {
                                     const fileName = file.originalName || file.originName || '';
                                     return (
                                         <li key={file.attmId || idx}>
-                                            <a href={file.attmPath} target="_blank" rel="noreferrer" className={styles.attachmentLink}>
+                                            <a href={`/react/board/attachment/${file.attmId}`} className={styles.attachmentLink}>
                                                 📎 {fileName}
                                             </a>
                                         </li>

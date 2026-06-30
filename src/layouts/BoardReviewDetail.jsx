@@ -410,7 +410,7 @@ const BoardReviewDetail = () => {
                                     const fileName = file.originalName || file.originName || '첨부파일';
                                     return (
                                         <li key={file.attmId || idx} className={styles.attachmentItem}>
-                                            <a href={file.attmPath} target="_blank" rel="noreferrer" className={styles.fileLink}>
+                                            <a href={`/react/board/attachment/${file.attmId}`} className={styles.fileLink}>
                                                 📎 {fileName}
                                             </a>
                                         </li>
