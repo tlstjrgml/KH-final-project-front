@@ -254,6 +254,15 @@
   line-height: 1.7; margin-bottom: 1.25rem;
 }
 
+.modalErrorText {
+  font-size: 13px;
+  line-height: 1.7;
+  color: #E24B4A;
+  margin-top: 6px;
+  font-weight: 500;
+  text-align: left;
+}
+
 .modalField { margin-bottom: 1.25rem; }
 .modalField label { display: block; font-size: 13px; font-weight: 500; color: #6C757D; margin-bottom: 6px; }
 

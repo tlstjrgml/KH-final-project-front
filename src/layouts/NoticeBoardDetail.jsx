@@ -225,7 +225,7 @@ const NoticeBoardDetail = () => {
                                     const fileName = file.originalName || file.originName || '';
                                     return (
                                         <li key={file.attmId || idx}>
-                                            <a href={file.attmPath} target="_blank" rel="noreferrer" className={styles.attachmentLink}>
+                                            <a href={`/react/board/attachment/${file.attmId}`} className={styles.attachmentLink}>
                                                 📎 {fileName}
                                             </a>
                                         </li>
