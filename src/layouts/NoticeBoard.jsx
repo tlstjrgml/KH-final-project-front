@@ -5,6 +5,7 @@ import { useNavigate } from 'react-router-dom';
 const NoticeBoard = () => {
     const navigate = useNavigate();
     const [boardList, setBoardList] = useState([]);
+    
     const [pages, setPages] = useState([1]);
     const [currentPage, setCurrentPage] = useState(1);
     const [endPage, setEndPage] = useState(1);
