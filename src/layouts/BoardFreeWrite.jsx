@@ -173,6 +173,7 @@ const BoardFreeWrite = () => {
                                         id={`file_input_${row.id}`}
                                         className={styles.fileInputHidden} 
                                         multiple 
+                                        accept=".jpg,.jpeg,.png,.webp,.pdf,.doc,.docx"
                                         onChange={(e) => handleFileChange(row.id, e)}
                                     />
                                     

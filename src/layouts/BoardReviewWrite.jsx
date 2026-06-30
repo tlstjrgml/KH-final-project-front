@@ -196,6 +196,7 @@ const BoardReviewWrite = () => {
                                     type="file"
                                     ref={el => fileInputRefs.current[row.id] = el}
                                     onChange={(e) => handleFileChange(e, row.id)}
+                                    accept=".jpg,.jpeg,.png,.gif,.webp,.pdf,.doc,.docx"
                                     style={{ display: 'none' }}
                                 />
                                 <button type="button" className={styles.btnFile} onClick={() => triggerFileInput(row.id)}>파일 선택</button>
