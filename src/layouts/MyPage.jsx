@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef} from 'react'
+import { useState, useEffect, useRef } from 'react'
 import styles from './MyPage.module.css'
 import { Link, useNavigate } from 'react-router-dom'
 
@@ -22,6 +22,10 @@ const MyPage = () => {
   const [boardPage, setBoardPage] = useState(1);
   const [replyPage, setReplyPage] = useState(1);
   const [wishes, setWishes] = useState([]);
+
+  // 회원탈퇴 모달용
+  const [password, setPassword] = useState('');
+  const [errorMsg, setErrorMsg] = useState('');
 
   useEffect(() => {
     const token = localStorage.getItem('token')
@@ -62,8 +66,8 @@ const MyPage = () => {
       headers: { 'Authorization': `Bearer ${token}` },
       body: formData
     })
-    .then(res => res.text())
-    .then(url => setProfile(prev => ({ ...prev, profileImg: url })))
+      .then(res => res.text())
+      .then(url => setProfile(prev => ({ ...prev, profileImg: url })))
   }
 
   const handleImageDelete = () => {
@@ -76,6 +80,37 @@ const MyPage = () => {
       setShowImgMenu(false);
     });
   };
+
+  const handleWithdraw = () => {
+    if (!password.trim()) {
+      setErrorMsg('비밀번호를 입력해주세요.');
+      return;
+    }
+
+    const token = localStorage.getItem('token');
+
+    fetch('http://localhost:8080/member/me', {
+      method: 'DELETE',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': `application/json`
+      },
+      body: JSON.stringify({ password: password })
+    })
+      .then(res => {
+        if (res.ok) {
+          alert('회원 탈퇴가 완료되었습니다.');
+          localStorage.removeItem('token'); // 토큰 삭제
+          window.location.replace('/'); // 메인 페이지로 이동
+        } else {
+          setErrorMsg('비밀번호가 일치하지 않습니다.');
+        }
+      })
+      .catch(err => {
+        console.error(err);
+        setErrorMsg('서버 오류가 발생했습니다.');
+      });
+  }; // 회원 탈퇴 함수
 
   return (
     <main className={styles.page}>
@@ -256,11 +291,13 @@ const MyPage = () => {
               </div>
               <div className={styles.modalField}>
                 <label>비밀번호 확인</label>
-                <input type="password" placeholder="비밀번호를 입력해주세요" />
+                <input type="password" placeholder="비밀번호를 입력해주세요"
+                  value={password} onChange={(e) => setPassword(e.target.value)} />
+                {errorMsg && <p className={styles.modalErrorText}>{errorMsg}</p>}
               </div>
               <div className={styles.modalActions}>
                 <button className={styles.btnCancel} onClick={() => setIsOpen(false)}>취소</button>
-                <button className={styles.btnDanger} onClick={() => {}}>
+                <button className={styles.btnDanger} onClick={handleWithdraw}>
                   <svg viewBox="0 0 24 24"><polyline points="9 11 12 14 22 4" /><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11" /></svg>
                   탈퇴하기
                 </button>
