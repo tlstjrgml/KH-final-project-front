@@ -24,6 +24,18 @@ const AGE_RANGE = {
 
 const CATEGORIES = ['주거', '일자리', '교육', '참여･기반', '금융･복지･문화']
 
+const isExpired = (aplyYmd) => {
+  if (!aplyYmd || !aplyYmd.includes('~')) return false
+  const endStr = aplyYmd.split('~')[1].trim()
+  if (!/^\d{8}$/.test(endStr)) return false
+  const endDate = new Date(
+    Number(endStr.slice(0, 4)),
+    Number(endStr.slice(4, 6)) - 1,
+    Number(endStr.slice(6, 8))
+  )
+  return endDate < new Date()
+}
+
 const WelfareList = () => {
   const navigate = useNavigate()
   const [searchParams] = useSearchParams()
@@ -284,6 +296,8 @@ const WelfareList = () => {
               <select className={styles.sortSel} value={sort} onChange={e => { setSort(e.target.value);       setCurrentPage(1) }}>
                 <option>최신순</option>
                 <option>찜 많은순</option>
+                <option>진행중</option>
+                <option>마감됨</option>
               </select>
             </div>
 
@@ -303,13 +317,18 @@ const WelfareList = () => {
                 return (
                   <div key={w.welfareId} className={styles.wcard} onClick={() => navigate(`/welfaredetail/${w.welfareId}`)}>
                     <div className={styles.wcardTop}>
-                      <span className={`${styles.badge} ${BADGE_CLASS[w.lclsfNm] || styles.badgeGray}`}>
-                        {displayLclsf(w.lclsfNm)}
-                      </span>
-                      <button className={`${styles.heartBtn} ${isWished ? styles.on : ''}`} onClick={(e) => toggleWish(w.welfareId, e)}>
-                        {isWished ? '♥' : '♡'}
-                      </button>
-                    </div>
+                    <span className={`${styles.badge} ${BADGE_CLASS[w.lclsfNm] || styles.badgeGray}`}>
+                      {displayLclsf(w.lclsfNm)}
+                    </span>
+                    <div className={styles.wcardRightGroup}>
+                    {isExpired(w.aplyYmd) && (
+                      <span className={styles.expiredBadge}>마감</span>
+                    )}
+                    <button className={`${styles.heartBtn} ${isWished ? styles.on : ''}`} onClick={(e) => toggleWish(w.welfareId, e)}>
+                      {isWished ? '♥' : '♡'}
+                    </button>
+                  </div>
+                 </div>
                     <div className={styles.wcardTitle}>{w.plcyNm}</div>
                     <div className={styles.wcardMeta}>
                       <span>{w.sprvsnInstCdNm}</span>

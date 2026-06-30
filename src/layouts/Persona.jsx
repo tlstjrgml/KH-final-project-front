@@ -126,6 +126,10 @@ const Persona = () => {
                       {item.lclsfNm}
                     </span>
                     <div className={styles.pcardTitle}>{item.plcyNm}</div>
+                    <div className={styles.pcardMeta}>
+                      <span>{item.sprvsnInstCdNm}</span>
+                      <span>신청: {item.aplyYmd || '상시'}</span>
+                    </div>  
                   </div>
                 </div>
               ))}
