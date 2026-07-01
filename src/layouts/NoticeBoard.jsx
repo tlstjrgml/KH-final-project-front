@@ -15,6 +15,8 @@ const NoticeBoard = () => {
 
     const [isAdmin, setIsAdmin] = useState(false);
 
+    const [sortType, setSortType] = useState('latest');
+
     useEffect(() => {
         const token = localStorage.getItem("token");
 
@@ -38,7 +40,8 @@ const NoticeBoard = () => {
             try {
                 const params = new URLSearchParams({
                     boardType: 'NOT',
-                    page: currentPage
+                    page: currentPage,
+                    sort: sortType
                 });
 
                 if (appliedKeyword && appliedKeyword.trim() !== '') {
@@ -58,7 +61,7 @@ const NoticeBoard = () => {
         };
 
         fetchBoardList();
-    }, [currentPage, appliedKeyword, searchType]);
+    }, [currentPage, appliedKeyword, searchType, sortType]);
 
     const handleSearch = () => {
         setCurrentPage(1);
@@ -77,13 +80,31 @@ const NoticeBoard = () => {
         }
     };
 
+    const handleSortChange = (type) => {
+        setSortType(type);
+        setCurrentPage(1); 
+    };
+
+
     return (
         <main className={styles.page}>
             <div className={styles.boardCard}>
                 <div className={styles.boardHeader}>
                     <h2 className={styles.boardTitle}>공지사항</h2>
 
-                    {isAdmin && (
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <select
+                            className={styles.searchSelect}
+                            value={sortType}
+                            onChange={(e) => handleSortChange(e.target.value)}
+                        >
+                            <option value="latest">최신순</option>
+                            <option value="views">조회순</option>
+                            <option value="oldest">오래된순</option>
+                        </select>
+
+                        {isAdmin && (
+
                         <button
                             type="button"
                             className={styles.btnWrite}
@@ -92,7 +113,9 @@ const NoticeBoard = () => {
                             <svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14" /></svg>
                             글쓰기
                         </button>
-                    )}
+                        )}
+                    </div>
+                  
                 </div>
 
                 <table className={styles.boardTable}>

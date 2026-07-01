@@ -102,6 +102,7 @@ const NoticeBoardDetail = () => {
         }
     };
 
+
     if (!post) return <div style={{ textAlign: 'center', padding: '50px' }}>로딩 중...</div>
 
     return (

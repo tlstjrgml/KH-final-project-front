@@ -5,6 +5,7 @@ import styles from './BoardFree.module.css';
 const BoardFree = () => {
     const navigate = useNavigate();
     const [boardList, setBoardList] = useState([]);
+
     const [pages, setPages] = useState([1]);
     const [currentPage, setCurrentPage] = useState(1);
     const [endPage, setEndPage] = useState(1);
@@ -13,12 +14,16 @@ const BoardFree = () => {
     const [searchKeyword, setSearchKeyword] = useState('');
     const [appliedKeyword, setAppliedKeyword] = useState('');
 
+    // 정렬 상태 관리 ('latest': 최신순, 'views': 조회순, 'oldest': 날짜순)
+    const [sortType, setSortType] = useState('latest');
+
     useEffect(() => {
         const fetchBoardList = async () => {
             try {
                 const params = new URLSearchParams({
                     boardType: 'FRE',
-                    page: currentPage
+                    page: currentPage,
+                    sort: sortType // 백엔드 API에 정렬 기준 전달
                 });
 
                 if (appliedKeyword && appliedKeyword.trim() !== '') {
@@ -39,7 +44,7 @@ const BoardFree = () => {
             }
         };
         fetchBoardList();
-    }, [currentPage, appliedKeyword, searchType]);
+    }, [currentPage, appliedKeyword, searchType, sortType]);
 
     const handleSearch = () => {
         setCurrentPage(1);
@@ -58,13 +63,42 @@ const BoardFree = () => {
         }
     };
 
+    const baseBtnStyle = {
+        padding: '6px 14px',
+        borderRadius: '8px',
+        border: 'none',
+        fontSize: '14px',
+        fontWeight: '600',
+        cursor: 'pointer',
+        transition: 'background-color 0.2s ease',
+    };
+
+    // 정렬 변경 핸들러
+    const handleSortChange = (type) => {
+        setSortType(type);
+        setCurrentPage(1); 
+    };
+
 
     return (
         <main className={styles.page}>
             <div className={styles.boardCard}>
 
-                <div className={styles.boardHeader}>
+                <div className={styles.boardHeader} >
                     <h2 className={styles.boardTitle}>자유 게시판</h2>
+
+                        {/* 정렬 드롭다운과 글쓰기 버튼을 이 div 안에 함께 넣어 하나의 덩어리로 만듬. */}
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                            <select
+                            className={styles.searchSelect}
+                            value={sortType}
+                            onChange={(e) => handleSortChange(e.target.value)}
+                        >
+                            <option value="latest">최신순</option>
+                            <option value="views">조회순</option>
+                            <option value="oldest">오래된순</option>
+                        </select>
+
                     <button
                         type="button"
                         className={styles.btnWrite}
@@ -73,6 +107,8 @@ const BoardFree = () => {
                         <svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14" /></svg>
                         글쓰기
                     </button>
+                        </div>
+                       
                 </div>
 
                 <table className={styles.boardTable}>
@@ -206,8 +242,12 @@ const BoardFree = () => {
                 </div>
 
             </div>
-        </main>
+
+        
+    </main>
+    
     );
+    
 };
 
 export default BoardFree;

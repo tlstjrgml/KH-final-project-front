@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import styles from './EditProfile.module.css'
 import { useNavigate } from 'react-router-dom';
 
@@ -17,8 +17,13 @@ const EditProfile = () => {
         passwordConfirm: ''
     });
 
+    const [emailError, setEmailError] = useState('');
+    const emailInputRef = useRef(null);
+
     const navigate = useNavigate();
     const token = localStorage.getItem('token');
+
+    const EMAIL_REGEX = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
 
     useEffect(() => {
         fetch('http://localhost:8080/member/me', {
@@ -39,6 +44,21 @@ const EditProfile = () => {
                 passwordConfirm: ''
             }));
     }, []);
+
+    useEffect(() => {
+        if (!profile.email) {
+            setEmailError('');
+            return;
+        }
+        const timer = setTimeout(() => {
+            if (EMAIL_REGEX.test(profile.email)) {
+                setEmailError('');
+            } else {
+                setEmailError('올바르지 않은 형식의 이메일입니다.');
+            }
+        }, 500);
+        return () => clearTimeout(timer);
+    }, [profile.email]);
 
     const rawParts = profile.birthDate ? profile.birthDate.substring(0, 10).split('-') : ['', '', ''];
     const birthParts = [
@@ -80,6 +100,14 @@ const EditProfile = () => {
         // 1. 필수항목 체크
         if (!profile.nickname || !profile.birthDate || !profile.phone || !profile.gender) {
             alert('필수 항목을 모두 입력해주세요');
+            return;
+        }
+
+        if (profile.email && !EMAIL_REGEX.test(profile.email)) {
+            alert('이메일 형식이 올바르지 않습니다.');
+            if (emailInputRef.current) {
+                emailInputRef.current.focus();
+            }
             return;
         }
 
@@ -132,6 +160,23 @@ const EditProfile = () => {
         navigate(-1);
     };
 
+    const formatPhoneNumber = (value) => {
+        const numbersOnly = value.replace(/[^0-9]/g, '').slice(0, 11);
+
+        if (numbersOnly.length < 4) {
+            return numbersOnly;
+        } else if (numbersOnly.length < 8) {
+            return `${numbersOnly.slice(0, 3)}-${numbersOnly.slice(3)}`;
+        } else {
+            return `${numbersOnly.slice(0, 3)}-${numbersOnly.slice(3, 7)}-${numbersOnly.slice(7)}`;
+        }
+    };
+
+    const handlePhoneChange = (e) => {
+        const formatted = formatPhoneNumber(e.target.value);
+        setProfile(prev => ({ ...prev, phone: formatted }));
+    };
+
     return (
         <main className={styles.page}>
             <h1 className={styles.pageTitle}>개인정보 수정</h1>
@@ -144,7 +189,8 @@ const EditProfile = () => {
 
                 <div className={styles.field}>
                     <label htmlFor="email">이메일<span className={styles.req}></span></label>
-                    <input type="email" id="email" name="email" value={profile.email} onChange={handleChange} />
+                    <input type="email" id="email" name="email" ref={emailInputRef} value={profile.email} onChange={handleChange} />
+                    {emailError && <p style={{ color: '#E03101', fontSize: '13px', marginTop: '6px' }}>{emailError}</p>}
                 </div>
 
                 <div className={styles.field}>
@@ -225,7 +271,15 @@ const EditProfile = () => {
 
                 <div className={styles.field}>
                     <label htmlFor="phone">전화번호<span className={styles.req}>*</span></label>
-                    <input type="tel" id="phone" name="phone" placeholder="010-0000-0000" value={profile.phone} onChange={handleChange} />
+                    <input
+                        type="tel"
+                        id="phone"
+                        name="phone"
+                        placeholder="010-0000-0000"
+                        value={profile.phone}
+                        onChange={handlePhoneChange}
+                        maxLength={13}
+                    />
                 </div>
             </section>
 
