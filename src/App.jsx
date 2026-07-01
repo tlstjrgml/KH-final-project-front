@@ -26,8 +26,8 @@ import BoardFreeEdit from './layouts/BoardFreeEdit';
 import MyBoardList from './layouts/MyBoardList';
 import MyRepliesList from './layouts/MyRepliesList';
 import MyReports from './layouts/MyReports';
-import MyWishList
- from './layouts/MyWishList';
+import MyWishList from './layouts/MyWishList';
+import FindPassword from './layouts/FindPassword';
 const PrivateRoute = ({ element }) => {
   const token = localStorage.getItem('token');
   if (!token) {
@@ -116,6 +116,7 @@ const AppInner = () => {
         <Route path="/" element={<Main />} />
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
+        <Route path='/FindPassword' element={<FindPassword/>}/>
         <Route path="/edit-profile" element={<PrivateRoute element={<EditProfile />} />} />
         <Route path="/mypage" element={<PrivateRoute element={<MyPage />} />} />
         <Route path="/mypage/boards" element={<PrivateRoute element={<MyBoardList />} />} />

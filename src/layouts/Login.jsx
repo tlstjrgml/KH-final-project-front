@@ -75,9 +75,7 @@ const Login = () => {
           <span className={styles.muted}>계정이 없으신가요?</span>
           <Link to="/signup">회원가입</Link>
           <span className={styles.sep}>·</span>
-          <Link to="#">아이디 찾기</Link>
-          <span className={styles.sep}>·</span>
-          <Link to="#">비밀번호 찾기</Link>
+          <Link to="/FindPassword">비밀번호 찾기</Link>
         </div>
       </div>
     </main>
