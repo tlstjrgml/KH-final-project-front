@@ -7,15 +7,19 @@ const BoardFreeDetail = () => {
     const navigate = useNavigate();
 
     const [post, setPost] = useState(null);
+
     const [isLiked, setIsLiked] = useState(false);
     const [likes, setLikes] = useState(0);
+    
     const [replies, setReplies] = useState([]);
     const [replyContent, setReplyContent] = useState('');
     const [replyInputs, setReplyInputs] = useState({});
     const [activeReplyForm, setActiveReplyForm] = useState(null);
     const [currentUser, setCurrentUser] = useState(null);
     const [editingReplyId, setEditingReplyId] = useState(null);
+
     const [editContent, setEditContent] = useState('');
+    
     const [isReportModalOpen, setIsReportModalOpen] = useState(false);
     const [reportReason, setReportReason] = useState('');
     const [reportTarget, setReportTarget] = useState(null);
