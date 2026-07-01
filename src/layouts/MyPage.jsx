@@ -28,7 +28,19 @@ const MyPage = () => {
   const [errorMsg, setErrorMsg] = useState('');
 
   useEffect(() => {
+    const token = localStorage.getItem('token');
+
+    if (!token) {
+      alert('로그인이 필요한 서비스입니다. 로그인 페이지로 이동합니다.');
+      navigate('/login', { replace: true }); // replace: true를 주면 뒤로가기 했을 때 다시 마이페이지로 오는 걸 막아줌
+    }
+  }, [navigate]);
+
+  useEffect(() => {
     const token = localStorage.getItem('token')
+
+    if (!token) return;
+
     Promise.all([
       fetch('http://localhost:8080/member/me', { headers: { 'Authorization': `Bearer ${token}` } }).then(res => res.json()),
       fetch('http://localhost:8080/member/me/boards', { headers: { 'Authorization': `Bearer ${token}` } }).then(res => res.json()),
