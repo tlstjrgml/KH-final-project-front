@@ -26,8 +26,7 @@ import BoardFreeEdit from './layouts/BoardFreeEdit';
 import MyBoardList from './layouts/MyBoardList';
 import MyRepliesList from './layouts/MyRepliesList';
 import MyReports from './layouts/MyReports';
-import MyWishList
- from './layouts/MyWishList';
+import MyWishList from './layouts/MyWishList';
 const PrivateRoute = ({ element }) => {
   const token = localStorage.getItem('token');
   if (!token) {
@@ -37,16 +36,16 @@ const PrivateRoute = ({ element }) => {
   return element;
 };
 
-const AdminRoute = ({element}) => {
+const AdminRoute = ({ element }) => {
   const token = localStorage.getItem('token');
-  if(!token) {
+  if (!token) {
     alert('로그인이 필요한 페이지입니다. 로그인을 해주세요');
-    return <Navigate to="/login"/>;
+    return <Navigate to="/login" />;
   }
   const isAdmin = JSON.parse(atob(token.split('.')[1])).isAdmin === 'Y';
-  if(!isAdmin){
+  if (!isAdmin) {
     alert('관리자만 접근할 수 있는 페이지입니다.');
-    return <Navigate to="/"/>;
+    return <Navigate to="/" />;
   }
   return element;
 }
@@ -57,36 +56,57 @@ const AppInner = () => {
   const navigate = useNavigate();
 
   const storedToken = localStorage.getItem('token');
-  const isLoggedIn = !!storedToken;
+
   const [toastMessage, setToastMessage] = useState(null);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
+  const [nickname, setNickname] = useState("");
 
-  let isAdmin = false;
-  let nickname = "";
+  useEffect(() => {
+    if (!storedToken) {
+      setIsLoggedIn(false);
+      setIsAdmin(false);
+      setNickname("");
+      return;
+    }
 
-  if (isLoggedIn) {
     try {
       const decodedToken = jwtDecode(storedToken);
-      isAdmin = decodedToken.isAdmin === 'Y';
-      nickname = decodedToken.nickname || "";
+
+      const isTokenExpired = decodedToken.exp * 1000 < Date.now();
+
+      if (isTokenExpired) {
+        console.warn("토큰이 만료되어 자동으로 로그아웃합니다.");
+        localStorage.removeItem('token');
+        setIsLoggedIn(false);
+        setIsAdmin(false);
+        setNickname("");
+      } else {
+        setIsLoggedIn(true);
+        setIsAdmin(decodedToken.isAdmin === 'Y');
+        setNickname(decodedToken.nickname || "");
+      }
     } catch (error) {
       console.error("토큰 파싱 에러:", error);
+      localStorage.removeItem('token');
+      setIsLoggedIn(false);
     }
-  }
+  }, [storedToken]);
 
-  useEffect(()=>{
-    if(!isLoggedIn) return;
+  useEffect(() => {
+    if (!isLoggedIn) return;
 
     const eventSource = new EventSource(`/react/sse/connect?token=${storedToken}`);;
-    eventSource.onmessage = (e) =>{
+    eventSource.onmessage = (e) => {
       setToastMessage(e.data);
-      setTimeout(()=>{
+      setTimeout(() => {
         setToastMessage(null);
       }, 10000);
     };
-    return () =>{
+    return () => {
       eventSource.close();
     };
-  },[isLoggedIn]);
+  }, [isLoggedIn]);
 
   useEffect(() => {
     if (urlToken) {
@@ -121,8 +141,8 @@ const AppInner = () => {
         <Route path="/mypage/boards" element={<PrivateRoute element={<MyBoardList />} />} />
         <Route path="/mypage/replies" element={<PrivateRoute element={<MyRepliesList />} />} />
         <Route path="/admin" element={<AdminRoute element={<AdminPage />} />} />
-        <Route path="/mypage/reports" element = {<PrivateRoute element={<MyReports />}/>}/>
-        <Route path="/mypage/wishes" element = {<PrivateRoute element={<MyWishList />}/>}/>
+        <Route path="/mypage/reports" element={<PrivateRoute element={<MyReports />} />} />
+        <Route path="/mypage/wishes" element={<PrivateRoute element={<MyWishList />} />} />
         {/* 후기 게시판 영역 */}
         <Route path="/boardreview" element={<BoardReview />} />
         <Route path="/boardreview/write" element={<PrivateRoute element={<BoardReviewWrite />} />} />
