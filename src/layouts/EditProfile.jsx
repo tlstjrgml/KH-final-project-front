@@ -5,7 +5,6 @@ import { useNavigate } from 'react-router-dom';
 const EditProfile = () => {
     const [profile, setProfile] = useState({
         nickname: '',
-        email: '',
         name: '',
         birthDate: '',
         gender: '',
@@ -17,13 +16,11 @@ const EditProfile = () => {
         passwordConfirm: ''
     });
 
-    const [emailError, setEmailError] = useState('');
-    const emailInputRef = useRef(null);
+    const [passwordConfirmError, setPasswordConfirmError] = useState('');
+    const passwordConfirmRef = useRef(null);
 
     const navigate = useNavigate();
     const token = localStorage.getItem('token');
-
-    const EMAIL_REGEX = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
 
     useEffect(() => {
         fetch('http://localhost:8080/member/me', {
@@ -32,7 +29,6 @@ const EditProfile = () => {
             .then(res => res.json())
             .then(data => setProfile({
                 nickname: data.nickname || '',
-                email: data.email || '',
                 name: data.name || '',
                 birthDate: data.birthDate ? data.birthDate.substring(0, 10) : '',
                 gender: data.gender || '',
@@ -44,21 +40,6 @@ const EditProfile = () => {
                 passwordConfirm: ''
             }));
     }, []);
-
-    useEffect(() => {
-        if (!profile.email) {
-            setEmailError('');
-            return;
-        }
-        const timer = setTimeout(() => {
-            if (EMAIL_REGEX.test(profile.email)) {
-                setEmailError('');
-            } else {
-                setEmailError('올바르지 않은 형식의 이메일입니다.');
-            }
-        }, 500);
-        return () => clearTimeout(timer);
-    }, [profile.email]);
 
     const rawParts = profile.birthDate ? profile.birthDate.substring(0, 10).split('-') : ['', '', ''];
     const birthParts = [
@@ -96,6 +77,23 @@ const EditProfile = () => {
         hasLength: profile.password.length >= 9
     };
 
+    const formatPhoneNumber = (value) => {
+        const numbersOnly = value.replace(/[^0-9]/g, '').slice(0, 11);
+
+        if (numbersOnly.length < 4) {
+            return numbersOnly;
+        } else if (numbersOnly.length < 8) {
+            return `${numbersOnly.slice(0, 3)}-${numbersOnly.slice(3)}`;
+        } else {
+            return `${numbersOnly.slice(0, 3)}-${numbersOnly.slice(3, 7)}-${numbersOnly.slice(7)}`;
+        }
+    };
+
+    const handlePhoneChange = (e) => {
+        const formatted = formatPhoneNumber(e.target.value);
+        setProfile(prev => ({ ...prev, phone: formatted }));
+    };
+
     const handleSave = () => {
         // 1. 필수항목 체크
         if (!profile.nickname || !profile.birthDate || !profile.phone || !profile.gender) {
@@ -103,28 +101,26 @@ const EditProfile = () => {
             return;
         }
 
-        if (profile.email && !EMAIL_REGEX.test(profile.email)) {
-            alert('이메일 형식이 올바르지 않습니다.');
-            if (emailInputRef.current) {
-                emailInputRef.current.focus();
-            }
-            return;
-        }
-
-        // 2. 비밀번호 형식 체크 (fetch 보내기 전에 먼저)
+        // 2. 비밀번호 형식 체크
         if (profile.password) {
             const allValid = Object.values(pwChecks).every(v => v === true);
             if (!allValid) {
                 alert('비밀번호 형식을 확인해주세요');
                 return;
             }
+            // 3. 비밀번호 확인 일치 체크
+            if (profile.password !== profile.passwordConfirm) {
+                setPasswordConfirmError('비밀번호가 일치하지 않습니다.');
+                passwordConfirmRef.current?.focus();
+                return;
+            } else {
+                setPasswordConfirmError('');
+            }
         }
 
         const updatedFields = {};
 
-        // 지금 구조에서 가장 안전하게 '바뀐 필드만' 백엔드로 넘기는 스크립트:
         if (profile.nickname) updatedFields.nickname = profile.nickname;
-        if (profile.email) updatedFields.email = profile.email;
         if (profile.name) updatedFields.name = profile.name;
         if (profile.birthDate) updatedFields.birthDate = profile.birthDate.substring(0, 10);
         if (profile.gender) updatedFields.gender = profile.gender;
@@ -133,7 +129,7 @@ const EditProfile = () => {
         if (profile.jobStatus) updatedFields.jobStatus = profile.jobStatus;
         if (profile.incomeLevel) updatedFields.incomeLevel = Number(profile.incomeLevel);
 
-        // 3. 검증 다 통과하면 fetch 실행
+        // 4. 검증 다 통과하면 fetch 실행
         fetch('http://localhost:8080/member/me', {
             method: 'PATCH',
             headers: {
@@ -160,23 +156,6 @@ const EditProfile = () => {
         navigate(-1);
     };
 
-    const formatPhoneNumber = (value) => {
-        const numbersOnly = value.replace(/[^0-9]/g, '').slice(0, 11);
-
-        if (numbersOnly.length < 4) {
-            return numbersOnly;
-        } else if (numbersOnly.length < 8) {
-            return `${numbersOnly.slice(0, 3)}-${numbersOnly.slice(3)}`;
-        } else {
-            return `${numbersOnly.slice(0, 3)}-${numbersOnly.slice(3, 7)}-${numbersOnly.slice(7)}`;
-        }
-    };
-
-    const handlePhoneChange = (e) => {
-        const formatted = formatPhoneNumber(e.target.value);
-        setProfile(prev => ({ ...prev, phone: formatted }));
-    };
-
     return (
         <main className={styles.page}>
             <h1 className={styles.pageTitle}>개인정보 수정</h1>
@@ -188,35 +167,47 @@ const EditProfile = () => {
                 </h2>
 
                 <div className={styles.field}>
-                    <label htmlFor="email">이메일<span className={styles.req}></span></label>
-                    <input type="email" id="email" name="email" ref={emailInputRef} value={profile.email} onChange={handleChange} />
-                    {emailError && <p style={{ color: '#E03101', fontSize: '13px', marginTop: '6px' }}>{emailError}</p>}
-                </div>
-
-                <div className={styles.field}>
                     <label htmlFor="password">비밀번호 <span className={styles.sectionHint}>(변경 시에만 입력)</span></label>
-                    <input type="password" id="password" name="password" placeholder="새 비밀번호" autoComplete="new-password" value={profile.password} onChange={handleChange} />
+                    <input
+                        type="password"
+                        id="password"
+                        name="password"
+                        placeholder="새 비밀번호"
+                        autoComplete="new-password"
+                        value={profile.password}
+                        onChange={handleChange}
+                    />
                 </div>
                 {profile.password && (
                     <ul className={styles.pwChecklist}>
-                        <li className={pwChecks.hasLower ? styles.valid : styles.invalid}>
-                            ✓ 영문 소문자 포함
-                        </li>
-                        <li className={pwChecks.hasUpper ? styles.valid : styles.invalid}>
-                            ✓ 영문 대문자 1자리 이상
-                        </li>
-                        <li className={pwChecks.hasSpecial ? styles.valid : styles.invalid}>
-                            ✓ 특수문자 1자리 이상
-                        </li>
-                        <li className={pwChecks.hasLength ? styles.valid : styles.invalid}>
-                            ✓ 9자리 이상
-                        </li>
+                        <li className={pwChecks.hasLower ? styles.valid : styles.invalid}>✓ 영문 소문자 포함</li>
+                        <li className={pwChecks.hasUpper ? styles.valid : styles.invalid}>✓ 영문 대문자 1자리 이상</li>
+                        <li className={pwChecks.hasSpecial ? styles.valid : styles.invalid}>✓ 특수문자 1자리 이상</li>
+                        <li className={pwChecks.hasLength ? styles.valid : styles.invalid}>✓ 9자리 이상</li>
                     </ul>
                 )}
 
                 <div className={styles.field}>
                     <label htmlFor="passwordConfirm">비밀번호 확인 <span className={styles.sectionHint}>(변경 시에만 입력)</span></label>
-                    <input type="password" id="passwordConfirm" name="passwordConfirm" placeholder="새 비밀번호를 다시 입력해주세요" autoComplete="new-password" value={profile.passwordConfirm} onChange={handleChange} />
+                    <input
+                        type="password"
+                        id="passwordConfirm"
+                        name="passwordConfirm"
+                        placeholder="새 비밀번호를 다시 입력해주세요"
+                        autoComplete="new-password"
+                        value={profile.passwordConfirm}
+                        onChange={(e) => {
+                            handleChange(e);
+                            setPasswordConfirmError('');
+                        }}
+                        ref={passwordConfirmRef}
+                        style={{ borderColor: passwordConfirmError ? '#e53e3e' : '' }}
+                    />
+                    {passwordConfirmError && (
+                        <p style={{ color: '#e53e3e', fontSize: '13px', marginTop: '4px' }}>
+                            {passwordConfirmError}
+                        </p>
+                    )}
                 </div>
             </section>
 
